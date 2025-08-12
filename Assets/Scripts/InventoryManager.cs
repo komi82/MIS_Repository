@@ -3,8 +3,14 @@ using System.Collections.Generic;
 
 public class InventoryManager : MonoBehaviour
 {
-    [SerializeField] private int maxSlots = 10;
+    [SerializeField] private int maxSlots = 4;
     private List<ItemData> inventory = new List<ItemData>();
+
+    public enum ItemStatus
+    {
+        one, two, three, four, max
+    }
+
 
     public void AddItem(ItemData item)
     {
