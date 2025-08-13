@@ -1,10 +1,10 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-
 public class ItemPickup : MonoBehaviour
 {
-    [SerializeField] private float pickupRange = 3f;
+    [Header("アイテム取得設定")]
+    [SerializeField] private float pickupRange = 10f;
     [SerializeField] private InventoryManager inventoryManager;
     [SerializeField] private Camera mainCamera;
 
@@ -24,8 +24,18 @@ public class ItemPickup : MonoBehaviour
             ItemBehaviour item = hit.collider.GetComponent<ItemBehaviour>();
             if (item != null)
             {
-                inventoryManager.AddItem(item.ItemData);
-                Destroy(item.gameObject); // 拾ったら消す
+                bool success = inventoryManager.AddItem(item.ItemData);
+
+                if (success)
+                {
+                    Debug.Log($"アイテム '{item.ItemData.itemName}' を取得しました");
+                    Destroy(item.gameObject); // 成功時のみ削除
+                }
+                else
+                {
+                    Debug.LogWarning("インベントリが満杯です。アイテムは残ります");
+                    // ここでは何もせず、アイテムはそのまま残す
+                }
             }
         }
     }
