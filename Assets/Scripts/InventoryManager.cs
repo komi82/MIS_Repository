@@ -75,10 +75,40 @@ public class InventoryManager : MonoBehaviour
         }
         return true;
     }
-    public void SelectItem(ItemData item)
+    public void SelectItem(int index)
     {
+        // インデックスの範囲チェック
+        if (index < 0 || index >= slotUIs.Length)
+        {
+            Debug.LogWarning($"SelectItem: index {index} が範囲外です");
+            selectedItem = null;
+            return;
+        }
+
+        // 対象スロットの取得
+        InventorySlotUI slot = slotUIs[index];
+        if (slot == null)
+        {
+            Debug.LogWarning($"SelectItem: index {index} に対応するスロットが null です");
+            selectedItem = null;
+            return;
+        }
+
+        // スロットから ItemData を取得
+        ItemData item = slot.CurrentItem;
+
+        // 選択状態の更新
         selectedItem = item;
-        Debug.Log("Selected: " + item.itemName);
+
+        // ログ出力（nullチェック込み）
+        if (item != null)
+        {
+            Debug.Log($"SelectItem: index {index} に '{item.itemName}' を選択しました");
+        }
+        else
+        {
+            Debug.Log($"SelectItem: index {index} は空スロットです");
+        }
     }
     public void RemoveItem(InventorySlotUI slot)
     {

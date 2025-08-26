@@ -73,7 +73,7 @@ public class SlotSelector : MonoBehaviour
                 slotFrames[i].sprite = spriteToApply;
 
                 Debug.Log($"スロット {i}: {(i == selectedIndex ? "選択中" : "非選択")} → 適用画像 = {spriteToApply.name}");
-             //   inventoryManager.SelectItem(slotFrames[i]);
+                inventoryManager.SelectItem(i);
             }
         }
     }
