@@ -3,6 +3,8 @@ using UnityEngine.UI;
 
 public class SlotSelector : MonoBehaviour
 {
+    [SerializeField] private InventoryManager inventoryManager;
+
     [Header("スロットの親Image（インベントリ枠画像）")]
     [SerializeField] private Image[] slotFrames = new Image[4];
 
@@ -13,7 +15,7 @@ public class SlotSelector : MonoBehaviour
     [SerializeField] private Sprite[] selectedFrameSprites = new Sprite[4];
 
     [Header("現在選択中のスロット番号（0〜3）")]
-    [SerializeField] private int selectedIndex = 0;
+    [SerializeField] public int selectedIndex = 0;
 
     void Start()
     {
@@ -60,7 +62,7 @@ public class SlotSelector : MonoBehaviour
 
     void UpdateSlotVisuals()
     {
-        for (int i = 0; i < slotFrames.Length; i++)
+        for (int i = 0; i <= selectedIndex; i++)
         {
             if (slotFrames[i] != null)
             {
@@ -71,6 +73,7 @@ public class SlotSelector : MonoBehaviour
                 slotFrames[i].sprite = spriteToApply;
 
                 Debug.Log($"スロット {i}: {(i == selectedIndex ? "選択中" : "非選択")} → 適用画像 = {spriteToApply.name}");
+             //   inventoryManager.SelectItem(slotFrames[i]);
             }
         }
     }

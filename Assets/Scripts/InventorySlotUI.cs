@@ -3,27 +3,22 @@ using UnityEngine.UI;
 
 public class InventorySlotUI : MonoBehaviour
 {
-    [Header("‚±‚ÌƒXƒƒbƒg‚ÌƒAƒCƒRƒ“‰æ‘œ")]
+    [Header("ã“ã®ã‚¹ãƒ­ãƒƒãƒˆã®ã‚¢ã‚¤ã‚³ãƒ³ç”»åƒ")]
     [SerializeField] private Image iconImage;
+    [SerializeField] private ItemData currentItem;
+    [SerializeField] private Sprite emptySlotSprite;
+    public ItemData CurrentItem => currentItem;
 
-    private ItemData currentItem;
-
-    /// <summary>
-    /// ‚±‚ÌƒXƒƒbƒg‚ªƒAƒCƒeƒ€‚Å–„‚Ü‚Á‚Ä‚¢‚é‚©‚Ç‚¤‚©
-    /// </summary>
+    // ã“ã®ã‚¹ãƒ­ãƒƒãƒˆãŒã‚¢ã‚¤ãƒ†ãƒ ã§åŸ‹ã¾ã£ã¦ã„ã‚‹ã‹ã©ã†ã‹
     public bool IsOccupied => currentItem != null;
 
-    /// <summary>
-    /// ƒXƒƒbƒg‚Ì‰Šú‰»i‹ó‚É‚·‚éj
-    /// </summary>
+    // ã‚¹ãƒ­ãƒƒãƒˆã®åˆæœŸåŒ–ï¼ˆç©ºã«ã™ã‚‹ï¼‰
     void Awake()
     {
         ClearSlot();
     }
 
-    /// <summary>
-    /// ƒAƒCƒeƒ€‚ğ‚±‚ÌƒXƒƒbƒg‚ÉŠi”[‚·‚é
-    /// </summary>
+    // ã‚¢ã‚¤ãƒ†ãƒ ã‚’ã“ã®ã‚¹ãƒ­ãƒƒãƒˆã«æ ¼ç´ã™ã‚‹
     public void AssignItem(ItemData item)
     {
         currentItem = item;
@@ -34,28 +29,24 @@ public class InventorySlotUI : MonoBehaviour
             iconImage.enabled = true;
         }
 
-        Debug.Log($"[{gameObject.name}] ‚ÉƒAƒCƒeƒ€ '{item.itemName}' ‚ğŠi”[‚µ‚Ü‚µ‚½");
+        Debug.Log($"[{gameObject.name}] ã«ã‚¢ã‚¤ãƒ†ãƒ  '{item.itemName}'ã‚’æ ¼ç´ã—ã¾ã—ãŸ");
     }
 
-    /// <summary>
-    /// ƒXƒƒbƒg‚ğ‹ó‚É‚·‚é
-    /// </summary>
+    // ã‚¹ãƒ­ãƒƒãƒˆã‚’ç©ºã«ã™ã‚‹
     public void ClearSlot()
     {
         currentItem = null;
 
         if (iconImage != null)
         {
-            iconImage.sprite = null;
-            iconImage.enabled = false;
+            iconImage.sprite = emptySlotSprite; // null â†’ ç©ºã‚¹ãƒ­ãƒƒãƒˆç”¨ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆ
+            iconImage.enabled = true;           // ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆã¯è¡¨ç¤ºã—ãŸã¾ã¾
         }
 
-        Debug.Log($"[{gameObject.name}] ‚ğ‰Šú‰»‚µ‚Ü‚µ‚½");
+        Debug.Log($"[{gameObject.name}] ã‚¹ãƒ­ãƒƒãƒˆã‚’ç©ºã«ã—ã¾ã—ãŸ");
     }
 
-    /// <summary>
-    /// Œ»İŠi”[‚³‚ê‚Ä‚¢‚éƒAƒCƒeƒ€‚ğæ“¾
-    /// </summary>
+    // ç¾åœ¨æ ¼ç´ã•ã‚Œã¦ã„ã‚‹ã‚¢ã‚¤ãƒ†ãƒ ã‚’å–å¾—
     public ItemData GetItem() => currentItem;
 }
 
@@ -71,7 +62,7 @@ public class InventorySlotUI : MonoBehaviour
 
     void Awake()
     {
-        ClearSlot(); // ‰Šú‰»‚ÉƒXƒƒbƒg‚ğ‹ó‚É‚·‚é
+        ClearSlot(); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÉƒXï¿½ï¿½ï¿½bï¿½gï¿½ï¿½ï¿½ï¿½É‚ï¿½ï¿½ï¿½
     }
     public void AssignItem(ItemData item)
     {
@@ -82,7 +73,7 @@ public class InventorySlotUI : MonoBehaviour
             iconImage.enabled = true;
         }
 
-        Debug.Log($"ƒXƒƒbƒg '{gameObject.name}' ‚É '{item.itemName}' ‚ğŠi”[‚µ‚Ü‚µ‚½");
+        Debug.Log($"ï¿½Xï¿½ï¿½ï¿½bï¿½g '{gameObject.name}' ï¿½ï¿½ '{item.itemName}' ï¿½ï¿½ï¿½iï¿½[ï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½");
     }
 
     public void ClearSlot()
@@ -94,7 +85,7 @@ public class InventorySlotUI : MonoBehaviour
             iconImage.enabled = false;
         }
 
-        Debug.Log($"ƒXƒƒbƒg '{gameObject.name}' ‚ğ‹ó‚É‚µ‚Ü‚µ‚½");
+        Debug.Log($"ï¿½Xï¿½ï¿½ï¿½bï¿½g '{gameObject.name}' ï¿½ï¿½ï¿½ï¿½É‚ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½");
     }
 
     public ItemData GetItem() => currentItem;
