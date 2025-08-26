@@ -13,7 +13,7 @@ public class SlotSelector : MonoBehaviour
     [SerializeField] private Sprite[] selectedFrameSprites = new Sprite[4];
 
     [Header("現在選択中のスロット番号（0〜3）")]
-    [SerializeField] public int selectedIndex = 0;
+    [SerializeField] private int selectedIndex = 0;
 
     void Start()
     {
@@ -60,7 +60,7 @@ public class SlotSelector : MonoBehaviour
 
     void UpdateSlotVisuals()
     {
-        for (int i = 0; i <= selectedIndex; i++)
+        for (int i = 0; i < slotFrames.Length; i++)
         {
             if (slotFrames[i] != null)
             {
