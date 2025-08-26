@@ -2,11 +2,11 @@ using UnityEngine;
 
 public class InventoryManager : MonoBehaviour
 {
-    [Header("ŠÇ—‘ÎÛ‚ÌƒXƒƒbƒgi4‚Âj")]
+    [Header("ç®¡ç†å¯¾è±¡ã®ã‚¹ãƒ­ãƒƒãƒˆï¼ˆ4ã¤ï¼‰")]
     [SerializeField] private InventorySlotUI[] slotUIs;
-
+    public ItemData selectedItem;
     /// <summary>
-    /// ƒAƒCƒeƒ€‚ğÅ‰‚Ì‹óƒXƒƒbƒg‚É’Ç‰Á‚·‚é
+    /// ã‚¢ã‚¤ãƒ†ãƒ ã‚’æœ€åˆã®ç©ºã‚¹ãƒ­ãƒƒãƒˆã«è¿½åŠ ã™ã‚‹
     /// </summary>
     public bool AddItem(ItemData item)
     {
@@ -19,24 +19,22 @@ public class InventoryManager : MonoBehaviour
             }
         }
 
-        Debug.LogWarning("ƒCƒ“ƒxƒ“ƒgƒŠ‚ª–”t‚Å‚·");
+        Debug.LogWarning("Inventory full");
         return false;
     }
 
     /// <summary>
-    /// w’èƒXƒƒbƒg‚ÉƒAƒCƒeƒ€‚ğ’Ç‰ÁiƒCƒ“ƒfƒbƒNƒXw’èj
+    /// æŒ‡å®šã‚¹ãƒ­ãƒƒãƒˆã«ã‚¢ã‚¤ãƒ†ãƒ ã‚’è¿½åŠ ï¼ˆã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹æŒ‡å®šï¼‰
     /// </summary>
     public bool AddItemToSlot(int index, ItemData item)
     {
         if (index < 0 || index >= slotUIs.Length)
         {
-            Debug.LogWarning($"ƒXƒƒbƒg”Ô† {index} ‚Í”ÍˆÍŠO‚Å‚·");
             return false;
         }
 
         if (slotUIs[index].IsOccupied)
         {
-            Debug.LogWarning($"ƒXƒƒbƒg {index} ‚Í‚·‚Å‚Ég—p‚³‚ê‚Ä‚¢‚Ü‚·");
             return false;
         }
 
@@ -45,7 +43,7 @@ public class InventoryManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ‘SƒXƒƒbƒg‚ğ‰Šú‰»i‹ó‚É‚·‚éj
+    /// å…¨ã‚¹ãƒ­ãƒƒãƒˆã‚’åˆæœŸåŒ–ï¼ˆç©ºã«ã™ã‚‹ï¼‰
     /// </summary>
     public void ClearAllSlots()
     {
@@ -54,11 +52,11 @@ public class InventoryManager : MonoBehaviour
             slot.ClearSlot();
         }
 
-        Debug.Log("ƒCƒ“ƒxƒ“ƒgƒŠ‚ğ‰Šú‰»‚µ‚Ü‚µ‚½");
+        Debug.Log("Inventory Cleared.");
     }
 
     /// <summary>
-    /// ƒXƒƒbƒg‚Ìó‘Ô‚ğæ“¾
+    /// ã‚¹ãƒ­ãƒƒãƒˆã®çŠ¶æ…‹ã‚’å–å¾—
     /// </summary>
     public InventorySlotUI GetSlot(int index)
     {
@@ -67,7 +65,7 @@ public class InventoryManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒCƒ“ƒxƒ“ƒgƒŠ‚ª–”t‚©‚Ç‚¤‚©
+    /// ã‚¤ãƒ³ãƒ™ãƒ³ãƒˆãƒªãŒæº€æ¯ã‹ã©ã†ã‹
     /// </summary>
     public bool IsFull()
     {
@@ -77,6 +75,29 @@ public class InventoryManager : MonoBehaviour
         }
         return true;
     }
+    public void SelectItem(ItemData item)
+    {
+        selectedItem = item;
+        Debug.Log("Selected: " + item.itemName);
+    }
+    public void RemoveItem(InventorySlotUI slot)
+    {
+        
+        slot.ClearSlot();
+    }
+
+    public InventorySlotUI FindSlotByItem(ItemData item)//selecteditemã«å¯¾å¿œã™ã‚‹ã‚¹ãƒ­ãƒƒãƒˆã‚’æ¤œç´¢
+    {
+        foreach (var slot in slotUIs)
+        {
+            if (slot.CurrentItem == item)
+            {
+                return slot;
+            }
+        }
+        return null;
+    }
+
 }
 
 
@@ -108,13 +129,13 @@ public class InventoryManager : MonoBehaviour
     {
         if (inventory.Count >= maxSlots)
         {
-            Debug.Log("ƒCƒ“ƒxƒ“ƒgƒŠ‚ª–”t‚Å‚·");
+            Debug.Log("ï¿½Cï¿½ï¿½ï¿½xï¿½ï¿½ï¿½gï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½tï¿½Å‚ï¿½");
             return;
         }
 
         inventory.Add(item);
         int slotIndex = inventory.Count;
-        Debug.Log($"ƒAƒCƒeƒ€ '{item.itemName}' ‚ğƒCƒ“ƒxƒ“ƒgƒŠ‚Ì {slotIndex} ”Ô–Ú‚ÌƒXƒƒbƒg‚É’Ç‰Á‚µ‚Ü‚µ‚½");
+        Debug.Log($"ï¿½Aï¿½Cï¿½eï¿½ï¿½ '{item.itemName}' ï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½xï¿½ï¿½ï¿½gï¿½ï¿½ï¿½ï¿½ {slotIndex} ï¿½Ô–Ú‚ÌƒXï¿½ï¿½ï¿½bï¿½gï¿½É’Ç‰ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½");
     }
 
     public IReadOnlyList<ItemData> GetInventory() => inventory;
