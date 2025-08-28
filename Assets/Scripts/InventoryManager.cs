@@ -5,6 +5,7 @@ public class InventoryManager : MonoBehaviour
     [Header("管理対象のスロット（4つ）")]
     [SerializeField] private InventorySlotUI[] slotUIs;
     public ItemData selectedItem;
+    [SerializeField] public InventorySlotUI selectedSlot;
     /// <summary>
     /// アイテムを最初の空スロットに追加する
     /// </summary>
