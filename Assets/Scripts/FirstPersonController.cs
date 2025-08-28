@@ -5,7 +5,7 @@ public class FirstPersonController : MonoBehaviour
 {
     public float moveSpeed = 5.0f;
     public float sensitivity = 2.0f;
-    public Transform playerBody; // ƒvƒŒƒCƒ„[‚ÌƒIƒuƒWƒFƒNƒgiej‚ğƒZƒbƒg
+    public Transform playerBody; // ï¿½vï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½[ï¿½ÌƒIï¿½uï¿½Wï¿½Fï¿½Nï¿½gï¿½iï¿½eï¿½jï¿½ï¿½ï¿½Zï¿½bï¿½g
 
     private CharacterController characterController;
 
@@ -14,34 +14,38 @@ public class FirstPersonController : MonoBehaviour
     public float gravity = -9.81f;
     private float verticalVelocity = 0f;
 
+    private Animator Controller = null;
+
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
-        characterController = GetComponent<CharacterController>(); // ƒvƒŒƒCƒ„[‚Ì CharacterController ‚ğæ“¾
+        characterController = GetComponent<CharacterController>(); // ï¿½vï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½[ï¿½ï¿½ CharacterController ï¿½ï¿½ï¿½æ“¾
+
+        Controller = GetComponent<Animator>();
     }
 
 
 
     void Update()
     {
-        // ƒ}ƒEƒX‘€ìi‹“_‚Ì‰ñ“]j
+        // ï¿½}ï¿½Eï¿½Xï¿½ï¿½ï¿½ï¿½iï¿½ï¿½ï¿½_ï¿½Ì‰ï¿½]ï¿½j
         float mouseX = Mouse.current.delta.x.ReadValue() * sensitivity;
         float mouseY = Mouse.current.delta.y.ReadValue() * sensitivity;
 
-        // ƒJƒƒ‰‚Ì‰ñ“]iã‰º‹“_‚Ì‚İj
+        // ï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½Ì‰ï¿½]ï¿½iï¿½ã‰ºï¿½ï¿½ï¿½_ï¿½Ì‚İj
         xRotation -= mouseY * 0.5f;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
         Camera.main.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-        // ƒvƒŒƒCƒ„[‚Ì‰ñ“]i¶‰E‹“_‚Ì‚İj
+        // ï¿½vï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½[ï¿½Ì‰ï¿½]ï¿½iï¿½ï¿½ï¿½Eï¿½ï¿½ï¿½_ï¿½Ì‚İj
         yRotation += mouseX * 0.5f;
         playerBody.rotation = Quaternion.Euler(0f, yRotation, 0f);
 
-        // WASDˆÚ“®
+        // WASDï¿½Ú“ï¿½
         float horizontal = Keyboard.current.aKey.isPressed ? -1f : Keyboard.current.dKey.isPressed ? 1f : 0f;
         float vertical = Keyboard.current.wKey.isPressed ? 1f : Keyboard.current.sKey.isPressed ? -1f : 0f;
 
         Vector3 moveDirection = playerBody.forward * vertical + playerBody.right * horizontal;
-        // d—Í‚Ì“K—p
+        // ï¿½dï¿½Í‚Ì“Kï¿½p
         if (characterController.isGrounded)
         {
             verticalVelocity = 0f;
@@ -54,5 +58,34 @@ public class FirstPersonController : MonoBehaviour
         moveDirection.y = verticalVelocity;
 
         characterController.Move(moveDirection * moveSpeed * Time.deltaTime);
+
+        if (Input.GetKey(KeyCode.W))
+        {
+            Controller.SetBool("movement_forward", true);
+        }else{
+            Controller.SetBool("movement_forward", false);
+        }
+
+        if (Input.GetKey(KeyCode.A))
+        {
+            Controller.SetBool("movement_left", true);
+        }else{
+            Controller.SetBool("movement_left", false);
+        }
+
+        if (Input.GetKey(KeyCode.D))
+        {
+            Controller.SetBool("movement_right", true);
+        }else{
+            Controller.SetBool("movement_right", false);
+        }
+
+        if (Input.GetKey(KeyCode.S))
+        {
+            Controller.SetBool("movement_back", true);
+        }else{
+            Controller.SetBool("movement_back", false);
+        }
+
     }
 }
