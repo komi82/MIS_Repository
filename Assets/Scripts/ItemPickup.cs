@@ -58,6 +58,7 @@ public class ItemPickup : MonoBehaviour
             Debug.Log($"アイテム '{currentTargetItem.ItemData.itemName}' を取得しました");
             Destroy(currentTargetItem.gameObject);
             pickupPromptUI.SetActive(false); // UIも非表示に
+
         }
         else
         {

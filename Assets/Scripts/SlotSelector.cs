@@ -51,11 +51,12 @@ public class SlotSelector : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha4)) SelectSlot(3);
     }
 
-    void SelectSlot(int index)
+    public void SelectSlot(int index)
     {
         if (index >= 0 && index < slotFrames.Length)
         {
             selectedIndex = index;
+            inventoryManager.SelectItem(index);
             UpdateSlotVisuals();
         }
     }
