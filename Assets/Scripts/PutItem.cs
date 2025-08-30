@@ -4,6 +4,8 @@ using UnityEngine.UI;
 public class PutItem : MonoBehaviour
 {
     [SerializeField] private InventoryManager inventoryManager;
+    [SerializeField] private SlotSelector slotselector;
+    [SerializeField] private ItemPickup itempickup;
     [SerializeField] private float pickupRange = 10f;
     [SerializeField] private Camera mainCamera;
     [Header("アイテム設置")]
@@ -23,7 +25,8 @@ public class PutItem : MonoBehaviour
             {
                   if (Input.GetKeyDown(KeyCode.E))
                    {
-                        PutSelectedItem();
+                    slotselector.SelectSlot(slotselector.selectedIndex);
+                    PutSelectedItem();
                    }
             }
         }
@@ -41,6 +44,7 @@ public class PutItem : MonoBehaviour
             if (targetObject.CompareTag("craft"))
             {
                 ItemData itemToPlace = inventoryManager.selectedItem;
+
                 if (itemToPlace != null)
                 {
                     if (inventoryManager == null)

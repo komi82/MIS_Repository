@@ -16,6 +16,7 @@ public class InventoryManager : MonoBehaviour
             if (!slot.IsOccupied)
             {
                 slot.AssignItem(item);
+
                 return true;
             }
         }
