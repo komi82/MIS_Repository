@@ -3,21 +3,21 @@ using UnityEngine.UI;
 
 public class ItemPickup : MonoBehaviour
 {
-    [Header("ƒAƒCƒeƒ€æ“¾İ’è")]
+    [Header("ï¿½Aï¿½Cï¿½eï¿½ï¿½ï¿½æ“¾ï¿½İ’ï¿½")]
     [SerializeField] private float pickupRange = 10f;
     [SerializeField] private InventoryManager inventoryManager;
     [SerializeField] private Camera mainCamera;
 
 
-    [Header("UIİ’è")]
-    [SerializeField] private GameObject pickupPromptUI; // •\¦—pUIi—áFText•t‚«‚ÌPanelj
-    [SerializeField] private Text pickupPromptText;     // ƒAƒCƒeƒ€–¼•\¦—pText
+    [Header("UIï¿½İ’ï¿½")]
+    [SerializeField] private GameObject pickupPromptUI; // ï¿½\ï¿½ï¿½ï¿½pUIï¿½iï¿½ï¿½FTextï¿½tï¿½ï¿½ï¿½ï¿½Panelï¿½j
+    [SerializeField] private Text pickupPromptText;     // ï¿½Aï¿½Cï¿½eï¿½ï¿½ï¿½ï¿½ï¿½\ï¿½ï¿½ï¿½pText
 
     private ItemBehaviour currentTargetItem;
 
     void Update()
     {
-        DetectItemInView(); // –ˆƒtƒŒ[ƒ€ƒŒƒCƒLƒƒƒXƒg
+        DetectItemInView(); // ï¿½ï¿½ï¿½tï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½Cï¿½Lï¿½ï¿½ï¿½Xï¿½g
 
         if (Input.GetKeyDown(KeyCode.F))
         {
@@ -35,14 +35,14 @@ public class ItemPickup : MonoBehaviour
             {
                 currentTargetItem = item;
 
-                // UI•\¦‚ÆƒeƒLƒXƒgXV
+                // UIï¿½\ï¿½ï¿½ï¿½Æƒeï¿½Lï¿½Xï¿½gï¿½Xï¿½V
                 pickupPromptUI.SetActive(true);
-                pickupPromptText.text = $"[F] E‚¤F{item.ItemData.itemName}";
+                pickupPromptText.text = $"[F] ï¿½Eï¿½ï¿½ï¿½F{item.ItemData.itemName}";
                 return;
             }
         }
 
-        // ‘ÎÛ‚ª‚È‚¢ê‡‚Í”ñ•\¦
+        // ï¿½ÎÛ‚ï¿½ï¿½È‚ï¿½ï¿½ê‡ï¿½Í”ï¿½\ï¿½ï¿½
         currentTargetItem = null;
         pickupPromptUI.SetActive(false);
     }
@@ -55,14 +55,14 @@ public class ItemPickup : MonoBehaviour
 
         if (success)
         {
-            Debug.Log($"ƒAƒCƒeƒ€ '{currentTargetItem.ItemData.itemName}' ‚ğæ“¾‚µ‚Ü‚µ‚½");
+            Debug.Log($"ï¿½Aï¿½Cï¿½eï¿½ï¿½ '{currentTargetItem.ItemData.itemName}' ï¿½ï¿½ï¿½æ“¾ï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½");
             Destroy(currentTargetItem.gameObject);
-            pickupPromptUI.SetActive(false); // UI‚à”ñ•\¦‚É
+            pickupPromptUI.SetActive(false); // UIï¿½ï¿½ï¿½ï¿½\ï¿½ï¿½ï¿½ï¿½
 
         }
         else
         {
-            Debug.LogWarning("ƒCƒ“ƒxƒ“ƒgƒŠ‚ª–”t‚Å‚·BƒAƒCƒeƒ€‚Íc‚è‚Ü‚·");
+            Debug.LogWarning("ï¿½Cï¿½ï¿½ï¿½xï¿½ï¿½ï¿½gï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½tï¿½Å‚ï¿½ï¿½Bï¿½Aï¿½Cï¿½eï¿½ï¿½ï¿½Ícï¿½ï¿½Ü‚ï¿½");
         }
 
         currentTargetItem = null;
@@ -82,7 +82,7 @@ using UnityEngine.InputSystem;
 
 public class ItemPickup : MonoBehaviour
 {
-    [Header("ƒAƒCƒeƒ€æ“¾İ’è")]
+    [Header("ï¿½Aï¿½Cï¿½eï¿½ï¿½ï¿½æ“¾ï¿½İ’ï¿½")]
     [SerializeField] private float pickupRange = 10f;
     [SerializeField] private InventoryManager inventoryManager;
     [SerializeField] private Camera mainCamera;
@@ -107,13 +107,13 @@ public class ItemPickup : MonoBehaviour
 
                 if (success)
                 {
-                    Debug.Log($"ƒAƒCƒeƒ€ '{item.ItemData.itemName}' ‚ğæ“¾‚µ‚Ü‚µ‚½");
-                    Destroy(item.gameObject); // ¬Œ÷‚Ì‚İíœ
+                    Debug.Log($"ï¿½Aï¿½Cï¿½eï¿½ï¿½ '{item.ItemData.itemName}' ï¿½ï¿½ï¿½æ“¾ï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½");
+                    Destroy(item.gameObject); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì‚İíœ
                 }
                 else
                 {
-                    Debug.LogWarning("ƒCƒ“ƒxƒ“ƒgƒŠ‚ª–”t‚Å‚·BƒAƒCƒeƒ€‚Íc‚è‚Ü‚·");
-                    // ‚±‚±‚Å‚Í‰½‚à‚¹‚¸AƒAƒCƒeƒ€‚Í‚»‚Ì‚Ü‚Üc‚·
+                    Debug.LogWarning("ï¿½Cï¿½ï¿½ï¿½xï¿½ï¿½ï¿½gï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½tï¿½Å‚ï¿½ï¿½Bï¿½Aï¿½Cï¿½eï¿½ï¿½ï¿½Ícï¿½ï¿½Ü‚ï¿½");
+                    // ï¿½ï¿½ï¿½ï¿½ï¿½Å‚Í‰ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Aï¿½Aï¿½Cï¿½eï¿½ï¿½ï¿½Í‚ï¿½ï¿½Ì‚Ü‚Ücï¿½ï¿½
                 }
             }
         }

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Itemslot : MonoBehaviour
 {
-    [SerializeField] InventoryManager inventoryManager;
+    [SerializeField] ItemslotManager itemslotManager;
     [SerializeField] private ItemData currentItem;
     public ItemData CurrentItem => currentItem;
 
@@ -15,6 +15,7 @@ public class Itemslot : MonoBehaviour
     public void AssignItem(ItemData item)
     {
         currentItem = item;
+        Instantiate(currentItem.prefab, transform.position, Quaternion.identity);
         Debug.Log($"[{gameObject.name}] にアイテム '{item.itemName}'を格納しました");
     }
 
