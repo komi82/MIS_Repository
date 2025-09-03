@@ -5,13 +5,15 @@ public class RequestManager : MonoBehaviour
 {
     [Header("依頼生成設定")]
     [SerializeField] private ItemDatabase itemDatabase;
-    [SerializeField] private string targetItemType = "薬品"; // 抽選対象のタイプ
     [SerializeField] private float minInterval = 10f;
     [SerializeField] private float maxInterval = 30f;
+    [SerializeField] private int maxRequests = 4;
+    [SerializeField] private List<RequestType> requestTypesPool;
 
     [Header("依頼管理")]
     [SerializeField] private List<Request> activeRequests = new List<Request>();
     [SerializeField] private MoneyManager moneyManager;
+    [SerializeField] private RequestBoard requestBoard;
 
     private float nextRequestTime;
 
@@ -27,7 +29,7 @@ public class RequestManager : MonoBehaviour
         float elapsed = SceneTimer.Instance.GetElapsedTime();
         if (elapsed >= nextRequestTime)
         {
-            GenerateRequests();
+            GenerateRequest();
             ScheduleNextRequest();
         }
     }
@@ -38,47 +40,77 @@ public class RequestManager : MonoBehaviour
         nextRequestTime = SceneTimer.Instance.GetElapsedTime() + interval;
     }
 
-    void GenerateRequests()
+    void GenerateRequest()
     {
-        List<ItemData> candidates = itemDatabase.GetItemsByType(targetItemType);
-        if (candidates.Count == 0)
+        if (activeRequests.Count >= maxRequests) return;
+
+        RequestType type = requestTypesPool[Random.Range(0, requestTypesPool.Count)];
+        Request newRequest = ScriptableObject.CreateInstance<Request>();
+        newRequest.requestType = type;
+        newRequest.isCompleted = false;
+        newRequest.rewardAmount = Random.Range(100, 300);
+
+        switch (type)
         {
-            Debug.LogWarning($"指定タイプ '{targetItemType}' のアイテムが見つかりません");
-            return;
+            case RequestType.DeliverItem:
+                var item = itemDatabase.GetRandomItemByType("薬品");
+                if (item == null) return;
+                newRequest.requestName = $"納品依頼: {item.itemName}";
+                newRequest.requiredItem = item;
+                break;
+
+            case RequestType.PurifyWeapon:
+                var cursed = itemDatabase.GetRandomItemByType("穢れた武器");
+                if (cursed == null) return;
+                var purified = itemDatabase.GetPurifiedVersion(cursed);
+                newRequest.requestName = $"浄化依頼: {cursed.itemName}";
+                newRequest.providedItem = cursed;
+                newRequest.requiredItem = purified;
+                break;
+
+            case RequestType.AddAttribute:
+                var baseWeapon = itemDatabase.GetRandomItemByType("武器");
+                if (baseWeapon == null) return;
+                var enhanced = itemDatabase.GetEnhancedVersion(baseWeapon);
+                newRequest.requestName = $"属性付与依頼: {baseWeapon.itemName}";
+                newRequest.providedItem = baseWeapon;
+                newRequest.requiredItem = enhanced;
+                break;
+
+            case RequestType.CraftWeapon:
+                var crafted = itemDatabase.GetRandomItemByType("武器");
+                if (crafted == null) return;
+                newRequest.requestName = $"武器作成依頼: {crafted.itemName}";
+                newRequest.requiredItem = crafted;
+                break;
+
+            case RequestType.RepairWeapon:
+                var broken = itemDatabase.GetRandomItemByType("壊れた武器");
+                if (broken == null) return;
+                var repaired = itemDatabase.GetRepairedVersion(broken);
+                newRequest.requestName = $"修理依頼: {broken.itemName}";
+                newRequest.providedItem = broken;
+                newRequest.requiredItem = repaired;
+                break;
         }
 
-        int count = Random.Range(1, 3); // 1〜2件生成
-        for (int i = 0; i < count && candidates.Count > 0; i++)
-        {
-            int index = Random.Range(0, candidates.Count);
-            ItemData item = candidates[index];
-            candidates.RemoveAt(index);
-
-            Request newRequest = ScriptableObject.CreateInstance<Request>();
-            newRequest.requestName = $"納品依頼: {item.itemName}";
-            newRequest.requiredItem = item;
-            newRequest.rewardAmount = Random.Range(100, 300);
-            newRequest.isCompleted = false;
-
-            activeRequests.Add(newRequest);
-            Debug.Log($"依頼生成: {newRequest.requestName}");
-        }
+        activeRequests.Add(newRequest);
+        requestBoard.DisplayRequests();
     }
 
-    public bool TryDeliver(ItemData item)
+    public bool TryDeliverByRequest(Request request)
     {
-        foreach (var request in activeRequests)
-        {
-            if (!request.isCompleted && request.requiredItem == item)
-            {
-                request.isCompleted = true;
-                moneyManager.AddMoney(request.rewardAmount);
-                Debug.Log($"納品成功: {request.requestName} に {item.itemName} を納品。報酬 {request.rewardAmount} 円獲得。");
-                return true;
-            }
-        }
+        if (request == null) return false;
 
-        Debug.Log($"納品失敗: {item.itemName} は現在の依頼に該当しません。");
+        if (!request.isCompleted)
+        {
+            request.isCompleted = true;
+            moneyManager.AddMoney(request.rewardAmount);
+            activeRequests.Remove(request);
+            requestBoard.DisplayRequests();
+            Debug.Log($"納品成功: {request.requestName} 報酬 {request.rewardAmount} 円");
+            return true;
+        }
         return false;
     }
 
