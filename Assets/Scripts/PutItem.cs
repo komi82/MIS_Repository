@@ -40,6 +40,7 @@ public class PutItem : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit, pickupRange))
         {
             GameObject targetObject = hit.collider.gameObject;
+            ItemslotManager putitem = targetObject.GetComponent<ItemslotManager>();
 
             if (targetObject.CompareTag("craft"))
             {
@@ -67,11 +68,7 @@ public class PutItem : MonoBehaviour
 
                     if (itemToPlace.prefab != null)
                     {
-                        // "craft" オブジェクトのローカル上方向に offset だけずらして配置
-                        Vector3 spawnPosition = hit.point + targetObject.transform.up * placementOffset;
-
-                        Instantiate(itemToPlace.prefab, spawnPosition, Quaternion.identity);
-
+                        putitem.AddItem(itemToPlace);
                         Debug.Log($"アイテム '{itemToPlace.itemName}' を 'craft' オブジェクト上に配置しました");
                         inventoryManager.RemoveItem(slot);
 
