@@ -130,7 +130,7 @@ public class InventoryManager : MonoBehaviour
         return null;
     }
 
-    public void TryDeliverAllItems(RequestManager requestManager)
+  /*  public void TryDeliverAllItems(RequestManager requestManager)
     {
         foreach (var slot in slotUIs)
         {
@@ -139,7 +139,7 @@ public class InventoryManager : MonoBehaviour
                 requestManager.TryDeliver(slot.CurrentItem);
             }
         }
-    }
+    }*/
 
 }
 
