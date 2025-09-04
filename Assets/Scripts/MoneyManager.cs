@@ -34,7 +34,7 @@ public class MoneyManager : MonoBehaviour
     {
         if (moneyText != null)
         {
-            moneyText.text = $"Š‹à: {currentMoney}‰~";
+            moneyText.text = $"{currentMoney}G";
         }
     }
 

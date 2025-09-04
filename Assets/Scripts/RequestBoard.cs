@@ -31,23 +31,23 @@ public class RequestBoard : MonoBehaviour
             switch (request.requestType)
             {
                 case RequestType.DeliverItem:
-                    description = $"”[•iˆË—Š: {request.requiredItem.itemName}\n•ñV: {request.rewardAmount}‰~";
+                    description = $"”[•i: {request.requiredItem.itemName}\n•ñV: {request.rewardAmount}G";
                     break;
 
                 case RequestType.PurifyWeapon:
-                    description = $"ò‰»ˆË—Š:{request.requiredItem.itemName}\n•ñV: {request.rewardAmount}‰~";
+                    description = $"ò‰»:{request.requiredItem.itemName}\n•ñV: {request.rewardAmount}G";
                     break;
 
                 case RequestType.AddAttribute:
-                    description = $"‘®«•t—^ˆË—Š:{request.requiredItem.itemName}\n•ñV: {request.rewardAmount}‰~";
+                    description = $"‘®«•t—^:{request.requiredItem.itemName}\n•ñV: {request.rewardAmount}G";
                     break;
 
                 case RequestType.CraftWeapon:
-                    description = $"•Šíì¬ˆË—Š: {request.requiredItem.itemName}\n•ñV: {request.rewardAmount}‰~";
+                    description = $"•Šíì¬: {request.requiredItem.itemName}\n•ñV: {request.rewardAmount}G";
                     break;
 
                 case RequestType.RepairWeapon:
-                    description = $"C—ˆË—Š:{request.requiredItem.itemName}\n•ñV: {request.rewardAmount}‰~";
+                    description = $"C—:{request.requiredItem.itemName}\n•ñV: {request.rewardAmount}G";
                     break;
             }
 

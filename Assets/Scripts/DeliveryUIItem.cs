@@ -23,14 +23,27 @@ public class DeliveryUIItem : MonoBehaviour
         requestManager = manager;
         parentList = list;
 
-        // 表示更新
         itemNameText.text = request.requiredItem.itemName;
-        itemIcon.sprite = request.requiredItem.icon; // ItemData に icon(Sprite) がある前提
-        rewardText.text = $"{request.rewardAmount} 円";
+        itemIcon.sprite = request.requiredItem.icon;
+        rewardText.text = $"{request.rewardAmount} G";
 
-        // ボタンイベント登録
+        // 所持判定
+        bool hasItem = InventoryManager.Instance.HasItem(request.requiredItem);
+
+        // ボタン状態制御
+        deliverButton.interactable = hasItem;
+
+        // 半透明化（ColorBlockを使う場合）
+        var colors = deliverButton.colors;
+        colors.normalColor = hasItem ? Color.white : new Color(1f, 1f, 1f, 0.5f);
+        deliverButton.colors = colors;
+
+        // イベント登録
         deliverButton.onClick.RemoveAllListeners();
-        deliverButton.onClick.AddListener(OnDeliverClicked);
+        if (hasItem)
+        {
+            deliverButton.onClick.AddListener(OnDeliverClicked);
+        }
     }
 
     /// <summary>
@@ -46,18 +59,27 @@ public class DeliveryUIItem : MonoBehaviour
 
         if (requestManager.TryDeliverByRequest(linkedRequest))
         {
-            // 納品成功 → UIセル削除
+            // インベントリからアイテムを削除
+            var slot = InventoryManager.Instance.FindSlotByItem(linkedRequest.requiredItem);
+            if (slot != null)
+            {
+                InventoryManager.Instance.RemoveItem(slot);
+                Debug.Log($"インベントリから '{linkedRequest.requiredItem.itemName}' を削除しました");
+            }
+            else
+            {
+                Debug.LogWarning($"納品対象アイテム '{linkedRequest.requiredItem.itemName}' がインベントリに見つかりませんでした");
+            }
+
+            // UIセル削除
             Destroy(gameObject);
 
             // リスト全体を更新
-            if (parentList != null)
-            {
-                parentList.RefreshList();
-            }
+            parentList?.RefreshList();
         }
         else
         {
-            Debug.Log($"納品失敗: {linkedRequest.requiredItem.itemName}");
+//            Debug.Log($"納品失敗: {linkedRequest.requiredItem.itemName}");
         }
     }
 }

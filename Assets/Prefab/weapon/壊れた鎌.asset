@@ -15,5 +15,5 @@ MonoBehaviour:
   itemID: 18
   itemType: "\u58CA\u308C\u305F\u6B66\u5668"
   itemName: "\u58CA\u308C\u305F\u938C"
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: ce613e5cc5ec5ce40b2e0572a7fa5fdb, type: 3}
   prefab: {fileID: 6585189000476788108, guid: 9d72b269d41c8f14982c86c223fd9f1a, type: 3}

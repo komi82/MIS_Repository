@@ -8,6 +8,7 @@ public class FirstPersonController : MonoBehaviour
     public Transform playerBody; // �v���C���[�̃I�u�W�F�N�g�i�e�j���Z�b�g
 
     private CharacterController characterController;
+    [SerializeField] private DeliveryStation deliveryStation;
 
     float xRotation = 0f;
     float yRotation = 0f;
@@ -28,18 +29,20 @@ public class FirstPersonController : MonoBehaviour
 
     void Update()
     {
-        // �}�E�X����i���_�̉�]�j
-        float mouseX = Mouse.current.delta.x.ReadValue() * sensitivity;
-        float mouseY = Mouse.current.delta.y.ReadValue() * sensitivity;
+        if (deliveryStation.CursorActive == false)
+        {
+            // �}�E�X����i���_�̉�]�j
+            float mouseX = Mouse.current.delta.x.ReadValue() * sensitivity;
+            float mouseY = Mouse.current.delta.y.ReadValue() * sensitivity;
 
-        // �J�����̉�]�i�㉺���_�̂݁j
-        xRotation -= mouseY * 0.5f;
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
-        Camera.main.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-        // �v���C���[�̉�]�i���E���_�̂݁j
-        yRotation += mouseX * 0.5f;
-        playerBody.rotation = Quaternion.Euler(0f, yRotation, 0f);
-
+            // �J�����̉�]�i�㉺���_�̂݁j
+            xRotation -= mouseY * 0.5f;
+            xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+            Camera.main.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+            // �v���C���[�̉�]�i���E���_�̂݁j
+            yRotation += mouseX * 0.5f;
+            playerBody.rotation = Quaternion.Euler(0f, yRotation, 0f);
+        }
         // WASD�ړ�
         float horizontal = Keyboard.current.aKey.isPressed ? -1f : Keyboard.current.dKey.isPressed ? 1f : 0f;
         float vertical = Keyboard.current.wKey.isPressed ? 1f : Keyboard.current.sKey.isPressed ? -1f : 0f;

@@ -19,6 +19,7 @@ public class RequestManager : MonoBehaviour
 
     void Start()
     {
+        GenerateRequest();
         ScheduleNextRequest();
     }
 
