@@ -11,9 +11,7 @@ public class PutItem : MonoBehaviour
     [Header("アイテム設置")]
     [SerializeField] private float placementOffset = 0.5f; // 任意の高さ
 
-    [Header("UI設定")]
-    [SerializeField] private GameObject pickupPromptUI; // 表示用UI（例：Text付きのPanel）
-    [SerializeField] private Text pickupPromptText;     // アイテム名表示用Text
+
     void Update()
     {
         Ray ray = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
@@ -40,7 +38,6 @@ public class PutItem : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit, pickupRange))
         {
             GameObject targetObject = hit.collider.gameObject;
-            ItemslotManager putitem = targetObject.GetComponent<ItemslotManager>();
 
             if (targetObject.CompareTag("craft"))
             {
@@ -68,7 +65,11 @@ public class PutItem : MonoBehaviour
 
                     if (itemToPlace.prefab != null)
                     {
-                        putitem.AddItem(itemToPlace);
+                        // "craft" オブジェクトのローカル上方向に offset だけずらして配置
+                        Vector3 spawnPosition = hit.point + targetObject.transform.up * placementOffset;
+
+                        Instantiate(itemToPlace.prefab, spawnPosition, Quaternion.identity);
+
                         Debug.Log($"アイテム '{itemToPlace.itemName}' を 'craft' オブジェクト上に配置しました");
                         inventoryManager.RemoveItem(slot);
 

@@ -6,6 +6,20 @@ public class InventoryManager : MonoBehaviour
     [SerializeField] private InventorySlotUI[] slotUIs;
     public ItemData selectedItem;
     [SerializeField] public InventorySlotUI selectedSlot;
+
+
+    public static InventoryManager Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject); // 重複防止
+            return;
+        }
+        Instance = this;
+    }
+
     /// <summary>
     /// アイテムを最初の空スロットに追加する
     /// </summary>
@@ -44,6 +58,17 @@ public class InventoryManager : MonoBehaviour
         return true;
     }
 
+    public bool HasItem(ItemData item)
+    {
+        foreach (var slot in slotUIs)
+        {
+            if (slot.CurrentItem == item)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
     /// <summary>
     /// 全スロットを初期化（空にする）
     /// </summary>
@@ -129,17 +154,6 @@ public class InventoryManager : MonoBehaviour
         }
         return null;
     }
-
-  /*  public void TryDeliverAllItems(RequestManager requestManager)
-    {
-        foreach (var slot in slotUIs)
-        {
-            if (slot.IsOccupied && slot.CurrentItem != null)
-            {
-                requestManager.TryDeliver(slot.CurrentItem);
-            }
-        }
-    }*/
 
 }
 
