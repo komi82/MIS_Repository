@@ -42,7 +42,7 @@ public class FirstPersonController : MonoBehaviour
             // �v���C���[�̉�]�i���E���_�̂݁j
             yRotation += mouseX * 0.5f;
             playerBody.rotation = Quaternion.Euler(0f, yRotation, 0f);
-        }
+        
         // WASD�ړ�
         float horizontal = Keyboard.current.aKey.isPressed ? -1f : Keyboard.current.dKey.isPressed ? 1f : 0f;
         float vertical = Keyboard.current.wKey.isPressed ? 1f : Keyboard.current.sKey.isPressed ? -1f : 0f;
@@ -65,30 +65,38 @@ public class FirstPersonController : MonoBehaviour
         if (Input.GetKey(KeyCode.W))
         {
             Controller.SetBool("movement_forward", true);
-        }else{
+        }
+        else
+        {
             Controller.SetBool("movement_forward", false);
         }
 
         if (Input.GetKey(KeyCode.A))
         {
             Controller.SetBool("movement_left", true);
-        }else{
+        }
+        else
+        {
             Controller.SetBool("movement_left", false);
         }
 
         if (Input.GetKey(KeyCode.D))
         {
             Controller.SetBool("movement_right", true);
-        }else{
+        }
+        else
+        {
             Controller.SetBool("movement_right", false);
         }
 
         if (Input.GetKey(KeyCode.S))
         {
             Controller.SetBool("movement_back", true);
-        }else{
+        }
+        else
+        {
             Controller.SetBool("movement_back", false);
         }
-
+    }
     }
 }
