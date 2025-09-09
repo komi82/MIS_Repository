@@ -30,8 +30,28 @@ public class ItemDatabase : ScriptableObject
         return allItems.Find(i => i.itemName == broken.itemName.Replace("‰ó‚ê‚½", ""));
     }
 
-    public ItemData GetEnhancedVersion(ItemData baseWeapon)
+    public ItemData GetEnhancedFireVersion(ItemData baseWeapon_fire)
     {
-        return allItems.Find(i => i.itemName == baseWeapon.itemName + "E‘®«•t‚«");
+        return allItems.Find(i => i.itemName == $"‰Š‚Ì{baseWeapon_fire.itemName}");
+    }
+
+    public ItemData GetEnhancedFrozenVersion(ItemData baseWeapon_frozen)
+    {
+        return allItems.Find(i => i.itemName == $"•X‚Ì{baseWeapon_frozen.itemName}");
+    }
+
+    public ItemData GetEnhancedWindVersion(ItemData baseWeapon_wind)
+    {
+        return allItems.Find(i => i.itemName == $"•—‚Ì{baseWeapon_wind.itemName}");
+    }
+
+    public ItemData GetEnhancedBrightVersion(ItemData baseWeapon_bright)
+    {
+        return allItems.Find(i => i.itemName == $"Œõ‚Ì{baseWeapon_bright.itemName}");
+    }
+
+    public ItemData GetEnhancedDarknessVersion(ItemData baseWeapon_darkness)
+    {
+        return allItems.Find(i => i.itemName == $"ˆÅ‚Ì{baseWeapon_darkness.itemName}");
     }
 }

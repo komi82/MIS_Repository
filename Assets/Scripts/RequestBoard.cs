@@ -38,7 +38,23 @@ public class RequestBoard : MonoBehaviour
                     description = $"ò‰»:{request.requiredItem.itemName}\n•ñV: {request.rewardAmount}G";
                     break;
 
-                case RequestType.AddAttribute:
+                case RequestType.AddAttribute_Fire:
+                    description = $"‘®«•t—^:{request.requiredItem.itemName}\n•ñV: {request.rewardAmount}G";
+                    break;
+
+                case RequestType.AddAttribute_Frozen:
+                    description = $"‘®«•t—^:{request.requiredItem.itemName}\n•ñV: {request.rewardAmount}G";
+                    break;
+
+                case RequestType.AddAttribute_Wind:
+                    description = $"‘®«•t—^:{request.requiredItem.itemName}\n•ñV: {request.rewardAmount}G";
+                    break;
+
+                case RequestType.AddAttribute_Bright:
+                    description = $"‘®«•t—^:{request.requiredItem.itemName}\n•ñV: {request.rewardAmount}G";
+                    break;
+
+                case RequestType.AddAttribute_Darkness:
                     description = $"‘®«•t—^:{request.requiredItem.itemName}\n•ñV: {request.rewardAmount}G";
                     break;
 

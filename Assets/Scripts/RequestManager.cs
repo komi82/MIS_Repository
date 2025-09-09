@@ -69,13 +69,49 @@ public class RequestManager : MonoBehaviour
                 newRequest.requiredItem = purified;
                 break;
 
-            case RequestType.AddAttribute:
-                var baseWeapon = itemDatabase.GetRandomItemByType("武器");
-                if (baseWeapon == null) return;
-                var enhanced = itemDatabase.GetEnhancedVersion(baseWeapon);
-                newRequest.requestName = $"属性付与依頼: {baseWeapon.itemName}";
-                newRequest.providedItem = baseWeapon;
-                newRequest.requiredItem = enhanced;
+            case RequestType.AddAttribute_Fire:
+                var baseWeapon_fire = itemDatabase.GetRandomItemByType("無属性武器");
+                if (baseWeapon_fire == null) return;
+                var enhancedfire = itemDatabase.GetEnhancedFireVersion(baseWeapon_fire);
+                newRequest.requestName = $"属性付与依頼: {baseWeapon_fire.itemName}";
+                newRequest.providedItem = baseWeapon_fire;
+                newRequest.requiredItem = enhancedfire;
+                break;
+
+            case RequestType.AddAttribute_Frozen:
+                var baseWeapon_frozen = itemDatabase.GetRandomItemByType("無属性武器");
+                if (baseWeapon_frozen == null) return;
+                var enhancedfrozen = itemDatabase.GetEnhancedFrozenVersion(baseWeapon_frozen);
+                newRequest.requestName = $"属性付与依頼: {baseWeapon_frozen.itemName}";
+                newRequest.providedItem = baseWeapon_frozen;
+                newRequest.requiredItem = enhancedfrozen;
+                break;
+
+            case RequestType.AddAttribute_Wind:
+                var baseWeapon_wind = itemDatabase.GetRandomItemByType("無属性武器");
+                if (baseWeapon_wind == null) return;
+                var enhancedwind = itemDatabase.GetEnhancedWindVersion(baseWeapon_wind);
+                newRequest.requestName = $"属性付与依頼: {baseWeapon_wind.itemName}";
+                newRequest.providedItem = baseWeapon_wind;
+                newRequest.requiredItem = enhancedwind;
+                break;
+
+            case RequestType.AddAttribute_Bright:
+                var baseWeapon_bright = itemDatabase.GetRandomItemByType("無属性武器");
+                if (baseWeapon_bright == null) return;
+                var enhancedbright = itemDatabase.GetEnhancedBrightVersion(baseWeapon_bright);
+                newRequest.requestName = $"属性付与依頼: {baseWeapon_bright.itemName}";
+                newRequest.providedItem = baseWeapon_bright;
+                newRequest.requiredItem = enhancedbright;
+                break;
+
+            case RequestType.AddAttribute_Darkness:
+                var baseWeapon_darkness = itemDatabase.GetRandomItemByType("無属性武器");
+                if (baseWeapon_darkness == null) return;
+                var enhanceddarkness = itemDatabase.GetEnhancedDarknessVersion(baseWeapon_darkness);
+                newRequest.requestName = $"属性付与依頼: {baseWeapon_darkness.itemName}";
+                newRequest.providedItem = baseWeapon_darkness;
+                newRequest.requiredItem = enhanceddarkness;
                 break;
 
             case RequestType.CraftWeapon:
