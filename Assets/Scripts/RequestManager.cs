@@ -16,9 +16,11 @@ public class RequestManager : MonoBehaviour
     [SerializeField] private RequestBoard requestBoard;
 
     private float nextRequestTime;
+    public static int RequestCompleted = 0;
 
     void Start()
     {
+        RequestCompleted = 0;
         GenerateRequest();
         ScheduleNextRequest();
     }
@@ -145,6 +147,7 @@ public class RequestManager : MonoBehaviour
             moneyManager.AddMoney(request.rewardAmount);
             activeRequests.Remove(request);
             requestBoard.DisplayRequests();
+            RequestCompleted++;
             Debug.Log($"納品成功: {request.requestName} 報酬 {request.rewardAmount} 円");
             return true;
         }
