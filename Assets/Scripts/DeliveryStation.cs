@@ -49,8 +49,8 @@ public class DeliveryStation : MonoBehaviour
         }
 
         // ヒットしなかった場合
-        CursorActive = false;
-        Cursor.lockState = CursorLockMode.Locked;   // 画面中央に固定＆非表示
+  //      CursorActive = false;
+  //      Cursor.lockState = CursorLockMode.Locked;   // 画面中央に固定＆非表示
 
 
         deliveryUI.SetActive(false);

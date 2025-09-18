@@ -7,7 +7,6 @@ using UnityEngine.SceneManagement;
 public class SceneTimer : MonoBehaviour
 {
     public static SceneTimer Instance { get; private set; }
-    [SerializeField] private Text timerText;
 
     private float startTime;
 
@@ -32,7 +31,6 @@ public class SceneTimer : MonoBehaviour
         if (Instance != null)
         {
             float elapsed = Instance.GetElapsedTime();
-            timerText.text = $"{elapsed:F2}";
         }
     }
 

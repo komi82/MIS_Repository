@@ -3,11 +3,12 @@ using UnityEngine.UI;
 
 public class MoneyManager : MonoBehaviour
 {
-    [SerializeField] private int currentMoney;
+    [SerializeField] public static int currentMoney;
     [SerializeField] private Text moneyText;
 
     private void Start()
     {
+        currentMoney = 0;
         UpdateUI();
     }
 
@@ -34,7 +35,7 @@ public class MoneyManager : MonoBehaviour
     {
         if (moneyText != null)
         {
-            moneyText.text = $"{currentMoney}G";
+            moneyText.text = $"{currentMoney:N0}G";
         }
     }
 
