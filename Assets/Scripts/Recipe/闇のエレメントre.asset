@@ -12,5 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d545c5357e5a5e4380394da5c760b43, type: 3}
   m_Name: "\u95C7\u306E\u30A8\u30EC\u30E1\u30F3\u30C8re"
   m_EditorClassIdentifier: 
-  requiredItems: []
+  requiredItems:
+  - {fileID: 0}
   resultItem: {fileID: 11400000, guid: 711390aca6b2b544896494455d809316, type: 2}
