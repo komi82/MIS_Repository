@@ -3,21 +3,21 @@ using UnityEngine.UI;
 
 public class ItemPickup : MonoBehaviour
 {
-    [Header("ƒAƒCƒeƒ€æ“¾İ’è")]
+    [Header("ã‚¢ã‚¤ãƒ†ãƒ å–å¾—è¨­å®š")]
     [SerializeField] private float pickupRange = 10f;
     [SerializeField] private InventoryManager inventoryManager;
     [SerializeField] private Camera mainCamera;
 
 
-    [Header("UIİ’è")]
-    [SerializeField] private GameObject pickupPromptUI; // •\¦—pUIi—áFText•t‚«‚ÌPanelj
-    [SerializeField] private Text pickupPromptText;     // ƒAƒCƒeƒ€–¼•\¦—pText
+    [Header("UIè¨­å®š")]
+    [SerializeField] private GameObject pickupPromptUI; // è¡¨ç¤ºç”¨UIï¼ˆä¾‹ï¼šTextä»˜ãã®Panelï¼‰
+    [SerializeField] private Text pickupPromptText;     // ã‚¢ã‚¤ãƒ†ãƒ åè¡¨ç¤ºç”¨Text
 
     private ItemBehaviour currentTargetItem;
 
     void Update()
     {
-        DetectItemInView(); // –ˆƒtƒŒ[ƒ€ƒŒƒCƒLƒƒƒXƒg
+        DetectItemInView(); 
 
         if (Input.GetKeyDown(KeyCode.F))
         {
@@ -35,14 +35,13 @@ public class ItemPickup : MonoBehaviour
             {
                 currentTargetItem = item;
 
-                // UI•\¦‚ÆƒeƒLƒXƒgXV
                 pickupPromptUI.SetActive(true);
-                pickupPromptText.text = $"[F] E‚¤F{item.ItemData.itemName}";
+                pickupPromptText.text = $"[F] æ‹¾ã†ï¼š{item.ItemData.itemName}";
                 return;
             }
         }
 
-        // ‘ÎÛ‚ª‚È‚¢ê‡‚Í”ñ•\¦
+        // ï¿½ÎÛ‚ï¿½ï¿½È‚ï¿½ï¿½ê‡ï¿½Í”ï¿½\ï¿½ï¿½
         currentTargetItem = null;
         pickupPromptUI.SetActive(false);
     }
@@ -55,14 +54,20 @@ public class ItemPickup : MonoBehaviour
 
         if (success)
         {
-            Debug.Log($"ƒAƒCƒeƒ€ '{currentTargetItem.ItemData.itemName}' ‚ğæ“¾‚µ‚Ü‚µ‚½");
+            Debug.Log($"ã‚¢ã‚¤ãƒ†ãƒ  '{currentTargetItem.ItemData.itemName}' ã‚’å–å¾—ã—ã¾ã—ãŸ");
+            // ã‚¹ãƒ­ãƒƒãƒˆå æœ‰è§£é™¤ï¼šã‚¹ãƒ­ãƒƒãƒˆã®å­ã‹ã‚‰æ‹¾ã£ãŸå ´åˆã¯è¦ªã® PlacementSlots ã«é€šçŸ¥
+            var parentSlots = currentTargetItem.transform.GetComponentInParent<PlacementSlots>();
+            if (parentSlots != null)
+            {
+                parentSlots.ClearSlotByTransform(currentTargetItem.transform.parent);
+            }
             Destroy(currentTargetItem.gameObject);
-            pickupPromptUI.SetActive(false); // UI‚à”ñ•\¦‚É
+            pickupPromptUI.SetActive(false);
 
         }
         else
         {
-            Debug.LogWarning("ƒCƒ“ƒxƒ“ƒgƒŠ‚ª–”t‚Å‚·BƒAƒCƒeƒ€‚Íc‚è‚Ü‚·");
+            Debug.LogWarning("ã‚¤ãƒ³ãƒ™ãƒ³ãƒˆãƒªãŒæº€æ¯ã§ã™ã€‚ã‚¢ã‚¤ãƒ†ãƒ ã¯æ®‹ã‚Šã¾ã™");
         }
 
         currentTargetItem = null;
@@ -82,7 +87,7 @@ using UnityEngine.InputSystem;
 
 public class ItemPickup : MonoBehaviour
 {
-    [Header("ƒAƒCƒeƒ€æ“¾İ’è")]
+    [Header("ï¿½Aï¿½Cï¿½eï¿½ï¿½ï¿½æ“¾ï¿½İ’ï¿½")]
     [SerializeField] private float pickupRange = 10f;
     [SerializeField] private InventoryManager inventoryManager;
     [SerializeField] private Camera mainCamera;
@@ -107,13 +112,13 @@ public class ItemPickup : MonoBehaviour
 
                 if (success)
                 {
-                    Debug.Log($"ƒAƒCƒeƒ€ '{item.ItemData.itemName}' ‚ğæ“¾‚µ‚Ü‚µ‚½");
-                    Destroy(item.gameObject); // ¬Œ÷‚Ì‚İíœ
+                    Debug.Log($"ï¿½Aï¿½Cï¿½eï¿½ï¿½ '{item.ItemData.itemName}' ï¿½ï¿½ï¿½æ“¾ï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½");
+                    Destroy(item.gameObject); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì‚İíœ
                 }
                 else
                 {
-                    Debug.LogWarning("ƒCƒ“ƒxƒ“ƒgƒŠ‚ª–”t‚Å‚·BƒAƒCƒeƒ€‚Íc‚è‚Ü‚·");
-                    // ‚±‚±‚Å‚Í‰½‚à‚¹‚¸AƒAƒCƒeƒ€‚Í‚»‚Ì‚Ü‚Üc‚·
+                    Debug.LogWarning("ï¿½Cï¿½ï¿½ï¿½xï¿½ï¿½ï¿½gï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½tï¿½Å‚ï¿½ï¿½Bï¿½Aï¿½Cï¿½eï¿½ï¿½ï¿½Ícï¿½ï¿½Ü‚ï¿½");
+                    // ï¿½ï¿½ï¿½ï¿½ï¿½Å‚Í‰ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Aï¿½Aï¿½Cï¿½eï¿½ï¿½ï¿½Í‚ï¿½ï¿½Ì‚Ü‚Ücï¿½ï¿½
                 }
             }
         }
