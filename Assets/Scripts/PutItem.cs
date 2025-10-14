@@ -10,7 +10,9 @@ public class PutItem : MonoBehaviour
     [SerializeField] private Camera mainCamera;
     [Header("アイテム設置")]
 	[SerializeField] private float placementOffset = 0.5f; // 任意の高さ（スロットTransform未設定時の後方互換）
-	[SerializeField] private RecipeDatabase recipeDatabase;
+	[SerializeField] private RecipeDatabase recipeDatabase; // craft 用
+	[SerializeField] private RecipeDatabase weaponRecipeDatabase; // blacksmith 用
+	[SerializeField] private RecipeDatabase washRecipeDatabase;   // wash 用
 
 
     void Update()
@@ -34,10 +36,18 @@ public class PutItem : MonoBehaviour
 				if (Input.GetKeyDown(KeyCode.R))
 				{
 					PlacementSlots slots = slotsOnParent != null ? slotsOnParent : targetObject.GetComponent<PlacementSlots>();
-					if (slots != null && recipeDatabase != null)
+					// タグに応じて参照するデータベースを切替
+					RecipeDatabase activeDB = null;
+					GameObject taggedObject = targetObject;
+					if (slotsOnParent != null) taggedObject = slotsOnParent.gameObject;
+					if (taggedObject.CompareTag("craft")) activeDB = recipeDatabase;
+					else if (taggedObject.CompareTag("blacksmith")) activeDB = weaponRecipeDatabase;
+					else if (taggedObject.CompareTag("wash")) activeDB = washRecipeDatabase;
+
+					if (slots != null && activeDB != null)
 					{
 						var combo = slots.GetCombination();
-						RecipeData match = recipeDatabase.FindMatch(combo.Item1, combo.Item2);
+						RecipeData match = activeDB.FindMatch(combo.Item1, combo.Item2);
 						if (match != null && match.resultItem != null && match.resultItem.prefab != null)
 						{
 							Transform anchor = slots.GetResultAnchor();
@@ -55,6 +65,11 @@ public class PutItem : MonoBehaviour
 							Debug.Log("クラフト可能なレシピがありません");
 						}
 					}
+					else
+					{
+						if (slots == null) Debug.LogWarning("PlacementSlots が見つかりません。対象または親に付与してください");
+						if (activeDB == null) Debug.LogWarning("対応する RecipeDatabase が未設定です（craft/blacksmith/wash を確認）");
+					}
 				}
             }
         }
@@ -69,7 +84,7 @@ public class PutItem : MonoBehaviour
         {
 			GameObject targetObject = hit.collider.gameObject;
 			var slotsOnParent = targetObject.GetComponentInParent<PlacementSlots>();
-			bool isCraftTarget = targetObject.CompareTag("craft") || (slotsOnParent != null);
+			bool isCraftTarget = targetObject.CompareTag("craft") || targetObject.CompareTag("blacksmith") || targetObject.CompareTag("wash") || (slotsOnParent != null);
 
 			if (isCraftTarget)
             {
@@ -97,8 +112,8 @@ public class PutItem : MonoBehaviour
 
 					if (itemToPlace.prefab != null)
                     {
-						// スロット優先で配置（親からも取得可）
-						PlacementSlots slots = slotsOnParent != null ? slotsOnParent : targetObject.GetComponent<PlacementSlots>();
+					// スロット優先で配置（親からも取得可）
+					PlacementSlots slots = slotsOnParent != null ? slotsOnParent : targetObject.GetComponent<PlacementSlots>();
 						Transform placeSlot = null;
 						Vector3 spawnPosition;
 						Quaternion spawnRotation = Quaternion.identity;
@@ -124,16 +139,27 @@ public class PutItem : MonoBehaviour
 							placed = Instantiate(itemToPlace.prefab, spawnPosition, spawnRotation);
 						}
 
-						Debug.Log($"アイテム '{itemToPlace.itemName}' を 'craft' に配置しました");
+						// タグ名をログに反映
+						string stationTag = (slotsOnParent != null ? slotsOnParent.gameObject.tag : targetObject.tag);
+						Debug.Log($"アイテム '{itemToPlace.itemName}' を '{stationTag}' に配置しました");
                         inventoryManager.RemoveItem(slot);
 
                         inventoryManager.selectedItem = null; // 選択状態も解除
 
 						// レシピ照合（スロットがある場合のみ）
-						if (slots != null && recipeDatabase != null)
+						if (slots != null)
 						{
-							var combo = slots.GetCombination();
-							RecipeData match = recipeDatabase.FindMatch(combo.Item1, combo.Item2);
+							// タグに応じて参照するデータベースを切替
+							RecipeDatabase activeDB = null;
+							GameObject taggedObject = (slotsOnParent != null ? slotsOnParent.gameObject : targetObject);
+							if (taggedObject.CompareTag("craft")) activeDB = recipeDatabase;
+							else if (taggedObject.CompareTag("blacksmith")) activeDB = weaponRecipeDatabase;
+							else if (taggedObject.CompareTag("wash")) activeDB = washRecipeDatabase;
+
+							if (activeDB != null)
+							{
+								var combo = slots.GetCombination();
+								RecipeData match = activeDB.FindMatch(combo.Item1, combo.Item2);
 							if (match != null && match.resultItem != null)
 							{
 								Debug.Log($"レシピ一致: {match.requiredItems[0]?.itemName} + {(match.requiredItems.Length > 1 ? match.requiredItems[1]?.itemName : "")} -> {match.resultItem.itemName}");
@@ -142,10 +168,15 @@ public class PutItem : MonoBehaviour
 							{
 								Debug.Log("レシピ一致なし");
 							}
+							}
+							else
+							{
+								Debug.LogWarning("対応する RecipeDatabase が未設定です（craft/blacksmith/wash を確認）");
+							}
 						}
 						else
 						{
-							if (recipeDatabase == null) Debug.LogWarning("RecipeDatabase が未設定です");
+							if (recipeDatabase == null && weaponRecipeDatabase == null && washRecipeDatabase == null) Debug.LogWarning("RecipeDatabase が未設定です");
 							if (slots == null) Debug.LogWarning("PlacementSlots が見つかりません。対象または親に付与してください");
 						}
                     }

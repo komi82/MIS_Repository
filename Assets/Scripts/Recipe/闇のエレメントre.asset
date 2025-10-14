@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: "\u95C7\u306E\u30A8\u30EC\u30E1\u30F3\u30C8re"
   m_EditorClassIdentifier: 
   requiredItems:
-  - {fileID: 0}
+  - {fileID: 11400000, guid: ffc2d528d9fad1a4d96c072c6b7d806c, type: 2}
+  - {fileID: 11400000, guid: 8a0ef0bfb44ddd141b5aca3f5c7b181f, type: 2}
   resultItem: {fileID: 11400000, guid: 711390aca6b2b544896494455d809316, type: 2}

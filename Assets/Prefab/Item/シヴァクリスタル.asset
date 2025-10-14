@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 200e4a51f668380468350d7ecd441e69, type: 3}
-  m_Name: "\u5CA9"
+  m_Name: "\u30B7\u30F4\u30A1\u30AF\u30EA\u30B9\u30BF\u30EB"
   m_EditorClassIdentifier: 
-  itemID: 3
+  itemID: 32
   itemType: "\u7D20\u6750"
-  itemName: "\u5CA9"
-  icon: {fileID: 21300000, guid: db3fadea2d1ebf34e9a0457475aef89e, type: 3}
-  prefab: {fileID: 4146833825846114697, guid: 0d76843cd17ceec4cad60f6e13298303, type: 3}
+  itemName: "\u30B7\u30F4\u30A1\u30AF\u30EA\u30B9\u30BF\u30EB"
+  icon: {fileID: 21300000, guid: 46b418c379eecf5469ab800c22901f0c, type: 3}
+  prefab: {fileID: 3048216622953258, guid: 951e18d4675dc7a42baee9ffa75f6656, type: 3}

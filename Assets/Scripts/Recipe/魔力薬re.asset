@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: "\u9B54\u529B\u85ACre"
   m_EditorClassIdentifier: 
   requiredItems:
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 11400000, guid: 922ba8b90cce22345a5a9eea9a130e12, type: 2}
+  - {fileID: 11400000, guid: 4591a8d5f99a502438d999ecf57e6e04, type: 2}
   resultItem: {fileID: 11400000, guid: 7796b6e8f5e60004588fda5ae771056e, type: 2}

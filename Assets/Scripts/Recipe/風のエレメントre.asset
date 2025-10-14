@@ -12,5 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d545c5357e5a5e4380394da5c760b43, type: 3}
   m_Name: "\u98A8\u306E\u30A8\u30EC\u30E1\u30F3\u30C8re"
   m_EditorClassIdentifier: 
-  requiredItems: []
+  requiredItems:
+  - {fileID: 11400000, guid: ffc2d528d9fad1a4d96c072c6b7d806c, type: 2}
+  - {fileID: 11400000, guid: 0a111a79be92a56498e171ee308c5ea3, type: 2}
   resultItem: {fileID: 11400000, guid: b102a0bee8ec8fc4582b8b4e0c1e1569, type: 2}

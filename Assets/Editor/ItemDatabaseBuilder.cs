@@ -9,7 +9,7 @@ public class ItemDatabaseBuilder
     [MenuItem("Tools/Build ItemDatabase (Add)")]
     public static void BuildDatabase()
     {
-        string folderPath = "Assets/Prefab/weapon";
+        string folderPath = "Assets/Prefab/Item";
         string[] guids = AssetDatabase.FindAssets("t:ItemData", new[] { folderPath });
 
         var newItems = guids
