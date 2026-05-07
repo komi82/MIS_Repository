@@ -44,6 +44,28 @@ public class SceneTimer : MonoBehaviour
     {
         startTime = Time.time;
         Debug.Log($"Scene '{scene.name}' loaded. Timer started.");
+        
+        // シーン名に応じてカーソル状態を設定
+        SetCursorStateForScene(scene.name);
+    }
+    
+    /// <summary>
+    /// シーン名に応じてカーソル状態を設定
+    /// </summary>
+    private void SetCursorStateForScene(string sceneName)
+    {
+        if (sceneName == "result" || sceneName == "title")
+        {
+            // resultシーンとtitleシーンではカーソルを表示
+            Cursor.lockState = CursorLockMode.Confined;
+            Cursor.visible = true;
+        }
+        else
+        {
+            // その他のシーン（arcade等）ではカーソルをロック
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
     }
 
     public float GetElapsedTime()

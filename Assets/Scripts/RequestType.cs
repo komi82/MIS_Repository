@@ -1,12 +1,14 @@
 public enum RequestType
 {
-    DeliverItem,     // ”[•iˆË—Ši–ò•i‚È‚Çj
-    PurifyWeapon,    // âq‚ê‚½•Ší‚Ìò‰»
-    AddAttribute_Fire,    // ‘®«•t—^
-    AddAttribute_Frozen,    // ‘®«•t—^
-    AddAttribute_Wind,    // ‘®«•t—^
-    AddAttribute_Bright,    // ‘®«•t—^
-    AddAttribute_Darkness,    // ‘®«•t—^
-    CraftWeapon,     // •Šíì¬
-    RepairWeapon     // ‰ó‚ê‚½•Ší‚ÌC—
+    DeliverItem,     // ãƒ‡ãƒªãƒãƒ¼ä¾é ¼ï¼ˆè–¬å“ãªã©ï¼‰
+    PurifyWeapon,    // å‘ªã‚ã‚ŒãŸæ­¦å™¨ã®æµ„åŒ–
+    AddAttribute_Fire,    // ç‚å±æ€§ä»˜ä¸
+    AddAttribute_Frozen,    // æ°·å±æ€§ä»˜ä¸
+    AddAttribute_Wind,    // é¢¨å±æ€§ä»˜ä¸
+    AddAttribute_Bright,    // å…‰å±æ€§ä»˜ä¸
+    AddAttribute_Darkness,    // é—‡å±æ€§ä»˜ä¸
+    CraftWeapon,     // æ­¦å™¨ä½œæˆ
+    RepairWeapon     // å£Šã‚ŒãŸæ­¦å™¨ã®ä¿®ç†
 }
+
+

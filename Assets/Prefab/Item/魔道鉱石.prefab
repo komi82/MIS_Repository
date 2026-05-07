@@ -78,7 +78,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: c22b4436a5b672345a5e9b1328f6b7dc, type: 3}
       propertyPath: m_Name
-      value: "\u5CA9"
+      value: "\u9B54\u9053\u9271\u77F3"
       objectReference: {fileID: 0}
     - target: {fileID: 5334037119324981776, guid: c22b4436a5b672345a5e9b1328f6b7dc, type: 3}
       propertyPath: m_Mesh
@@ -144,7 +144,7 @@ BoxCollider:
   m_ProvidesContacts: 1
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 4.595462, y: 5.7, z: 5.0862875}
+  m_Size: {x: 4.895462, y: 6, z: 5.3862877}
   m_Center: {x: -0.08692816, y: 1.3518133, z: -0.2431427}
 --- !u!1 &4522046379529254588 stripped
 GameObject:

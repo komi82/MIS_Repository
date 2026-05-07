@@ -1,11 +1,25 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class RequestBoard : MonoBehaviour
 {
     [SerializeField] private RequestManager requestManager;
     [SerializeField] private Transform requestListParent;
     [SerializeField] private GameObject requestUIPrefab;
+
+    [Header("ä¾é ¼ã‚¿ã‚¤ãƒ—åˆ¥ã®è‰²è¨­å®š")]
+    public Color deliverItemColor = Color.white;
+    public Color purifyWeaponColor = Color.cyan;
+    public Color addAttributeFireColor = Color.red;
+    public Color addAttributeFrozenColor = Color.blue;
+    public Color addAttributeWindColor = Color.green;
+    public Color addAttributeBrightColor = Color.yellow;
+    public Color addAttributeDarknessColor = Color.magenta;
+    public Color craftWeaponColor = Color.white;
+    public Color repairWeaponColor = Color.gray;
+
+    public static bool playRequestSound = true; // é³´ã‚‰ã—ãŸã„æ™‚ã ã‘true
 
     private void Start()
     {
@@ -14,60 +28,99 @@ public class RequestBoard : MonoBehaviour
 
     public void DisplayRequests()
     {
-        // Šù‘¶UI‚ğƒNƒŠƒA
+        // æ—¢å­˜UIã‚’å‰Šé™¤
         foreach (Transform child in requestListParent)
         {
             Destroy(child.gameObject);
         }
 
-        // ˆË—Š‚²‚Æ‚ÉUI¶¬
+        // ä¾é ¼ã‚’è¡¨ç¤ºã™ã‚‹UIä½œæˆ
         foreach (var request in requestManager.GetActiveRequests())
         {
             var ui = Instantiate(requestUIPrefab, requestListParent);
-            var text = ui.GetComponentInChildren<Text>();
+            var text = ui.GetComponentInChildren<TextMeshProUGUI>();
 
             string description = "";
 
             switch (request.requestType)
             {
                 case RequestType.DeliverItem:
-                    description = $"”[•i: {request.requiredItem.itemName}\n•ñV: {request.rewardAmount}G";
+                    description = $"èª¿åˆ: {request.requiredItem.itemName}\nå ±é…¬: {request.rewardAmount}G";
                     break;
 
                 case RequestType.PurifyWeapon:
-                    description = $"ò‰»:{request.requiredItem.itemName}\n•ñV: {request.rewardAmount}G";
+                    description = $"æµ„åŒ–:{request.requiredItem.itemName}\nå ±é…¬: {request.rewardAmount}G";
                     break;
 
                 case RequestType.AddAttribute_Fire:
-                    description = $"‘®«•t—^:{request.requiredItem.itemName}\n•ñV: {request.rewardAmount}G";
+                    description = $"å±æ€§ä»˜ä¸:{request.requiredItem.itemName}\nå ±é…¬: {request.rewardAmount}G";
                     break;
 
                 case RequestType.AddAttribute_Frozen:
-                    description = $"‘®«•t—^:{request.requiredItem.itemName}\n•ñV: {request.rewardAmount}G";
+                    description = $"å±æ€§ä»˜ä¸:{request.requiredItem.itemName}\nå ±é…¬: {request.rewardAmount}G";
                     break;
 
                 case RequestType.AddAttribute_Wind:
-                    description = $"‘®«•t—^:{request.requiredItem.itemName}\n•ñV: {request.rewardAmount}G";
+                    description = $"å±æ€§ä»˜ä¸:{request.requiredItem.itemName}\nå ±é…¬: {request.rewardAmount}G";
                     break;
 
                 case RequestType.AddAttribute_Bright:
-                    description = $"‘®«•t—^:{request.requiredItem.itemName}\n•ñV: {request.rewardAmount}G";
+                    description = $"å±æ€§ä»˜ä¸:{request.requiredItem.itemName}\nå ±é…¬: {request.rewardAmount}G";
                     break;
 
                 case RequestType.AddAttribute_Darkness:
-                    description = $"‘®«•t—^:{request.requiredItem.itemName}\n•ñV: {request.rewardAmount}G";
+                    description = $"å±æ€§ä»˜ä¸:{request.requiredItem.itemName}\nå ±é…¬: {request.rewardAmount}G";
                     break;
 
                 case RequestType.CraftWeapon:
-                    description = $"•Šíì¬: {request.requiredItem.itemName}\n•ñV: {request.rewardAmount}G";
+                    description = $"æ­¦å™¨ä½œæˆ: {request.requiredItem.itemName}\nå ±é…¬: {request.rewardAmount}G";
                     break;
 
                 case RequestType.RepairWeapon:
-                    description = $"C—:{request.requiredItem.itemName}\n•ñV: {request.rewardAmount}G";
+                    description = $"ä¿®ç†:{request.requiredItem.itemName}\nå ±é…¬: {request.rewardAmount}G";
                     break;
             }
 
             text.text = description;
+            if (playRequestSound && SoundManager.Instance != null)
+            {
+                SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.RequestSound);
+                playRequestSound = false; // 1å›ã ã‘å†ç”Ÿ
+            }
+            // ä¾é ¼ã‚¿ã‚¤ãƒ—ã«å¿œã˜ã¦æ–‡å­—è‰²ã‚’å¤‰æ›´
+            Color textColor = GetColorForRequestType(request.requestType);
+            text.color = textColor;
+        }
+    }
+
+    /// <summary>
+    /// ä¾é ¼ã‚¿ã‚¤ãƒ—ã«å¿œã˜ãŸè‰²ã‚’å–å¾—
+    /// </summary>
+    private Color GetColorForRequestType(RequestType requestType)
+    {
+        switch (requestType)
+        {
+            case RequestType.DeliverItem:
+                return deliverItemColor;
+            case RequestType.PurifyWeapon:
+                return purifyWeaponColor;
+            case RequestType.AddAttribute_Fire:
+                return addAttributeFireColor;
+            case RequestType.AddAttribute_Frozen:
+                return addAttributeFrozenColor;
+            case RequestType.AddAttribute_Wind:
+                return addAttributeWindColor;
+            case RequestType.AddAttribute_Bright:
+                return addAttributeBrightColor;
+            case RequestType.AddAttribute_Darkness:
+                return addAttributeDarknessColor;
+            case RequestType.CraftWeapon:
+                return craftWeaponColor;
+            case RequestType.RepairWeapon:
+                return repairWeaponColor;
+            default:
+                return Color.white;
         }
     }
 }
+

@@ -1,10 +1,11 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class MoneyManager : MonoBehaviour
 {
     [SerializeField] public static int currentMoney;
-    [SerializeField] private Text moneyText;
+    [SerializeField] private TextMeshProUGUI moneyText;
 
     private void Start()
     {
@@ -27,7 +28,7 @@ public class MoneyManager : MonoBehaviour
             return true;
         }
 
-        Debug.LogWarning("ŠŽ‹à‚ª‘«‚è‚Ü‚¹‚ñ");
+        Debug.LogWarning("ãŠé‡‘ãŒè¶³ã‚Šã¾ã›ã‚“");
         return false;
     }
 
@@ -41,3 +42,5 @@ public class MoneyManager : MonoBehaviour
 
     public int GetMoney() => currentMoney;
 }
+
+

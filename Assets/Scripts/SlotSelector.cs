@@ -31,12 +31,12 @@ public class SlotSelector : MonoBehaviour
     void HandleScrollInput()
     {
         float scroll = Input.GetAxis("Mouse ScrollWheel");
-        if (scroll > 0f)
+        if (scroll < 0f)
         {
             selectedIndex = (selectedIndex + 1) % slotFrames.Length;
             UpdateSlotVisuals();
         }
-        else if (scroll < 0f)
+        else if (scroll > 0f)
         {
             selectedIndex = (selectedIndex - 1 + slotFrames.Length) % slotFrames.Length;
             UpdateSlotVisuals();
@@ -63,20 +63,30 @@ public class SlotSelector : MonoBehaviour
 
     void UpdateSlotVisuals()
     {
-        for (int i = 0; i <= selectedIndex; i++)
+        // 全てのスロットをデフォルトに戻す
+        for (int i = 0; i < slotFrames.Length; i++)
         {
-            if (slotFrames[i] != null)
+            if (slotFrames[i] != null && defaultFrameSprite != null)
             {
-                Sprite spriteToApply = (i == selectedIndex && i < selectedFrameSprites.Length)
-                    ? selectedFrameSprites[i]
-                    : defaultFrameSprite;
-
-                slotFrames[i].sprite = spriteToApply;
-
-                Debug.Log($"スロット {i}: {(i == selectedIndex ? "選択中" : "非選択")} → 適用画像 = {spriteToApply.name}");
-                inventoryManager.SelectItem(i);
+                slotFrames[i].sprite = defaultFrameSprite;
+                slotFrames[i].SetAllDirty();
             }
         }
+        
+        // 選択中のスロットのみ選択用スプライトを適用
+        if (selectedIndex >= 0 && selectedIndex < slotFrames.Length && 
+            selectedIndex < selectedFrameSprites.Length && selectedFrameSprites[selectedIndex] != null)
+        {
+            if (slotFrames[selectedIndex] != null)
+            {
+                slotFrames[selectedIndex].sprite = selectedFrameSprites[selectedIndex];
+                slotFrames[selectedIndex].SetAllDirty();
+                Debug.Log($"スロット {selectedIndex}: 選択中 → 適用画像 = {selectedFrameSprites[selectedIndex].name}");
+            }
+        }
+        
+        // InventoryManagerの選択状態を更新
+        inventoryManager.SelectItem(selectedIndex);
     }
 
     /// <summary>

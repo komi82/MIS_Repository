@@ -60,9 +60,11 @@ public class InventoryManager : MonoBehaviour
 
     public bool HasItem(ItemData item)
     {
+        if (item == null) return false;
+        
         foreach (var slot in slotUIs)
         {
-            if (slot.CurrentItem == item)
+            if (slot.CurrentItem != null && slot.CurrentItem.itemName == item.itemName)
             {
                 return true;
             }
@@ -145,9 +147,11 @@ public class InventoryManager : MonoBehaviour
 
     public InventorySlotUI FindSlotByItem(ItemData item)//selecteditemに対応するスロットを検索
     {
+        if (item == null) return null;
+        
         foreach (var slot in slotUIs)
         {
-            if (slot.CurrentItem == item)
+            if (slot.CurrentItem != null && slot.CurrentItem.itemName == item.itemName)
             {
                 return slot;
             }

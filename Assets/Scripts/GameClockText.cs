@@ -1,65 +1,75 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class GameClockText : MonoBehaviour
 {
-    [Header("ƒŠƒAƒ‹ŠÔ‚ÆƒQ[ƒ€ŠÔ‚ÌƒXƒP[ƒ‹")]
+    [Header("ãƒªã‚¢ãƒ«æ™‚é–“ã¨ã‚²ãƒ¼ãƒ æ™‚é–“ã®æ¯”ç‡")]
     [SerializeField] private float realSecondsPerStep = 1f;
     [SerializeField] private float gameMinutesPerStep = 1f;
 
-    [Header("UIQÆ")]
-    [SerializeField] private Text clockText;
-    [SerializeField] private GameObject transitionPanel; // •\¦‚·‚éUI
+    [Header("UIè¦ç´ ")]
+    [SerializeField] private TextMeshProUGUI clockText;
+    [SerializeField] private GameObject transitionPanel; // é·ç§»ç”¨UI
 
     private float timer = 0f;
-    private int gameHour = 9;
+    private int gameHour = 0;
     private int gameMinute = 0;
     private bool transitionStarted = false;
+    
+    [Header("ã‚«ã‚¦ãƒ³ãƒˆãƒ€ã‚¦ãƒ³è¨­å®š")]
+    [SerializeField] private int totalGameMinutes = 300; // 5æ™‚é–“ = 300åˆ†
+    private int remainingMinutes;
     [SerializeField] private DeliveryStation deliveryStation;
 
 
     void Start()
     {
-        transitionPanel.SetActive(false); // UI•\¦
-
+        transitionPanel.SetActive(false); // UIéè¡¨ç¤º
+        remainingMinutes = totalGameMinutes; // æ®‹ã‚Šæ™‚é–“ã‚’åˆæœŸåŒ–
+        UpdateGameTimeFromRemaining(); // åˆæœŸæ™‚é–“ã‚’è¨­å®š
     }
 
     void Update()
     {
-
         if (timer >= realSecondsPerStep)
         {
             timer -= realSecondsPerStep;
-            AdvanceGameTime();
+            CountdownGameTime(); // ã‚«ã‚¦ãƒ³ãƒˆãƒ€ã‚¦ãƒ³æ–¹å¼ã«å¤‰æ›´
         }
 
-        if (gameHour == 21 && !transitionStarted)
+        if (remainingMinutes <= 0 && !transitionStarted) // æ®‹ã‚Šæ™‚é–“ãŒ0ä»¥ä¸‹ã®å ´åˆ
         {
             transitionStarted = true;
-            transitionPanel.SetActive(true); // UI•\¦
+            transitionPanel.SetActive(true); // UIè¡¨ç¤º
+            if (SoundManager.Instance != null)
+            {
+                SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.timeupSound);
+            }
             deliveryStation.CursorActive = true;
-            Cursor.lockState = CursorLockMode.Confined; // ƒQ[ƒ€ƒEƒBƒ“ƒhƒE“à‚É§ŒÀ
-            Invoke(nameof(TransitionToNextScene), 3f); // 3•bŒã‚ÉƒV[ƒ“‘JˆÚ
+            Cursor.lockState = CursorLockMode.Confined; // ãƒã‚¦ã‚¹ã‚«ãƒ¼ã‚½ãƒ«è¡¨ç¤º
+            Invoke(nameof(TransitionToNextScene), 1f); //1ç§’å¾Œã«ã‚·ãƒ¼ãƒ³é·ç§»
         }
         else
         {
-            timer += Time.deltaTime;
-
+            timer += Time.deltaTime; // ã‚¿ã‚¤ãƒãƒ¼ã‚’åŠ ç®—æ–¹å¼ã«å¤‰æ›´
         }
 
         UpdateClockDisplay();
     }
 
-    void AdvanceGameTime()
+    void CountdownGameTime()
     {
-        gameMinute += Mathf.RoundToInt(gameMinutesPerStep);
-        if (gameMinute >= 60)
-        {
-            gameHour += gameMinute / 60;
-            gameMinute %= 60;
-        }
-        if (gameHour >= 24) gameHour %= 24;
+        remainingMinutes -= Mathf.RoundToInt(gameMinutesPerStep);
+        if (remainingMinutes < 0) remainingMinutes = 0;
+        UpdateGameTimeFromRemaining();
+    }
+    
+    void UpdateGameTimeFromRemaining()
+    {
+        gameHour = remainingMinutes / 60;
+        gameMinute = remainingMinutes % 60;
     }
 
     void UpdateClockDisplay()
@@ -69,6 +79,6 @@ public class GameClockText : MonoBehaviour
 
     void TransitionToNextScene()
     {
-        SceneManager.LoadScene("result");
+        FadeManager.Instance.LoadSceneWithFade("result");
     }
 }

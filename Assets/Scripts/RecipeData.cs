@@ -3,6 +3,8 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "RecipeData", menuName = "Data/Recipe")]
 public class RecipeData : ScriptableObject
 {
-    public ItemData[] requiredItems; // •K—v‚ÈƒAƒCƒeƒ€‚Ì‘g‚İ‡‚í‚¹
-    public ItemData resultItem;      // Œ‹‰Ê‚Æ‚µ‚Ä•Ô‚·ƒAƒCƒeƒ€
+    public ItemData[] requiredItems; // å¿…è¦ãªã‚¢ã‚¤ãƒ†ãƒ ã®çµ„ã¿åˆã‚ã›
+    public ItemData resultItem;      // çµæœã¨ã—ã¦è¿”ã™ã‚¢ã‚¤ãƒ†ãƒ 
 }
+
+

@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RecipeData
   requiredItems:
   - {fileID: 11400000, guid: a12148d520f033147a1281448cbb3d59, type: 2}
-  - {fileID: 11400000, guid: 449c9306d483e4241ac4997142cc9709, type: 2}
-  resultItem: {fileID: 11400000, guid: 31ddf166d59a72e43a8c3631ac96a015, type: 2}
+  - {fileID: 11400000, guid: 31ddf166d59a72e43a8c3631ac96a015, type: 2}
+  resultItem: {fileID: 11400000, guid: 982f0621e979a1e48a9b8f26e05fc1ff, type: 2}

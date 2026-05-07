@@ -2,24 +2,24 @@ using UnityEngine;
 
 public class DeliveryUIList : MonoBehaviour
 {
-    [Header("UIİ’è")]
-    public Transform contentParent;              // DeliveryUIItem ‚ğ•À‚×‚ée
-    public GameObject deliveryItemPrefab;        // DeliveryUIItem ƒvƒŒƒnƒu
-    public RequestManager requestManager;        // ˆË—ŠŠÇ—
+    [Header("UIè¨­å®š")]
+    public Transform contentParent;              // DeliveryUIItem ã‚’é…ç½®ã™ã‚‹è¦ª
+    public GameObject deliveryItemPrefab;        // DeliveryUIItem ãƒ—ãƒ¬ãƒãƒ–
+    public RequestManager requestManager;        // ä¾é ¼ç®¡ç†
 
     /// <summary>
-    /// ƒŠƒXƒg‚ğÄ•`‰æ
+    /// ãƒªã‚¹ãƒˆã‚’å†æç”»
     /// </summary>
     public void RefreshList()
     {
-        // Šù‘¶ƒZƒ‹íœ
+        // æ—¢å­˜å­ã‚’å‰Šé™¤
         foreach (Transform child in contentParent)
         {
             Destroy(child.gameObject);
         }
 
-        // ˆË—Š‚ğ•À‚×‚é
-        foreach (var request in requestManager.GetActiveRequests()) // ActiveRequests ƒvƒƒpƒeƒB‚Å‚àOK
+        // ä¾é ¼ã‚’è¡¨ç¤º
+        foreach (var request in requestManager.GetActiveRequests()) // ActiveRequests ãƒ—ãƒ­ãƒ‘ãƒ†ã‚£ã§OK
         {
             if (!request.isCompleted)
             {
@@ -29,7 +29,7 @@ public class DeliveryUIList : MonoBehaviour
             }
         }
 
-        // ƒŒƒCƒAƒEƒgÄŒvZiZigZagLayoutGroup—pj
+        // ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆå†è¨ˆç®—ï¼ˆZigZagLayoutGroupç”¨ï¼‰
         var layout = contentParent.GetComponent<ZigZagLayoutGroup>();
         if (layout != null)
         {
@@ -38,3 +38,4 @@ public class DeliveryUIList : MonoBehaviour
         }
     }
 }
+

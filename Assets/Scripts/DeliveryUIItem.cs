@@ -1,21 +1,33 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class DeliveryUIItem : MonoBehaviour
 {
-    [Header("UIQÆ")]
-    public Text itemNameText;
+    [Header("UIè¦ç´ ")]
+    public TextMeshProUGUI itemNameText;
     public Image itemIcon;
-    public Text rewardText;
+    public TextMeshProUGUI rewardText;
     public Button deliverButton;
 
-    // •R‚Ã‚­ˆË—Š‚Æƒ}ƒl[ƒWƒƒ[
+    [Header("ä¾é ¼ã‚¿ã‚¤ãƒ—åˆ¥ã®è‰²è¨­å®š")]
+    public Color deliverItemColor = Color.white;
+    public Color purifyWeaponColor = Color.cyan;
+    public Color addAttributeFireColor = Color.red;
+    public Color addAttributeFrozenColor = Color.blue;
+    public Color addAttributeWindColor = Color.green;
+    public Color addAttributeBrightColor = Color.yellow;
+    public Color addAttributeDarknessColor = Color.magenta;
+    public Color craftWeaponColor = Color.white;
+    public Color repairWeaponColor = Color.gray;
+
+    // ãƒªãƒ³ã‚¯ã•ã‚ŒãŸä¾é ¼ã¨ãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼
     private Request linkedRequest;
     private RequestManager requestManager;
-    private DeliveryUIList parentList; // ƒŠƒXƒg‘S‘Ì‚ÌŠÇ—ƒNƒ‰ƒX
+    private DeliveryUIList parentList; // ãƒªã‚¹ãƒˆå…¨ä½“ã®ç®¡ç†ã‚¯ãƒ©ã‚¹
 
     /// <summary>
-    /// UIƒZƒ‹‚Ì‰Šú‰»
+    /// UIè¦ç´ ã®åˆæœŸåŒ–
     /// </summary>
     public void Setup(Request request, RequestManager manager, DeliveryUIList list)
     {
@@ -25,20 +37,31 @@ public class DeliveryUIItem : MonoBehaviour
 
         itemNameText.text = request.requiredItem.itemName;
         itemIcon.sprite = request.requiredItem.icon;
+        
+        // ç”»åƒã®æ¯”ç‡ã‚’ä¿æŒã™ã‚‹ã‚ˆã†ã«è¨­å®š
+        if (itemIcon != null)
+        {
+            itemIcon.preserveAspect = true;
+            itemIcon.type = Image.Type.Simple;
+        }
+        
         rewardText.text = $"{request.rewardAmount} G";
 
-        // Š”»’è
+        // ä¾é ¼ã‚¿ã‚¤ãƒ—ã«å¿œã˜ã¦æ–‡å­—è‰²ã‚’å¤‰æ›´
+        UpdateTextColor(request.requestType);
+
+        // ã‚¢ã‚¤ãƒ†ãƒ æ‰€æŒãƒã‚§ãƒƒã‚¯
         bool hasItem = InventoryManager.Instance.HasItem(request.requiredItem);
 
-        // ƒ{ƒ^ƒ“ó‘Ô§Œä
+        // ãƒœã‚¿ãƒ³çŠ¶æ…‹è¨­å®š
         deliverButton.interactable = hasItem;
 
-        // ”¼“§–¾‰»iColorBlock‚ğg‚¤ê‡j
+        // ãƒœã‚¿ãƒ³è‰²å¤‰æ›´ï¼ˆColorBlockã‚’ä½¿ã†å ´åˆï¼‰
         var colors = deliverButton.colors;
         colors.normalColor = hasItem ? Color.white : new Color(1f, 1f, 1f, 0.5f);
         deliverButton.colors = colors;
 
-        // ƒCƒxƒ“ƒg“o˜^
+        // ã‚¤ãƒ™ãƒ³ãƒˆç™»éŒ²
         deliverButton.onClick.RemoveAllListeners();
         if (hasItem)
         {
@@ -47,39 +70,93 @@ public class DeliveryUIItem : MonoBehaviour
     }
 
     /// <summary>
-    /// ”[•iƒ{ƒ^ƒ“‰Ÿ‰º‚Ìˆ—
+    /// ä¾é ¼ã‚¿ã‚¤ãƒ—ã«å¿œã˜ã¦ãƒ†ã‚­ã‚¹ãƒˆã®è‰²ã‚’æ›´æ–°
+    /// </summary>
+    private void UpdateTextColor(RequestType requestType)
+    {
+        Color targetColor = Color.white; // ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆè‰²
+
+        switch (requestType)
+        {
+            case RequestType.DeliverItem:
+                targetColor = deliverItemColor;
+                break;
+            case RequestType.PurifyWeapon:
+                targetColor = purifyWeaponColor;
+                break;
+            case RequestType.AddAttribute_Fire:
+                targetColor = addAttributeFireColor;
+                break;
+            case RequestType.AddAttribute_Frozen:
+                targetColor = addAttributeFrozenColor;
+                break;
+            case RequestType.AddAttribute_Wind:
+                targetColor = addAttributeWindColor;
+                break;
+            case RequestType.AddAttribute_Bright:
+                targetColor = addAttributeBrightColor;
+                break;
+            case RequestType.AddAttribute_Darkness:
+                targetColor = addAttributeDarknessColor;
+                break;
+            case RequestType.CraftWeapon:
+                targetColor = craftWeaponColor;
+                break;
+            case RequestType.RepairWeapon:
+                targetColor = repairWeaponColor;
+                break;
+        }
+
+        // ãƒ†ã‚­ã‚¹ãƒˆã®è‰²ã‚’é©ç”¨
+        if (itemNameText != null)
+        {
+            itemNameText.color = targetColor;
+        }
+        
+        // å ±é…¬ãƒ†ã‚­ã‚¹ãƒˆã«ã‚‚è‰²ã‚’é©ç”¨
+        if (rewardText != null)
+        {
+            rewardText.color = targetColor;
+        }
+    }
+
+    /// <summary>
+    /// ãƒ‡ãƒªãƒãƒ¼ãƒœã‚¿ãƒ³ã‚¯ãƒªãƒƒã‚¯æ™‚ã®å‡¦ç†
     /// </summary>
     public void OnDeliverClicked()
     {
+        RequestBoard.playRequestSound = false; // ã‚µã‚¦ãƒ³ãƒ‰æŠ‘åˆ¶
         if (linkedRequest == null || requestManager == null)
         {
-            Debug.LogWarning("DeliveryUIItem: Request ‚Ü‚½‚Í Manager ‚ª–¢İ’è‚Å‚·B");
+            Debug.LogWarning("DeliveryUIItem: Request ã¾ãŸã¯ Manager ãŒæœªè¨­å®šã§ã™ã€‚");
             return;
         }
 
         if (requestManager.TryDeliverByRequest(linkedRequest))
         {
-            // ƒCƒ“ƒxƒ“ƒgƒŠ‚©‚çƒAƒCƒeƒ€‚ğíœ
+            // ã‚¤ãƒ³ãƒ™ãƒ³ãƒˆãƒªã‹ã‚‰ã‚¢ã‚¤ãƒ†ãƒ ã‚’å‰Šé™¤
             var slot = InventoryManager.Instance.FindSlotByItem(linkedRequest.requiredItem);
             if (slot != null)
             {
+                SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.deliverySound);
                 InventoryManager.Instance.RemoveItem(slot);
-                Debug.Log($"ƒCƒ“ƒxƒ“ƒgƒŠ‚©‚ç '{linkedRequest.requiredItem.itemName}' ‚ğíœ‚µ‚Ü‚µ‚½");
+                Debug.Log($"ã‚¤ãƒ³ãƒ™ãƒ³ãƒˆãƒªã‹ã‚‰ '{linkedRequest.requiredItem.itemName}' ã‚’å‰Šé™¤ã—ã¾ã—ãŸ");
             }
             else
             {
-                Debug.LogWarning($"”[•i‘ÎÛƒAƒCƒeƒ€ '{linkedRequest.requiredItem.itemName}' ‚ªƒCƒ“ƒxƒ“ƒgƒŠ‚ÉŒ©‚Â‚©‚è‚Ü‚¹‚ñ‚Å‚µ‚½");
+                Debug.LogWarning($"ãƒ‡ãƒªãƒãƒ¼å¯¾è±¡ã‚¢ã‚¤ãƒ†ãƒ  '{linkedRequest.requiredItem.itemName}' ãŒã‚¤ãƒ³ãƒ™ãƒ³ãƒˆãƒªã«è¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã§ã—ãŸ");
             }
 
-            // UIƒZƒ‹íœ
+            // UIè¦ç´ å‰Šé™¤
             Destroy(gameObject);
 
-            // ƒŠƒXƒg‘S‘Ì‚ğXV
+            // ãƒªã‚¹ãƒˆå…¨ä½“ã‚’æ›´æ–°
             parentList?.RefreshList();
         }
         else
         {
-//            Debug.Log($"”[•i¸”s: {linkedRequest.requiredItem.itemName}");
+//            Debug.Log($"ãƒ‡ãƒªãƒãƒ¼å¤±æ•—: {linkedRequest.requiredItem.itemName}");
         }
     }
 }
+

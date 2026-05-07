@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: "\u30DE\u30B9\u30D6\u30EC\u30FC\u30C9"
   m_EditorClassIdentifier: 
   itemID: 24
-  itemType: "\u7121\u5C5E\u6027\u6B66\u5668"
+  itemType: "\u57FA\u672C\u6B66\u5668"
   itemName: "\u30DE\u30B9\u30D6\u30EC\u30FC\u30C9"
   icon: {fileID: 21300000, guid: e3483a73e37683e4f822f19ee1c40a41, type: 3}
   prefab: {fileID: 6968787620444183109, guid: 66176765b02bed24391a1804ae4817ca, type: 3}

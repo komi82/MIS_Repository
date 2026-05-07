@@ -4,8 +4,9 @@ using UnityEngine.InputSystem;
 public class FirstPersonController : MonoBehaviour
 {
     public float moveSpeed = 5.0f;
+    float mo = 0.0f;
     public float sensitivity = 2.0f;
-    public Transform playerBody; // �v���C���[�̃I�u�W�F�N�g�i�e�j���Z�b�g
+    public Transform playerBody; // プレイヤーのオブジェクト（親）をセット
 
     private CharacterController characterController;
     [SerializeField] private DeliveryStation deliveryStation;
@@ -19,8 +20,14 @@ public class FirstPersonController : MonoBehaviour
 
     void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;
-        characterController = GetComponent<CharacterController>(); // �v���C���[�� CharacterController ���擾
+        mo = moveSpeed;
+        // DeliveryStationがない場合、またはカーソルがアクティブでない場合のみロック
+        if (deliveryStation == null || !deliveryStation.CursorActive)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+        characterController = GetComponent<CharacterController>(); // プレイヤーの CharacterController を取得
 
         Controller = GetComponent<Animator>();
     }
@@ -29,26 +36,36 @@ public class FirstPersonController : MonoBehaviour
 
     void Update()
     {
+        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+        {
+          moveSpeed = mo * 2.0f;
+}
+        else
+        {
+          moveSpeed = mo;
+        }
+
         if (deliveryStation.CursorActive == false)
         {
-            // �}�E�X����i���_�̉�]�j
+            // マウス入力（視点の回転）
             float mouseX = Mouse.current.delta.x.ReadValue() * sensitivity;
             float mouseY = Mouse.current.delta.y.ReadValue() * sensitivity;
 
-            // �J�����̉�]�i�㉺���_�̂݁j
+            // カメラの回転（上下のみ）
             xRotation -= mouseY * 0.5f;
-            xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+            xRotation = Mathf.Clamp(xRotation, -90f, 90f); // 上下の可動域を制限（-90度 = 真下、90度 = 真上）
             Camera.main.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-            // �v���C���[�̉�]�i���E���_�̂݁j
+            // プレイヤーの回転（左右のみ）
             yRotation += mouseX * 0.5f;
+            // yRotation = Mathf.Clamp(yRotation, -180f, 180f); // 左右の可動域を制限したい場合はこの行のコメントを外す
             playerBody.rotation = Quaternion.Euler(0f, yRotation, 0f);
         
-        // WASD�ړ�
+        // WASD移動
         float horizontal = Keyboard.current.aKey.isPressed ? -1f : Keyboard.current.dKey.isPressed ? 1f : 0f;
         float vertical = Keyboard.current.wKey.isPressed ? 1f : Keyboard.current.sKey.isPressed ? -1f : 0f;
 
         Vector3 moveDirection = playerBody.forward * vertical + playerBody.right * horizontal;
-        // �d�͂̓K�p
+        // 重力の適用
         if (characterController.isGrounded)
         {
             verticalVelocity = 0f;
@@ -100,3 +117,4 @@ public class FirstPersonController : MonoBehaviour
     }
     }
 }
+

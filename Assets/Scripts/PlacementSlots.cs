@@ -90,6 +90,13 @@ public class PlacementSlots : MonoBehaviour
 	{
 		return (occupiedItem1, occupiedItem2);
 	}
+
+	public bool HasEmptySlot()
+	{
+		if (slot1 != null && occupiedItem1 == null) return true;
+		if (slot2 != null && occupiedItem2 == null) return true;
+		return false;
+	}
 }
 
 
