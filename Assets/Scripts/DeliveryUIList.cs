@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// Delivery UI のリスト全体を生成・更新するコンテナ管理クラス。
+/// `RequestManager` の未完了依頼から `DeliveryUIItem` を都度作り直す。
+/// </summary>
 public class DeliveryUIList : MonoBehaviour
 {
     [Header("UI設定")]

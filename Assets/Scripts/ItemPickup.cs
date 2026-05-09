@@ -2,6 +2,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+/// <summary>
+/// 視線先アイテムの検出と取得処理を担当する。
+/// 取得時は `InventoryManager` へ追加し、必要に応じて `PlacementSlots` の占有状態を解放する。
+/// </summary>
 public class ItemPickup : MonoBehaviour
 {
     [Header("アイテム取得設定")]

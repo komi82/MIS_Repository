@@ -1,6 +1,10 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+/// <summary>
+/// テスト用の単純移動スクリプト。
+/// Spaceキー押下中に対象オブジェクトをY方向へ移動させる。
+/// </summary>
 public class fpsmovie : MonoBehaviour
 {
     public float speed = 5f; // 上昇速度

@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// パーティクル開始色を時間経過で補間する演出スクリプト。
+/// 他システムとは独立して、対象 `ParticleSystem` の見た目のみを制御する。
+/// </summary>
 public class ParticleStartColorLerp : MonoBehaviour
 {
     public ParticleSystem ps;

@@ -1,6 +1,10 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// 単一インベントリ枠のUI状態（アイコン/空状態）を管理する。
+/// `InventoryManager` から呼ばれ、格納アイテムに応じて見た目を更新する。
+/// </summary>
 public class InventorySlotUI : MonoBehaviour
 {
     [Header("このスロットのアイコン画像")]

@@ -1,6 +1,10 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+/// <summary>
+/// プレイヤーの一人称視点操作（視点回転・移動・重力・移動アニメ）を制御する。
+/// `DeliveryStation.CursorActive` を参照して、UI操作中は視点入力を止める。
+/// </summary>
 public class FirstPersonController : MonoBehaviour
 {
     public float moveSpeed = 5.0f;

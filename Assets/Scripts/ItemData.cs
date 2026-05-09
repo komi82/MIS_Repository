@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// ゲーム内アイテム1件分の基本定義データ。
+/// 各管理クラス（在庫・依頼・レシピ）が共通参照する基盤ScriptableObject。
+/// </summary>
 [CreateAssetMenu(fileName = "NewItem", menuName = "Game/Item")]
 public class ItemData : ScriptableObject
 {

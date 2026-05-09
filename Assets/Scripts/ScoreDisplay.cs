@@ -3,6 +3,10 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 
+/// <summary>
+/// リザルト画面のスコア演出とランク表示を担当する。
+/// `MoneyManager.currentMoney` と `RequestManager.RequestCompleted` を参照して最終表示を作る。
+/// </summary>
 public class ScoreDisplay : MonoBehaviour
 {
     [Header("UI要素")]

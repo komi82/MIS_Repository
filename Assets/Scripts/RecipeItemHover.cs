@@ -4,6 +4,10 @@ using UnityEngine.EventSystems;
 using TMPro;
 using System.Collections.Generic;
 
+/// <summary>
+/// レシピ項目クリック時の必要素材/結果表示を担当するUIコンポーネント。
+/// 複数 `RecipeDatabase` を横断検索し、タグ指定のUIへアイコンとテキストを反映する。
+/// </summary>
 public class RecipeItemHover : MonoBehaviour, IPointerClickHandler
 {
     [Header("UI要素")]

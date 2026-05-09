@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// レシピ閲覧ステーションの開閉を担当するインタラクト制御。
+/// `DeliveryStation` とカーソル状態を共有し、UI表示中は `FirstPersonController` を停止する。
+/// </summary>
 public class RecipeStation : MonoBehaviour
 {
     [SerializeField] private GameObject recipeUI; // レシピUIパネル

@@ -1,6 +1,11 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+/// <summary>
+/// 依頼の生成・保持・完了処理を統括する管理クラス。
+/// `SceneTimer` の経過時間を使って次の依頼生成タイミングを決め、
+/// 完了件数を `RequestCompleted` で全体共有する。
+/// </summary>
 public class RequestManager : MonoBehaviour
 {
     [Header("依頼生成設定")]

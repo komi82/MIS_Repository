@@ -1,3 +1,7 @@
+/// <summary>
+/// 依頼のカテゴリ定義。
+/// `Request` と `RequestManager` がこの種別で処理分岐・UI表示を切り替える。
+/// </summary>
 public enum RequestType
 {
     DeliverItem,     // デリバー依頼（薬品など）

@@ -1,6 +1,10 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// インベントリの選択スロットを管理する。
+/// マウスホイール/数字キー入力を `InventoryManager.SelectItem` に橋渡しして表示枠を更新する。
+/// </summary>
 public class SlotSelector : MonoBehaviour
 {
     [SerializeField] private InventoryManager inventoryManager;

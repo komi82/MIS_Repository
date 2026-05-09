@@ -3,6 +3,11 @@ using UnityEngine.UI;
 using System.Collections;
 using TMPro;
 
+/// <summary>
+/// アイテム配置・クラフト入力・各作業ステーションUIを統合制御する中核クラス。
+/// `InventoryManager` `PlacementSlots` `RecipeDatabase` `SoundManager` などと連携して、
+/// 配置可否判定、レシピ照合、ミニゲーム完了後の生成処理を行う。
+/// </summary>
 public class PutItem : MonoBehaviour
 {
     [SerializeField] private InventoryManager inventoryManager;

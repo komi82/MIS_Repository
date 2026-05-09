@@ -2,6 +2,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+/// <summary>
+/// 単一依頼のUI表示と「納品」操作を担当する。
+/// `RequestManager` に完了処理を委譲し、`DeliveryUIList` の再描画を促す。
+/// </summary>
 public class DeliveryUIItem : MonoBehaviour
 {
     [Header("UI要素")]

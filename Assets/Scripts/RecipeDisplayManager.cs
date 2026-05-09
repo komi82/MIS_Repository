@@ -4,6 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Globalization;
 
+/// <summary>
+/// レシピ一覧UIの生成・統合表示・並び替えを管理する。
+/// `RecipeDatabase` 群の内容を読み取り、`RecipeItemHover` と連携して詳細表示導線を作る。
+/// </summary>
 public class RecipeDisplayManager : MonoBehaviour
 {
     [SerializeField] private RecipeDatabase recipeDatabase;           // 通常レシピ用

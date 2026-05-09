@@ -2,6 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// 旧2枠インベントリ向けの単一スロットデータ保持クラス。
+/// `ItemslotManager` と組み合わせて簡易在庫管理を行う。
+/// </summary>
 public class Itemslot : MonoBehaviour
 {
     [SerializeField] InventoryManager inventoryManager;
