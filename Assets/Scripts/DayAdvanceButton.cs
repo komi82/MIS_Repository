@@ -1,4 +1,5 @@
 using UnityEngine;
+using TMPro;
 
 /// <summary>
 /// アタッチ先ボタン押下で Day を進め、GameClockText の
@@ -6,6 +7,9 @@ using UnityEngine;
 /// </summary>
 public class DayAdvanceButton : MonoBehaviour
 {
+    public static DayAdvanceButton Instance;
+    [SerializeField] private TextMeshProUGUI DayText;
+
     [Header("日数管理")]
     [SerializeField] private int day = 1;
     private static bool s_hasDay;
@@ -18,6 +22,7 @@ public class DayAdvanceButton : MonoBehaviour
 
     private void Awake()
     {
+        Instance = this;
         // 初回だけInspector値を採用し、以後は静的値を保持する
         if (!s_hasDay)
         {
@@ -27,6 +32,11 @@ public class DayAdvanceButton : MonoBehaviour
         {
             day = s_day;
         }
+    }
+
+    public void Updateday()
+    {
+        DayText.text = $"Day {day}";
     }
 
     public static void ResetPersistentState()

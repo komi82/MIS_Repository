@@ -1,31 +1,31 @@
 using UnityEngine;
 
 /// <summary>
-/// ƒp[ƒeƒBƒNƒ‹ŠJnF‚ğŠÔŒo‰ß‚Å•âŠÔ‚·‚é‰‰oƒXƒNƒŠƒvƒgB
-/// ‘¼ƒVƒXƒeƒ€‚Æ‚Í“Æ—§‚µ‚ÄA‘ÎÛ `ParticleSystem` ‚ÌŒ©‚½–Ú‚Ì‚İ‚ğ§Œä‚·‚éB
+/// ï¿½pï¿½[ï¿½eï¿½Bï¿½Nï¿½ï¿½ï¿½Jï¿½nï¿½Fï¿½ï¿½ï¿½ï¿½ï¿½ÔŒoï¿½ß‚Å•ï¿½Ô‚ï¿½ï¿½é‰‰ï¿½oï¿½Xï¿½Nï¿½ï¿½ï¿½vï¿½gï¿½B
+/// ï¿½ï¿½ï¿½Vï¿½Xï¿½eï¿½ï¿½ï¿½Æ‚Í“Æ—ï¿½ï¿½ï¿½ï¿½ÄAï¿½Îï¿½ `ParticleSystem` ï¿½ÌŒï¿½ï¿½ï¿½ï¿½Ú‚Ì‚İ‚ğ§Œä‚·ï¿½ï¿½B
 /// </summary>
 public class ParticleStartColorLerp : MonoBehaviour
 {
     public ParticleSystem ps;
 
-    public Color startColor = Color.white;   // ŠJn‚ÌF
-    public Color endColor = Color.red;       // 2•bŒã‚ÌF
+    public Color startColor = Color.white;   // ï¿½Jï¿½nï¿½ï¿½ï¿½ÌF
+    public Color endColor = Color.red;       // 2ï¿½bï¿½ï¿½ÌF
 
-    public float delay = 1f;                 // F•Ï‰»ŠJn‚Ü‚Å‚Ì’x‰„ŠÔ
-    public float duration = 2f;              // F‚ª•Ï‚í‚é‚Ü‚Å‚ÌŠÔ
+    public float delay = 1f;                 // ï¿½Fï¿½Ï‰ï¿½ï¿½Jï¿½nï¿½Ü‚Å‚Ì’xï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    public float duration = 2f;              // ï¿½Fï¿½ï¿½ï¿½Ï‚ï¿½ï¿½Ü‚Å‚Ìï¿½ï¿½ï¿½
 
     private float startTime;
 
     void Start()
     {
-        startTime = Time.time;               // ƒQ[ƒ€ŠJn‚ğ‹L˜^
+        startTime = Time.time;               // ï¿½Qï¿½[ï¿½ï¿½ï¿½Jï¿½nï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Lï¿½^
     }
 
     void Update()
     {
         float elapsed = Time.time - startTime;
 
-        // ’x‰„’†‚ÍŠJnF‚ğˆÛ
+        // ï¿½xï¿½ï¿½ï¿½ï¿½ï¿½ÍŠJï¿½nï¿½Fï¿½ï¿½ï¿½Ûï¿½
         if (elapsed < delay)
         {
             var main = ps.main;
@@ -33,12 +33,12 @@ public class ParticleStartColorLerp : MonoBehaviour
             return;
         }
 
-        // ’x‰„Œã‚ÌŒo‰ßŠÔ
+        // ï¿½xï¿½ï¿½ï¿½ï¿½ÌŒoï¿½ßï¿½ï¿½ï¿½
         float t = Mathf.Clamp01((elapsed - delay) / duration);
 
-        // F‚ğ•âŠÔ
+        // ï¿½Fï¿½ï¿½ï¿½ï¿½
         Color current = Color.Lerp(startColor, endColor, t);
-        current.a = 1f; // “§–¾‰»–h~
+        current.a = 1f; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½hï¿½~
 
         var mainModule = ps.main;
         mainModule.startColor = current;

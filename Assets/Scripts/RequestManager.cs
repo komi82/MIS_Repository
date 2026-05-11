@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using System.Collections.Generic;
 
 /// <summary>
@@ -27,6 +28,7 @@ public class RequestManager : MonoBehaviour
     [SerializeField] private MoneyManager moneyManager;
     [SerializeField] private RequestBoard requestBoard;
 
+    public static event Action RequestComp;
     private float nextRequestTime;
     public static int RequestCompleted = 0;
 
@@ -63,7 +65,7 @@ public class RequestManager : MonoBehaviour
 
     void ScheduleNextRequest()
     {
-        float interval = Random.Range(minInterval, maxInterval);
+        float interval = UnityEngine.Random.Range(minInterval, maxInterval);
         nextRequestTime = SceneTimer.Instance.GetElapsedTime() + interval;
     }
 
@@ -71,7 +73,7 @@ public class RequestManager : MonoBehaviour
     {
         if (activeRequests.Count >= maxRequests) return;
 
-		RequestType type = requestTypesPool[Random.Range(0, requestTypesPool.Count)];
+		RequestType type = requestTypesPool[UnityEngine.Random.Range(0, requestTypesPool.Count)];
 
 		// スロット必要タイプ（Deliver/Craft以外）で空きスロットがない場合は生成を停止
 		if (type != RequestType.DeliverItem && type != RequestType.CraftWeapon)
@@ -88,7 +90,7 @@ public class RequestManager : MonoBehaviour
         newRequest.requestType = type;
         newRequest.isCompleted = false;
         // rewardAmount計算式: Random(150,400) * 1.1^(n+1) 最小値150以下は切り上げ
-        int baseReward = Random.Range(150, 401);
+        int baseReward = UnityEngine.Random.Range(150, 401);
         float multiplier = Mathf.Pow(1.1f, RequestCompleted + 1);
         newRequest.rewardAmount = Mathf.FloorToInt(baseReward * multiplier);
 
@@ -272,6 +274,7 @@ public class RequestManager : MonoBehaviour
             activeRequests.Remove(request);
             requestBoard.DisplayRequests();
             RequestCompleted++;
+            RequestComp?.Invoke();
             Debug.Log($"デリバー完了: {request.requestName} 報酬 {request.rewardAmount} 円");
             return true;
         }

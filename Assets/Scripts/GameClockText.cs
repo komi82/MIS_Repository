@@ -16,7 +16,7 @@ public class GameClockText : MonoBehaviour
     [SerializeField] private TextMeshProUGUI completeThresholdText; // completeMoneyThreshold表示用
     [SerializeField] private GameObject transitionPanel; // 遷移用UI
     [SerializeField] private GameObject completePanel; // 目標達成時の遷移用UI
-    [SerializeField] private int border = 30;
+    [SerializeField] private int border = 3;
     [SerializeField] private int completeMoneyThreshold = 10000; // Complete分岐の所持金しきい値
     [SerializeField] private DayAdvanceButton dayAdvanceButton;
     private static bool s_hasCompleteMoneyThreshold;
@@ -25,8 +25,6 @@ public class GameClockText : MonoBehaviour
     private bool transitionStarted = false;
     private bool isCompleteTransition = false; // Completeシーンへ遷移するかどうか
     [SerializeField] private DeliveryStation deliveryStation;
-    int remainingCount;
-    private int defaultBorder;
     private int defaultCompleteMoneyThreshold;
 
     private void Awake()
@@ -39,7 +37,6 @@ public class GameClockText : MonoBehaviour
         }
 
         Instance = this;
-        defaultBorder = border;
         defaultCompleteMoneyThreshold = completeMoneyThreshold;
 
         // シーンを跨いで保持（初回だけInspector値を採用）
@@ -68,7 +65,7 @@ public class GameClockText : MonoBehaviour
 
     void Start()
     {
-        remainingCount = border;
+        border = 3;
         transitionPanel.SetActive(false); // UI非表示
         if (completePanel != null)
         {
@@ -78,9 +75,19 @@ public class GameClockText : MonoBehaviour
         UpdateCompleteThresholdDisplay();
     }
 
+    private void OnEnable()
+    {
+        RequestManager.RequestComp += DeadlineCountDown;
+    }
+
+    private void OnDisable()
+    {
+        RequestManager.RequestComp -= DeadlineCountDown;
+    }
+
     void Update()
     {
-        if (remainingCount <= 0 && !transitionStarted)
+        if (border <= 0 && !transitionStarted)
         {
             transitionStarted = true;
 
@@ -108,12 +115,12 @@ public class GameClockText : MonoBehaviour
 
         UpdateClockDisplay();
         UpdateCompleteThresholdDisplay();
+        DayAdvanceButton.Instance.Updateday();
     }
 
     void UpdateClockDisplay()
     {
-        remainingCount = border - RequestManager.RequestCompleted;
-        clockText.text = $"DeadLine: {remainingCount:N0}";
+        clockText.text = $"DeadLine: {border:N0}";
     }
 
     void TransitionToNextScene()
@@ -129,10 +136,13 @@ public class GameClockText : MonoBehaviour
         FadeManager.Instance.LoadSceneWithFade(nextScene);
     }
 
+    private void DeadlineCountDown()
+    {
+        border--;
+    }
+
     public void ResetBorderToDefault()
     {
-        border = defaultBorder;
-        remainingCount = border;
         transitionStarted = false;
         UpdateClockDisplay();
     }
