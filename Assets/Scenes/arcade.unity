@@ -26707,6 +26707,7 @@ GameObject:
   - component: {fileID: 1717329643}
   - component: {fileID: 1717329646}
   - component: {fileID: 1717329645}
+  - component: {fileID: 1717329647}
   - component: {fileID: 1717329644}
   m_Layer: 5
   m_Name: limit
@@ -26750,8 +26751,9 @@ MonoBehaviour:
   completeThresholdText: {fileID: 1857049361}
   transitionPanel: {fileID: 1485101284}
   completePanel: {fileID: 709386763}
-  border: 10
-  completeMoneyThreshold: 3000
+  border: 3
+  completeMoneyThreshold: 500
+  dayAdvanceButton: {fileID: 1717329647}
   deliveryStation: {fileID: 1981430905}
 --- !u!114 &1717329645
 MonoBehaviour:
@@ -26852,6 +26854,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1717329642}
   m_CullTransparentMesh: 1
+--- !u!114 &1717329647
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1717329642}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e54afd7ab97e91c469d0603deea0777f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DayAdvanceButton
+  day: 1
+  gameClockText: {fileID: 1717329644}
 --- !u!1 &1722468077
 GameObject:
   m_ObjectHideFlags: 0
@@ -28493,6 +28509,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1995236010}
+  - component: {fileID: 1995236011}
   - component: {fileID: 1995236009}
   - component: {fileID: 1995236008}
   m_Layer: 0
@@ -28531,7 +28548,7 @@ MonoBehaviour:
   fadeTime: 1
   fadeColor: {r: 0, g: 0, b: 0, a: 1}
   fadeImage: {fileID: 0}
-  enableDebugLog: 0
+  enableDebugLog: 1
 --- !u!4 &1995236010
 Transform:
   m_ObjectHideFlags: 0
@@ -28547,6 +28564,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1995236011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1995236007}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0d57ba56852c344292272d171eee544, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ChangeScene
+  targetUI: {fileID: 0}
+  playButtonSound: 0
+  hideKey: 0
+  arcadeSceneName: arcade
+  resetArcadeFromScenes: []
+  debugArcadeState: 1
 --- !u!1 &2007609372 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8623712197363919604, guid: bbb57d0f49440d741b9eab6fed095b59, type: 3}

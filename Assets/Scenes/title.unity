@@ -2000,8 +2000,8 @@ MonoBehaviour:
   hideKey: 27
   arcadeSceneName: arcade
   resetArcadeFromScenes:
-  - title
-  debugArcadeState: 0
+  - 
+  debugArcadeState: 1
 --- !u!1 &1968146475
 GameObject:
   m_ObjectHideFlags: 0

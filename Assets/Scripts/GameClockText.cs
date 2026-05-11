@@ -7,6 +7,10 @@ using TMPro;
 /// </summary>
 public class GameClockText : MonoBehaviour
 {
+    // 他シーンにある可能性がある連携先向け: Singleton参照。
+    // DontDestroyOnLoad するかどうかは、必要になってから切り替えてください。
+    public static GameClockText Instance { get; private set; }
+
     [Header("UI要素")]
     [SerializeField] private TextMeshProUGUI clockText;
     [SerializeField] private TextMeshProUGUI completeThresholdText; // completeMoneyThreshold表示用
@@ -14,11 +18,52 @@ public class GameClockText : MonoBehaviour
     [SerializeField] private GameObject completePanel; // 目標達成時の遷移用UI
     [SerializeField] private int border = 30;
     [SerializeField] private int completeMoneyThreshold = 10000; // Complete分岐の所持金しきい値
+    [SerializeField] private DayAdvanceButton dayAdvanceButton;
+    private static bool s_hasCompleteMoneyThreshold;
+    private static int s_completeMoneyThreshold;
 
     private bool transitionStarted = false;
     private bool isCompleteTransition = false; // Completeシーンへ遷移するかどうか
     [SerializeField] private DeliveryStation deliveryStation;
     int remainingCount;
+    private int defaultBorder;
+    private int defaultCompleteMoneyThreshold;
+
+    private void Awake()
+    {
+        // もし複数生成された場合は後勝ちではなく、既存を優先して破棄する。
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        defaultBorder = border;
+        defaultCompleteMoneyThreshold = completeMoneyThreshold;
+
+        // シーンを跨いで保持（初回だけInspector値を採用）
+        if (!s_hasCompleteMoneyThreshold)
+        {
+            s_completeMoneyThreshold = completeMoneyThreshold;
+            s_hasCompleteMoneyThreshold = true;
+        }
+        else
+        {
+            completeMoneyThreshold = s_completeMoneyThreshold;
+        }
+    }
+
+    public static void ResetPersistentState()
+    {
+        s_hasCompleteMoneyThreshold = false;
+        s_completeMoneyThreshold = 0;
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
+    }
 
 
     void Start()
@@ -73,8 +118,41 @@ public class GameClockText : MonoBehaviour
 
     void TransitionToNextScene()
     {
+        // arcadeシーン内で DayAdvanceButton を参照できる想定。
+        // ここで Day を進めて次回の閾値計算に反映させる。
+        if (isCompleteTransition && dayAdvanceButton != null)
+        {
+            dayAdvanceButton.OnClickAdvanceDay();
+        }
+
         string nextScene = isCompleteTransition ? "Complete" : "result";
         FadeManager.Instance.LoadSceneWithFade(nextScene);
+    }
+
+    public void ResetBorderToDefault()
+    {
+        border = defaultBorder;
+        remainingCount = border;
+        transitionStarted = false;
+        UpdateClockDisplay();
+    }
+
+    public int GetCompleteMoneyThreshold()
+    {
+        return s_hasCompleteMoneyThreshold ? s_completeMoneyThreshold : completeMoneyThreshold;
+    }
+
+    public void SetCompleteMoneyThreshold(int value)
+    {
+        s_completeMoneyThreshold = Mathf.Max(0, value);
+        s_hasCompleteMoneyThreshold = true;
+        completeMoneyThreshold = s_completeMoneyThreshold; // inspector表示も追従
+        UpdateCompleteThresholdDisplay();
+    }
+
+    public void ResetCompleteMoneyThresholdToDefault()
+    {
+        SetCompleteMoneyThreshold(defaultCompleteMoneyThreshold);
     }
 
     /// <summary>
@@ -85,7 +163,7 @@ public class GameClockText : MonoBehaviour
     {
         if (day < 1) day = 1;
         float scaled = MoneyManager.currentMoney * 0.8f * day;
-        completeMoneyThreshold = Mathf.Max(0, Mathf.RoundToInt(scaled));
+        SetCompleteMoneyThreshold(Mathf.Max(0, Mathf.RoundToInt(scaled)));
         UpdateCompleteThresholdDisplay();
     }
 

@@ -27,7 +27,6 @@ public class backtitle : MonoBehaviour
         FadeManager.Instance.LoadSceneWithFade("title");
         xScoreText.text = null;
         yScoreText.text = null;
-        MoneyManager.currentMoney = 0;
-        RequestManager.RequestCompleted=0;
+        // シーン遷移時に値を初期化しない仕様
     }
 }

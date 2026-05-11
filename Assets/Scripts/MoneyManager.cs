@@ -13,7 +13,7 @@ public class MoneyManager : MonoBehaviour
 
     private void Start()
     {
-        currentMoney = 0;
+        // シーン遷移で初期化しない仕様
         UpdateUI();
     }
 

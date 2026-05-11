@@ -32,7 +32,7 @@ public class RequestManager : MonoBehaviour
 
     void Start()
     {
-        RequestCompleted = 0;
+        // シーン遷移で初期化しない仕様
         GenerateRequest();
         ScheduleNextRequest();
     }
