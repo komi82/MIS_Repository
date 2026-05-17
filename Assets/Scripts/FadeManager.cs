@@ -203,6 +203,33 @@ public class FadeManager : MonoBehaviour
         if (isFading) return;
         StartCoroutine(FadeOut());
     }
+
+    /// <summary>
+    /// フェードアウト後にゲームを終了する
+    /// </summary>
+    public void QuitWithFade()
+    {
+        if (isFading) return;
+        StartCoroutine(FadeOutAndQuit());
+    }
+
+    IEnumerator FadeOutAndQuit()
+    {
+        isFading = true;
+
+        if (enableDebugLog)
+        {
+            Debug.Log("FadeManager: 終了フェード開始");
+        }
+
+        yield return StartCoroutine(FadeOut());
+
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }
     
     /// <summary>
     /// フェードインのみ
