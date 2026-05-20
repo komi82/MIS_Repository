@@ -1,17 +1,25 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
+using UnityEngine.SceneManagement;
 
+
+/// <summary>
+/// 視線先アイテムの検出と取得処理を担当する。
+/// 取得時は `InventoryManager` へ追加し、必要に応じて `PlacementSlots` の占有状態を解放する。
+/// </summary>
 public class ItemPickup : MonoBehaviour
 {
     [Header("アイテム取得設定")]
     [SerializeField] private float pickupRange = 10f;
     [SerializeField] private InventoryManager inventoryManager;
     [SerializeField] private Camera mainCamera;
+    [SerializeField] private SlotSelector slotSelector; // スロット再選択用
 
 
     [Header("UI設定")]
     [SerializeField] private GameObject pickupPromptUI; // 表示用UI（例：Text付きのPanel）
-    [SerializeField] private Text pickupPromptText;     // アイテム名表示用Text
+    [SerializeField] private TextMeshProUGUI pickupPromptText;     // アイテム名表示用Text
 
     private ItemBehaviour currentTargetItem;
 
@@ -36,12 +44,12 @@ public class ItemPickup : MonoBehaviour
                 currentTargetItem = item;
 
                 pickupPromptUI.SetActive(true);
-                pickupPromptText.text = $"[F] 拾う：{item.ItemData.itemName}";
+                pickupPromptText.text = $"<sprite name=F> 拾う：{item.ItemData.itemName}";
                 return;
             }
         }
 
-        // �Ώۂ��Ȃ��ꍇ�͔�\��
+        // 対象がない場合は非表示
         currentTargetItem = null;
         pickupPromptUI.SetActive(false);
     }
@@ -54,15 +62,35 @@ public class ItemPickup : MonoBehaviour
 
         if (success)
         {
+
             Debug.Log($"アイテム '{currentTargetItem.ItemData.itemName}' を取得しました");
-            // スロット占有解除：スロットの子から拾った場合は親の PlacementSlots に通知
-            var parentSlots = currentTargetItem.transform.GetComponentInParent<PlacementSlots>();
-            if (parentSlots != null)
+            if (SceneManager.GetActiveScene().name == "tutorial2")
             {
-                parentSlots.ClearSlotByTransform(currentTargetItem.transform.parent);
+                ConditionalSceneTransition.TriggerTransitionStatic();
             }
-            Destroy(currentTargetItem.gameObject);
+            if (SoundManager.Instance != null)
+            {
+                SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.itemPickupSound);
+            }
+            // Infinity タグ以外のときのみ、スロット解放＆プレハブ破壊
+            if (!currentTargetItem.CompareTag("Infinity"))
+			{
+				// スロット占有解除：スロットの子から拾った場合は親の PlacementSlots に通知
+				var parentSlots = currentTargetItem.transform.GetComponentInParent<PlacementSlots>();
+				if (parentSlots != null)
+				{
+					parentSlots.ClearSlotByTransform(currentTargetItem.transform.parent);
+				}
+				Destroy(currentTargetItem.gameObject);
+			}
             pickupPromptUI.SetActive(false);
+            
+            // 現在選択中のスロットを再選択して、InventoryManagerの選択状態を更新
+            if (slotSelector != null)
+            {
+                slotSelector.SelectSlot(slotSelector.selectedIndex);
+                Debug.Log($"スロット {slotSelector.selectedIndex} を再選択しました");
+            }
 
         }
         else
@@ -87,7 +115,7 @@ using UnityEngine.InputSystem;
 
 public class ItemPickup : MonoBehaviour
 {
-    [Header("�A�C�e���擾�ݒ�")]
+    [Header("�E�A�E�C�E�e�E��E��E�擾�E�ݒ�")]
     [SerializeField] private float pickupRange = 10f;
     [SerializeField] private InventoryManager inventoryManager;
     [SerializeField] private Camera mainCamera;
@@ -112,13 +140,13 @@ public class ItemPickup : MonoBehaviour
 
                 if (success)
                 {
-                    Debug.Log($"�A�C�e�� '{item.ItemData.itemName}' ���擾���܂���");
-                    Destroy(item.gameObject); // �������̂ݍ폜
+                    Debug.Log($"�E�A�E�C�E�e�E��E� '{item.ItemData.itemName}' �E��E��E�擾�E��E��E�܂��E��E�");
+                    Destroy(item.gameObject); // �E��E��E��E��E��E��E�̂ݍ폜
                 }
                 else
                 {
-                    Debug.LogWarning("�C���x���g�������t�ł��B�A�C�e���͎c��܂�");
-                    // �����ł͉��������A�A�C�e���͂��̂܂܎c��
+                    Debug.LogWarning("�E�C�E��E��E�x�E��E��E�g�E��E��E��E��E��E��E�t�E�ł��E�B�E�A�E�C�E�e�E��E��E�͎c�E��E�܂�");
+                    // �E��E��E��E��E�ł͉��E��E��E��E��E��E��E�A�E�A�E�C�E�e�E��E��E�͂��E�̂܂܎c�E��E�
                 }
             }
         }

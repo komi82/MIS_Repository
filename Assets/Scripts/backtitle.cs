@@ -3,19 +3,30 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using TMPro;
 
 
+/// <summary>
+/// リザルト画面からタイトルへ戻るボタン処理を担当する。
+/// 遷移時にスコア表示や `MoneyManager` / `RequestManager` の静的値を初期化する。
+/// </summary>
 public class backtitle : MonoBehaviour
 {
-    [SerializeField] private Text xScoreText;
-    [SerializeField] private Text yScoreText;
+    [SerializeField] private TextMeshProUGUI xScoreText;
+    [SerializeField] private TextMeshProUGUI yScoreText;
+
+    void Start()
+    {
+        // resultシーンではカーソルを表示状態にする
+        Cursor.lockState = CursorLockMode.Confined;
+        Cursor.visible = true;
+    }
 
     public void change_button()
     {
-        SceneManager.LoadScene("title");
+        FadeManager.Instance.LoadSceneWithFade("title");
         xScoreText.text = null;
         yScoreText.text = null;
-        MoneyManager.currentMoney = 0;
-        RequestManager.RequestCompleted=0;
+        // シーン遷移時に値を初期化しない仕様
     }
 }

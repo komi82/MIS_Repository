@@ -1,10 +1,14 @@
 using UnityEngine;
 
+/// <summary>
+/// デリバー端末とのインタラクトを管理する。
+/// `DeliveryUIList` の更新やカーソル状態切替を通じて、納品UIの開閉を制御する。
+/// </summary>
 public class DeliveryStation : MonoBehaviour
 {
-    [SerializeField] private GameObject deliveryUI; // �[�iUI�p�l��
-    [SerializeField] private float detectRange = 7f; // ���m����
-    [SerializeField] private Camera mainCamera;      // �v���C���[�̃J����
+    [SerializeField] private GameObject deliveryUI; // デリバーUIパネル
+    [SerializeField] private float detectRange = 7f; // 検知範囲
+    [SerializeField] private Camera mainCamera;      // プレイヤーのカメラ
     [SerializeField] private DeliveryUIList deliveryUiList;
     public bool CursorActive = false;
 
@@ -16,6 +20,15 @@ public class DeliveryStation : MonoBehaviour
 
     void Update()
     {
+        // EscキーでUIを強制的に閉じる
+        if (Input.GetKeyDown(KeyCode.Escape) && deliveryUI.activeSelf)
+        {
+            deliveryUI.SetActive(false);
+            CursorActive = false;
+            Cursor.lockState = CursorLockMode.Locked;   // 画面中央に固定＆非表示
+            Cursor.visible = false; // カーソルを明示的に非表示
+            return;
+        }
 
         if (Input.GetKeyDown(KeyCode.F))
         {
@@ -30,29 +43,39 @@ public class DeliveryStation : MonoBehaviour
         {
             if (hit.collider.gameObject == this.gameObject)
             {
-                deliveryUI.SetActive(!deliveryUI.activeSelf);
-                deliveryUiList.RefreshList();
-                if (CursorActive)
+                 // 基本的な効果音再生
+                if (SoundManager.Instance != null)
                 {
-                    CursorActive = false;
-                    Cursor.lockState = CursorLockMode.Locked;   // ��ʒ����ɌŒ聕��\��
-
+                    SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.buttonClickSound);
+                }
+                // UIが非表示の場合は必ず表示にする
+                if (!deliveryUI.activeSelf)
+                {
+                    
+                    deliveryUI.SetActive(true);
+                    deliveryUiList.RefreshList();
+                    CursorActive = true;
+                    Cursor.lockState = CursorLockMode.Confined; // ゲームウィンドウ内に制限
+                    Cursor.visible = true; // カーソルを明示的に表示
                 }
                 else
                 {
-                    CursorActive = true;
-                    Cursor.lockState = CursorLockMode.Confined; // �Q�[���E�B���h�E���ɐ���
-
+                    // UIが表示されている場合は非表示にする
+                    deliveryUI.SetActive(false);
+                    CursorActive = false;
+                    Cursor.lockState = CursorLockMode.Locked;   // 画面中央に固定＆非表示
+                    Cursor.visible = false; // カーソルを明示的に非表示
                 }
                 return;
             }
         }
 
-        // �q�b�g���Ȃ������ꍇ
+        // タグがない場合
   //      CursorActive = false;
-  //      Cursor.lockState = CursorLockMode.Locked;   // ��ʒ����ɌŒ聕��\��
+  //      Cursor.lockState = CursorLockMode.Locked;   // 画面中央に固定＆非表示
 
 
         deliveryUI.SetActive(false);
     }
 }
+

@@ -2,14 +2,14 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// q—v‘f‚ğƒWƒOƒUƒO‚É•À‚×‚éƒŒƒCƒAƒEƒgƒOƒ‹[ƒv
+/// ã‚¸ã‚°ã‚¶ã‚°ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆã§æ•´åˆ—ã™ã‚‹ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆã‚°ãƒ«ãƒ¼ãƒ—
 /// </summary>
 public class ZigZagLayoutGroup : LayoutGroup
 {
-    public float spacingX = 100f;   // ‰¡ŠÔŠu
-    public float spacingY = 100f;   // cŠÔŠu
-    public float offsetX = 50f;     // ‹ô”s‚Ì‰¡ƒYƒŒ—Ê
-    public int itemsPerRow = 4;     // 1s‚ ‚½‚è‚ÌƒAƒCƒeƒ€”
+    public float spacingX = 100f;   // æ¨ªé–“éš”
+    public float spacingY = 100f;   // ç¸¦é–“éš”
+    public float offsetX = 50f;     // å¶æ•°è¡Œã®å³ã‚ªãƒ•ã‚»ãƒƒãƒˆ
+    public int itemsPerRow = 4;     // 1è¡Œã‚ãŸã‚Šã®ã‚¢ã‚¤ãƒ†ãƒ æ•°
 
     public override void CalculateLayoutInputHorizontal()
     {
@@ -23,7 +23,7 @@ public class ZigZagLayoutGroup : LayoutGroup
             var item = rectChildren[i];
 
             float x = col * spacingX + (row % 2 == 1 ? offsetX : 0);
-            float y = -row * spacingY;
+            float y = row * spacingY;
 
             SetChildAlongAxis(item, 0, x, item.sizeDelta.x);
             SetChildAlongAxis(item, 1, y, item.sizeDelta.y);
@@ -41,3 +41,4 @@ public class ZigZagLayoutGroup : LayoutGroup
     public override void SetLayoutHorizontal() => CalculateLayoutInputHorizontal();
     public override void SetLayoutVertical() => CalculateLayoutInputHorizontal();
 }
+

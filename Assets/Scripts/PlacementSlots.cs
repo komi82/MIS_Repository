@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// ステーション上の設置スロット状態を保持する。
+/// `PutItem` から呼ばれ、配置・組み合わせ取得・クラフト後クリアを担当する。
+/// </summary>
 public class PlacementSlots : MonoBehaviour
 {
 	[Header("設置スロット(最大2)")]
@@ -89,6 +93,13 @@ public class PlacementSlots : MonoBehaviour
 	public (ItemData, ItemData) GetCombination()
 	{
 		return (occupiedItem1, occupiedItem2);
+	}
+
+	public bool HasEmptySlot()
+	{
+		if (slot1 != null && occupiedItem1 == null) return true;
+		if (slot2 != null && occupiedItem2 == null) return true;
+		return false;
 	}
 }
 

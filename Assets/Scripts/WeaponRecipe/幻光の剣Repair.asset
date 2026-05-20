@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e87e367eb790e244bebf59b628c1b0d, type: 3}
+  m_Name: "\u5E7B\u5149\u306E\u5263Repair"
+  m_EditorClassIdentifier: 
+  requiredItems:
+  - {fileID: 11400000, guid: 465f0b48b14dd40449f61ae3cfc8d8ee, type: 2}
+  - {fileID: 11400000, guid: 4591a8d5f99a502438d999ecf57e6e04, type: 2}
+  resultItem: {fileID: 11400000, guid: 0d9989668e399204db347a8200230d8f, type: 2}

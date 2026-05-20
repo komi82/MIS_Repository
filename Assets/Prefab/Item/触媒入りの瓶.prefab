@@ -66,7 +66,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: db6841642bd125b4d8d553fa0aab2d67, type: 3}
       propertyPath: m_Name
-      value: "\u30DD\u30FC\u30B7\u30E7\u30F3"
+      value: "\u89E6\u5A92\u5165\u308A\u306E\u74F6"
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -179,7 +179,7 @@ BoxCollider:
   m_ProvidesContacts: 1
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 3.2169056, y: 10.476656, z: 3.2}
+  m_Size: {x: 3.5169055, y: 10.776656, z: 3.5}
   m_Center: {x: -0.012181401, y: 4.7383285, z: 0}
 --- !u!1 &8954841456551791121 stripped
 GameObject:

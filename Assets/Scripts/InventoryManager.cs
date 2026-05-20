@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// プレイヤーインベントリの内容と選択状態を管理する。
+/// `ItemPickup`/`PutItem`/`SlotSelector` から参照され、追加・削除・選択を一元化する。
+/// </summary>
 public class InventoryManager : MonoBehaviour
 {
     [Header("管理対象のスロット（4つ）")]
@@ -55,14 +59,17 @@ public class InventoryManager : MonoBehaviour
         }
 
         slotUIs[index].AssignItem(item);
+
         return true;
     }
 
     public bool HasItem(ItemData item)
     {
+        if (item == null) return false;
+        
         foreach (var slot in slotUIs)
         {
-            if (slot.CurrentItem == item)
+            if (slot.CurrentItem != null && slot.CurrentItem.itemName == item.itemName)
             {
                 return true;
             }
@@ -145,9 +152,11 @@ public class InventoryManager : MonoBehaviour
 
     public InventorySlotUI FindSlotByItem(ItemData item)//selecteditemに対応するスロットを検索
     {
+        if (item == null) return null;
+        
         foreach (var slot in slotUIs)
         {
-            if (slot.CurrentItem == item)
+            if (slot.CurrentItem != null && slot.CurrentItem.itemName == item.itemName)
             {
                 return slot;
             }

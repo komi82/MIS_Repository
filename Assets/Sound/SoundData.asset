@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0dc2525998cb6e49bbf83ad285b68b2, type: 3}
+  m_Name: SoundData
+  m_EditorClassIdentifier: Assembly-CSharp::SoundData
+  buttonClickSound: {fileID: 8300000, guid: a29c0a32781a5584b83b808274a50bdd, type: 3}
+  itemPickupSound: {fileID: 8300000, guid: d539ee2559555644ba5426ff95b90280, type: 3}
+  recipeCompleteSound: {fileID: 8300000, guid: bec6d8794ef766f49a509ad0c0d77786, type: 3}
+  deliverySound: {fileID: 8300000, guid: a249e100ceb2f0849ab8c73fc53618d5, type: 3}
+  RequestSound: {fileID: 8300000, guid: bc92773a79f54ad4091be43b77dd6ecb, type: 3}
+  putSound: {fileID: 8300000, guid: 3afcfe46d29bb78429652a3cb023ba8f, type: 3}
+  timeupSound: {fileID: 8300000, guid: e0751ba445b2f324682ffecd8a0f1ead, type: 3}
+  rouletteSound: {fileID: 8300000, guid: 02a63d13224ca51419c9a6ba3c855fab, type: 3}
+  displaySound: {fileID: 8300000, guid: 68caba413f603394d80523bb249b30b4, type: 3}
+  mainMenuBGM: {fileID: 0}
+  gameplayBGM: {fileID: 8300000, guid: 56707644298bc1d4693bf1ab7805141a, type: 3}
+  resultBGM: {fileID: 0}
+  bgmVolume: 0.15
+  sfxVolume: 0.5
+  uiVolume: 0.5
+  bgmFadeTime: 0
+  maxConcurrentSFX: 5
