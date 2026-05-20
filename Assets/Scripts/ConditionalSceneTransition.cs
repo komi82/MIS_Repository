@@ -71,6 +71,7 @@ public class ConditionalSceneTransition : MonoBehaviour
 
         Instance = this;
 
+
         if (transitionUI != null)
         {
             transitionUI.SetActive(false);
@@ -101,6 +102,7 @@ public class ConditionalSceneTransition : MonoBehaviour
             Instance = null;
         }
     }
+
 
     void Update()
     {
@@ -216,6 +218,7 @@ public class ConditionalSceneTransition : MonoBehaviour
         hasTriggered = true;
         BlockGameplayInput();
 
+
         if (transitionUI != null)
         {
             transitionUI.SetActive(true);
@@ -292,4 +295,5 @@ public class ConditionalSceneTransition : MonoBehaviour
             behaviour.enabled = false;
         }
     }
+
 }

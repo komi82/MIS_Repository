@@ -68,6 +68,7 @@ public class ItemPickup : MonoBehaviour
             {
                 ConditionalSceneTransition.TriggerTransitionStatic();
             }
+
             if (SoundManager.Instance != null)
             {
                 SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.itemPickupSound);

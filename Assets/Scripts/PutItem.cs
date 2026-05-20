@@ -4,7 +4,6 @@ using System.Collections;
 using TMPro;
 using UnityEngine.SceneManagement;
 
-
 /// <summary>
 /// アイテム配置・クラフト入力・各作業ステーションUIを統合制御する中核クラス。
 /// `InventoryManager` `PlacementSlots` `RecipeDatabase` `SoundManager` などと連携して、
@@ -306,6 +305,7 @@ public class PutItem : MonoBehaviour
 						}
 						else
 						{
+
 							canShow = slots.HasEmptySlot();
 						}
 					}
@@ -434,6 +434,7 @@ public class PutItem : MonoBehaviour
 			{
 				ConditionalSceneTransition.TriggerTransitionStatic();
 			}
+
 		}
 		else
 		{
