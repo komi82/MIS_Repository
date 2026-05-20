@@ -22,7 +22,6 @@ public class ChangeScene: MonoBehaviour
         public string componentType;
         public string json;
     }
-
     [Header("UI設定")]
     [Tooltip("表示するUIオブジェクト")]
     public GameObject targetUI;
@@ -360,6 +359,7 @@ public class ChangeScene: MonoBehaviour
             current = next;
         }
         return current;
+
     }
     void Start()
     {
@@ -490,6 +490,7 @@ public class ChangeScene: MonoBehaviour
         {
             SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.deliverySound);
         }
+
         // title → arcade の「次のゲーム開始」だけは初期化する
         // （それ以外の arcade 遷移では、変数を保持したままにする）
         if (SceneManager.GetActiveScene().name == "title")
@@ -499,6 +500,7 @@ public class ChangeScene: MonoBehaviour
             DayAdvanceButton.ResetPersistentState();
             GameClockText.ResetPersistentState();
         }
+
         FadeManager.Instance.LoadSceneWithFade("arcade");
     }
     
