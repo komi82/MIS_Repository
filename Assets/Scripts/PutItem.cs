@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// アイテム配置・クラフト入力・各作業ステーションUIを統合制御する中核クラス。
@@ -304,6 +305,7 @@ public class PutItem : MonoBehaviour
 						}
 						else
 						{
+
 							canShow = slots.HasEmptySlot();
 						}
 					}
@@ -428,6 +430,11 @@ public class PutItem : MonoBehaviour
 			}
 						Instantiate(match.resultItem.prefab, pos, rot);
 			Debug.Log($"クラフト生成: {match.resultItem.itemName}");
+			if (SceneManager.GetActiveScene().name == "tutorial3")
+			{
+				ConditionalSceneTransition.TriggerTransitionStatic();
+			}
+
 		}
 		else
 		{

@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
+
 
 /// <summary>
 /// 視線先アイテムの検出と取得処理を担当する。
@@ -60,7 +62,13 @@ public class ItemPickup : MonoBehaviour
 
         if (success)
         {
+
             Debug.Log($"アイテム '{currentTargetItem.ItemData.itemName}' を取得しました");
+            if (SceneManager.GetActiveScene().name == "tutorial2")
+            {
+                ConditionalSceneTransition.TriggerTransitionStatic();
+            }
+
             if (SoundManager.Instance != null)
             {
                 SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.itemPickupSound);

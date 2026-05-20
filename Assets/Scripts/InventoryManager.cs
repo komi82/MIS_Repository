@@ -59,6 +59,7 @@ public class InventoryManager : MonoBehaviour
         }
 
         slotUIs[index].AssignItem(item);
+
         return true;
     }
 

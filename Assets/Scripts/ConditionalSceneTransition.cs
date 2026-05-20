@@ -33,6 +33,12 @@ public class ConditionalSceneTransition : MonoBehaviour
     [SerializeField] private float delayBeforeLoad = 2f;
     [SerializeField] private bool triggerOnce = true;
 
+    [Header("入力無効化")]
+    [Tooltip("true: 表示・遷移開始時に DeliveryStation.CursorActive 方式で操作入力を止める")]
+    [SerializeField] private bool blockInputOnTransition = true;
+    [SerializeField] private DeliveryStation deliveryStation;
+    [SerializeField] private FirstPersonController playerController;
+
     [Header("プレイヤー接触")]
     [Tooltip("このオブジェクトに Is Trigger の Collider を付け、プレイヤーが入ったとき発火")]
     [SerializeField] private string playerTag = "Player";
@@ -53,8 +59,19 @@ public class ConditionalSceneTransition : MonoBehaviour
     private int lastPolledValue;
     private Coroutine transitionCoroutine;
 
+    /// <summary>シーン内から static で表示・遷移を呼ぶときの参照（Awake で設定）</summary>
+    public static ConditionalSceneTransition Instance { get; private set; }
+
     void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Debug.LogWarning("ConditionalSceneTransition: 複数存在します。最後に Awake したものが Instance になります。");
+        }
+
+        Instance = this;
+
+
         if (transitionUI != null)
         {
             transitionUI.SetActive(false);
@@ -65,8 +82,27 @@ public class ConditionalSceneTransition : MonoBehaviour
             sceneLoader = FindFirstObjectByType<LoadTutorialScene>();
         }
 
+        if (deliveryStation == null)
+        {
+            deliveryStation = FindFirstObjectByType<DeliveryStation>();
+        }
+
+        if (playerController == null)
+        {
+            playerController = FindFirstObjectByType<FirstPersonController>();
+        }
+
         lastPolledValue = currentValue;
     }
+
+    void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            Instance = null;
+        }
+    }
+
 
     void Update()
     {
@@ -146,6 +182,29 @@ public class ConditionalSceneTransition : MonoBehaviour
         NotifyVariableChanged(value);
     }
 
+    /// <summary>
+    /// 表示・遷移を直接開始する（トリガー種別・変数比較を経由しない）。
+    /// UI Button の On Click () や他スクリプトから呼べる。
+    /// </summary>
+    public void TriggerTransition()
+    {
+        StartTransitionSequence();
+    }
+
+    /// <summary>
+    /// Instance 経由で表示・遷移を開始する。他スクリプトからの static 呼び出し用。
+    /// </summary>
+    public static void TriggerTransitionStatic()
+    {
+        if (Instance == null)
+        {
+            Debug.LogWarning("ConditionalSceneTransition: Instance が未設定です。シーンにコンポーネントがあるか確認してください。");
+            return;
+        }
+
+        Instance.TriggerTransition();
+    }
+
     void StartTransitionSequence()
     {
         if (hasTriggered && triggerOnce) return;
@@ -157,6 +216,8 @@ public class ConditionalSceneTransition : MonoBehaviour
     IEnumerator TransitionSequence()
     {
         hasTriggered = true;
+        BlockGameplayInput();
+
 
         if (transitionUI != null)
         {
@@ -199,4 +260,40 @@ public class ConditionalSceneTransition : MonoBehaviour
                 return false;
         }
     }
+
+    /// <summary>
+    /// PutItem.BeginPlayerUiBlock / DeliveryStation と同様にプレイヤー操作を無効化する。
+    /// </summary>
+    void BlockGameplayInput()
+    {
+        if (!blockInputOnTransition) return;
+
+        if (deliveryStation != null)
+        {
+            deliveryStation.CursorActive = true;
+        }
+
+        if (playerController != null)
+        {
+            playerController.enabled = false;
+        }
+
+        DisableInputBehaviour(FindFirstObjectByType<ItemPickup>());
+        DisableInputBehaviour(FindFirstObjectByType<SlotSelector>());
+        DisableInputBehaviour(FindFirstObjectByType<PutItem>());
+        DisableInputBehaviour(deliveryStation);
+        DisableInputBehaviour(FindFirstObjectByType<RecipeStation>());
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
+
+    static void DisableInputBehaviour(Behaviour behaviour)
+    {
+        if (behaviour != null)
+        {
+            behaviour.enabled = false;
+        }
+    }
+
 }

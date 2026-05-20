@@ -2154,7 +2154,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5df5c7c810a5a2c46aa8cbe7d7ae77d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LoadTutorialScene
-  sceneName: title
+  sceneName: tutorial
+
   playButtonSound: 1
 --- !u!114 &1733730370
 MonoBehaviour:
@@ -2200,9 +2201,10 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: ChangeScene, Assembly-CSharp
-        m_MethodName: change_button
+      - m_Target: {fileID: 1733730369}
+        m_TargetAssemblyTypeName: LoadTutorialScene, Assembly-CSharp
+        m_MethodName: LoadScene
+
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

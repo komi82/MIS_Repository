@@ -1,6 +1,8 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
+
 
 /// <summary>
 /// 依頼の生成・保持・完了処理を統括する管理クラス。
@@ -46,9 +48,12 @@ public class RequestManager : MonoBehaviour
         // 依頼がなくなった場合は強制的に1つ生成してタイマーをリセット
         if (activeRequests.Count == 0)
         {
-            GenerateRequest();
-            ScheduleNextRequest();
-            return;
+            if (SceneManager.GetActiveScene().name != "tutorial4")
+            {       GenerateRequest();
+                    ScheduleNextRequest();
+                    return;
+            }
+
         }
 
         float elapsed = SceneTimer.Instance.GetElapsedTime();
