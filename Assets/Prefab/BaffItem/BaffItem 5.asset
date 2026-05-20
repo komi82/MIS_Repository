@@ -18,4 +18,4 @@ MonoBehaviour:
   price: 200
   startprice: 200
   ownedCount: 0
-  prefab: {fileID: 7658118858198973911, guid: 587791ec71da66e49919692553ce6604, type: 3}
+  prefab: {fileID: 29106235857035982, guid: 587791ec71da66e49919692553ce6604, type: 3}

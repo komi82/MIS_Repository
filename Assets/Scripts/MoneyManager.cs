@@ -8,8 +8,21 @@ using TMPro;
 /// </summary>
 public class MoneyManager : MonoBehaviour
 {
-    [SerializeField] public static int currentMoney;
+    public static MoneyManager Instance { get; private set; }
+
+    [SerializeField] public static int currentMoney = 10000;
     [SerializeField] private TextMeshProUGUI moneyText;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+    }
 
     private void Start()
     {

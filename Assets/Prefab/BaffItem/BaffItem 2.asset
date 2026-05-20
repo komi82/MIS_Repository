@@ -15,7 +15,7 @@ MonoBehaviour:
   B_itemID: 2
   B_itemType: up
   B_itemName: item2
-  price: 100
+  price: 110
   startprice: 100
-  ownedCount: 0
-  prefab: {fileID: 1037839949650150491, guid: 6ebd8c5ca9ae45142b9c05fcd94bccfd, type: 3}
+  ownedCount: 1
+  prefab: {fileID: 1037839949650150491, guid: d8e59f8c40ddee9469aeaa5d611ef322, type: 3}

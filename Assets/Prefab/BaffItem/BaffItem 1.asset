@@ -15,7 +15,7 @@ MonoBehaviour:
   B_itemID: 1
   B_itemType: speedup
   B_itemName: item1
-  price: 50
+  price: 60
   startprice: 50
-  ownedCount: 0
-  prefab: {fileID: 2981309548975973535, guid: 59f4d72904165a7439f1b8a5e290997b, type: 3}
+  ownedCount: 2
+  prefab: {fileID: 2981309548975973535, guid: 2ae1680edcf729c4abee824c1860f2c5, type: 3}
