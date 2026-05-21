@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: ArtifactDatabase
   m_EditorClassIdentifier: Assembly-CSharp::ArtifactDatabase
   allArtifacts:
-  - {fileID: 11400000, guid: f08e4a42d091ffd428602302ee6ea131, type: 2}
-  - {fileID: 11400000, guid: 0f5fc320bffcc7c408d9bf48ccffdfca, type: 2}
+  - {fileID: 11400000, guid: 75e0bad2dcabd3441bd730d95677ebeb, type: 2}
+  - {fileID: 11400000, guid: d25a264425c7d0e4db88eb03787de42a, type: 2}

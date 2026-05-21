@@ -79,7 +79,7 @@ public class ArtifactManager : MonoBehaviour
                         selectedItem.price = Mathf.RoundToInt(selectedItem.price * 1.1f);
                         Debug.Log(selectedItem.A_itemName + " を購入");
 
-                        //A_itemObj.SetActive(false);
+                        A_itemObj.SetActive(false);
                     }
                 });
             }

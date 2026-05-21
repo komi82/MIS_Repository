@@ -27070,7 +27070,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2692658632154067728, guid: 87e27f4c2e61aac458cadad90223538f, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -1092
       objectReference: {fileID: 0}
     - target: {fileID: 2692658632154067728, guid: 87e27f4c2e61aac458cadad90223538f, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -27092,6 +27092,14 @@ PrefabInstance:
       propertyPath: targetCamera
       value: 
       objectReference: {fileID: 330585545}
+    - target: {fileID: 5588187471670457864, guid: 87e27f4c2e61aac458cadad90223538f, type: 3}
+      propertyPath: targets.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5588187471670457864, guid: 87e27f4c2e61aac458cadad90223538f, type: 3}
+      propertyPath: 'targets.Array.data[0]'
+      value: 
+      objectReference: {fileID: 747104990}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

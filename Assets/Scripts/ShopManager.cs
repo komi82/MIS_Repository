@@ -75,7 +75,7 @@ public class ShopManager : MonoBehaviour
 
                         Debug.Log(selectedItem.B_itemName + " を購入");
 
-                        //itemObj.SetActive(false); //アイテム購入を一度きりに
+                        itemObj.SetActive(false); //アイテム購入を一度きりに
                     }
                 });
             }

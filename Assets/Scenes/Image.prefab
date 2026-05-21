@@ -28,8 +28,8 @@ RectTransform:
   m_GameObject: {fileID: 29106235857035982}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -50,7 +50,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbd6f66342f65624c86e6b5b54a1b550, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OffScreenObjectIndicator
-  target: {fileID: 0}
+  targets: []
   targetCamera: {fileID: 0}
   canvasRect: {fileID: 0}
   edgePadding: 0.05
@@ -84,7 +84,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: da718bce80282f547a1db45153959ed7, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
