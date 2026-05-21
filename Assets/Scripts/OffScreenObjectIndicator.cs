@@ -1,15 +1,17 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
 /// 追跡対象がカメラに映っていないとき、対象の方向に応じて画面端へ UI を表示する。
 /// 映っている間は UI を非表示にする。
 /// インジケーター UI（Screen Space Overlay の Canvas 配下）にアタッチする。
+/// 追跡対象はリスト先頭から順に追跡し、それ以外の登録オブジェクトは非表示にする。
 /// </summary>
 [RequireComponent(typeof(RectTransform))]
 public class OffScreenObjectIndicator : MonoBehaviour
 {
     [Header("追跡対象")]
-    [SerializeField] private Transform target;
+    [SerializeField] private List<Transform> targets = new List<Transform>();
 
     [Header("カメラ・Canvas")]
     [SerializeField] private Camera targetCamera;
@@ -29,6 +31,8 @@ public class OffScreenObjectIndicator : MonoBehaviour
     private RectTransform indicatorRect;
     private CanvasGroup canvasGroup;
     private bool isIndicatorVisible;
+    private Transform currentTarget;
+    private int currentTargetIndex = -1;
 
     void Awake()
     {
@@ -53,18 +57,30 @@ public class OffScreenObjectIndicator : MonoBehaviour
             }
         }
 
+        InitializeTargets();
         SetIndicatorVisible(false);
+    }
+
+    void OnDestroy()
+    {
+        RestoreAllTargetsVisibility();
     }
 
     void LateUpdate()
     {
-        if (target == null || targetCamera == null || canvasRect == null)
+        if (currentTarget == null && !TryAdvanceToNextTarget())
         {
             SetIndicatorVisible(false);
             return;
         }
 
-        Vector3 viewportPos = targetCamera.WorldToViewportPoint(target.position);
+        if (targetCamera == null || canvasRect == null)
+        {
+            SetIndicatorVisible(false);
+            return;
+        }
+
+        Vector3 viewportPos = targetCamera.WorldToViewportPoint(currentTarget.position);
         if (IsTargetInView(viewportPos))
         {
             SetIndicatorVisible(false);
@@ -85,6 +101,72 @@ public class OffScreenObjectIndicator : MonoBehaviour
             Vector2 direction = edgeViewport - new Vector2(0.5f, 0.5f);
             float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
             indicatorRect.localRotation = Quaternion.Euler(0f, 0f, angle + rotationOffset);
+        }
+    }
+
+    void InitializeTargets()
+    {
+        currentTargetIndex = FindFirstValidTargetIndex(0);
+        currentTarget = currentTargetIndex >= 0 ? targets[currentTargetIndex] : null;
+        ApplyTargetVisibility();
+    }
+
+    bool TryAdvanceToNextTarget()
+    {
+        int nextIndex = FindFirstValidTargetIndex(currentTargetIndex + 1);
+        if (nextIndex < 0)
+        {
+            currentTarget = null;
+            currentTargetIndex = -1;
+            return false;
+        }
+
+        currentTargetIndex = nextIndex;
+        currentTarget = targets[currentTargetIndex];
+        ApplyTargetVisibility();
+        return true;
+    }
+
+    int FindFirstValidTargetIndex(int startIndex)
+    {
+        for (int i = startIndex; i < targets.Count; i++)
+        {
+            if (targets[i] != null)
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    void ApplyTargetVisibility()
+    {
+        for (int i = 0; i < targets.Count; i++)
+        {
+            Transform t = targets[i];
+            if (t == null)
+            {
+                continue;
+            }
+
+            bool shouldShow = i == currentTargetIndex;
+            if (t.gameObject.activeSelf != shouldShow)
+            {
+                t.gameObject.SetActive(shouldShow);
+            }
+        }
+    }
+
+    void RestoreAllTargetsVisibility()
+    {
+        for (int i = 0; i < targets.Count; i++)
+        {
+            Transform t = targets[i];
+            if (t != null)
+            {
+                t.gameObject.SetActive(true);
+            }
         }
     }
 
@@ -175,6 +257,12 @@ public class OffScreenObjectIndicator : MonoBehaviour
 
     public void SetTarget(Transform newTarget)
     {
-        target = newTarget;
+        targets.Clear();
+        if (newTarget != null)
+        {
+            targets.Add(newTarget);
+        }
+
+        InitializeTargets();
     }
 }

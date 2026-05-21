@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c048c3fcb849d59418033670fcf268cf, type: 3}
+  m_Name: BaffItemDatabase
+  m_EditorClassIdentifier: Assembly-CSharp::BaffItemDatabase
+  allBaffItems:
+  - {fileID: 11400000, guid: d6934ff4556b4aa4daf39782d85d805f, type: 2}
+  - {fileID: 11400000, guid: ad5f15f84f979df4197499d53c58ac6d, type: 2}
+  - {fileID: 11400000, guid: 6c1f629632d901d4c8539abe1b9c67a7, type: 2}
+  - {fileID: 11400000, guid: 75dd9b70c4176dd4d89162fd915d8725, type: 2}
+  - {fileID: 11400000, guid: 7430427b03e0d2b44b063710b5f27158, type: 2}
+  - {fileID: 11400000, guid: 98ddbc9d7ff47e648847463ab00a96cd, type: 2}

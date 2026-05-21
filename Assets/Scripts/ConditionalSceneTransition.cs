@@ -196,13 +196,42 @@ public class ConditionalSceneTransition : MonoBehaviour
     /// </summary>
     public static void TriggerTransitionStatic()
     {
-        if (Instance == null)
+        if (!EnsureInstance())
         {
-            Debug.LogWarning("ConditionalSceneTransition: Instance が未設定です。シーンにコンポーネントがあるか確認してください。");
+            Debug.LogWarning(
+                "ConditionalSceneTransition: Instance が未設定です。シーンにコンポーネントを置くか、LoadTutorialScene を配置してください。");
             return;
         }
 
         Instance.TriggerTransition();
+    }
+
+    /// <summary>
+    /// static 呼び出し前に Instance を解決する。非アクティブなオブジェクトも検索する。
+    /// </summary>
+    static bool EnsureInstance()
+    {
+        if (Instance != null)
+        {
+            return true;
+        }
+
+        Instance = FindFirstObjectByType<ConditionalSceneTransition>(FindObjectsInactive.Include);
+        if (Instance != null)
+        {
+            return true;
+        }
+
+        // シーンに未配置の場合、LoadTutorialScene から実行時に生成する（tutorial4 など）
+        LoadTutorialScene loader = FindFirstObjectByType<LoadTutorialScene>(FindObjectsInactive.Include);
+        if (loader == null)
+        {
+            return false;
+        }
+
+        GameObject host = new GameObject("ConditionalSceneTransition(Auto)");
+        host.AddComponent<ConditionalSceneTransition>();
+        return Instance != null;
     }
 
     void StartTransitionSequence()

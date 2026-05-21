@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
+
 
 /// <summary>
 /// 単一依頼のUI表示と「納品」操作を担当する。
@@ -145,6 +147,10 @@ public class DeliveryUIItem : MonoBehaviour
                 SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.deliverySound);
                 InventoryManager.Instance.RemoveItem(slot);
                 Debug.Log($"インベントリから '{linkedRequest.requiredItem.itemName}' を削除しました");
+                if (SceneManager.GetActiveScene().name == "tutorial4")
+                {
+                    ConditionalSceneTransition.TriggerTransitionStatic();
+                }
             }
             else
             {
