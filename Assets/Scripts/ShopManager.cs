@@ -22,9 +22,10 @@ public class ShopManager : MonoBehaviour
 
     void InitializeItem()
     {
-        foreach(BaffItemData B_item in baffitemDatas)
+        foreach (BaffItemData B_item in baffitemDatas)
         {
-            B_item.Resetprice();
+            B_item.ResetShopPrice();
+            B_item.ownedCount = OwnedProgressManager.GetBaffOwned(B_item.B_itemID);
         }
     }
 
@@ -69,7 +70,8 @@ public class ShopManager : MonoBehaviour
                     // 購入成功時
                     if (success)
                     {
-                        selectedItem.ownedCount++; //アイテムの所持数増加
+                        OwnedProgressManager.AddBaffItem(selectedItem.B_itemID);
+                        selectedItem.ownedCount = OwnedProgressManager.GetBaffOwned(selectedItem.B_itemID);
 
                         selectedItem.price = Mathf.RoundToInt(selectedItem.price * 1.1f); //アイテムの価格上昇
 
