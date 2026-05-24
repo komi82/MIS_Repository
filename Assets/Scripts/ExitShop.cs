@@ -8,6 +8,6 @@ public class ExitShop : MonoBehaviour
 {
     public void Exitshop()
     {
-        FadeManager.Instance.LoadSceneWithFade("free");
+        FadeManager.Instance.LoadSceneWithFade("arcade");
     }
 }

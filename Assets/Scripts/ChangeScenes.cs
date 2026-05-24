@@ -305,7 +305,7 @@ public class ChangeScene: MonoBehaviour
 
     private void ResetArcadeRuntimeState()
     {
-        // シーン遷移時に値を初期化しない仕様
+        OwnedProgressManager.ResetAll();
     }
 
     private void ClearSavedArcadeState()
@@ -497,6 +497,7 @@ public class ChangeScene: MonoBehaviour
         {
             MoneyManager.currentMoney = 0;
             RequestManager.RequestCompleted = 0;
+            OwnedProgressManager.ResetAll();
             DayAdvanceButton.ResetPersistentState();
             GameClockText.ResetPersistentState();
         }
