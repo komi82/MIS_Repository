@@ -23,8 +23,9 @@ public class GameClockText : MonoBehaviour
     private static int s_completeMoneyThreshold;
 
     private bool transitionStarted = false;
-    private bool isCompleteTransition = false; // Completeシーンへ遷移するかどうか
+    private bool isCompleteTransition = false; // 所持金しきい値達成時（Shop遷移）かどうか
     [SerializeField] private DeliveryStation deliveryStation;
+    [SerializeField] private FirstPersonController playerController;
     private int defaultCompleteMoneyThreshold;
 
     private void Awake()
@@ -38,6 +39,16 @@ public class GameClockText : MonoBehaviour
 
         Instance = this;
         defaultCompleteMoneyThreshold = completeMoneyThreshold;
+
+        if (deliveryStation == null)
+        {
+            deliveryStation = FindFirstObjectByType<DeliveryStation>();
+        }
+
+        if (playerController == null)
+        {
+            playerController = FindFirstObjectByType<FirstPersonController>();
+        }
 
         // シーンを跨いで保持（初回だけInspector値を採用）
         if (!s_hasCompleteMoneyThreshold)
@@ -91,7 +102,7 @@ public class GameClockText : MonoBehaviour
         {
             transitionStarted = true;
 
-            // 目標所持金以上ならComplete導線、それ以外は通常導線に分岐
+            // 目標所持金以上ならShop導線、それ以外は通常導線に分岐
             isCompleteTransition = MoneyManager.currentMoney >= completeMoneyThreshold;
             if (isCompleteTransition)
             {
@@ -108,8 +119,7 @@ public class GameClockText : MonoBehaviour
             {
                 SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.timeupSound);
             }
-            if (deliveryStation != null) deliveryStation.CursorActive = true;
-            Cursor.lockState = CursorLockMode.Confined; // マウスカーソル表示
+            BlockGameplayInput();
             Invoke(nameof(TransitionToNextScene), 1f); //1秒後にシーン遷移
         }
 
@@ -126,14 +136,82 @@ public class GameClockText : MonoBehaviour
     void TransitionToNextScene()
     {
         // arcadeシーン内で DayAdvanceButton を参照できる想定。
-        // ここで Day を進めて次回の閾値計算に反映させる。
+        // 所持金しきい値達成時は Day を進めて次回の閾値計算に反映させる。
         if (isCompleteTransition && dayAdvanceButton != null)
         {
             dayAdvanceButton.OnClickAdvanceDay();
         }
 
-        string nextScene = isCompleteTransition ? "Complete" : "result";
+        int currentDay = dayAdvanceButton != null
+            ? dayAdvanceButton.GetDay()
+            : 1;
+
+        string nextScene;
+        if (currentDay >= DayAdvanceButton.ResultDayThreshold)
+        {
+            nextScene = "result";
+        }
+        else if (isCompleteTransition)
+        {
+            nextScene = "Shop";
+        }
+        else
+        {
+            nextScene = "result";
+        }
+
+        if (IsMenuScene(nextScene))
+        {
+            ActivateCursorForMenuScene();
+        }
+
         FadeManager.Instance.LoadSceneWithFade(nextScene);
+    }
+
+    static bool IsMenuScene(string sceneName)
+    {
+        if (string.IsNullOrEmpty(sceneName)) return false;
+        string lower = sceneName.ToLowerInvariant();
+        return lower == "shop" || lower == "result";
+    }
+
+    static void ActivateCursorForMenuScene()
+    {
+        Cursor.lockState = CursorLockMode.Confined;
+        Cursor.visible = true;
+    }
+
+    /// <summary>
+    /// ConditionalSceneTransition と同様に、キー・マウス操作をすべて無効化する。
+    /// </summary>
+    void BlockGameplayInput()
+    {
+        if (deliveryStation != null)
+        {
+            deliveryStation.CursorActive = false;
+            deliveryStation.enabled = false;
+        }
+
+        if (playerController != null)
+        {
+            playerController.enabled = false;
+        }
+
+        DisableInputBehaviour(FindFirstObjectByType<ItemPickup>());
+        DisableInputBehaviour(FindFirstObjectByType<SlotSelector>());
+        DisableInputBehaviour(FindFirstObjectByType<PutItem>());
+        DisableInputBehaviour(FindFirstObjectByType<RecipeStation>());
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
+
+    static void DisableInputBehaviour(Behaviour behaviour)
+    {
+        if (behaviour != null)
+        {
+            behaviour.enabled = false;
+        }
     }
 
     private void DeadlineCountDown()
@@ -172,7 +250,7 @@ public class GameClockText : MonoBehaviour
     public void UpdateCompleteThresholdByDay(int day)
     {
         if (day < 1) day = 1;
-        float scaled = MoneyManager.currentMoney * 0.8f * day;
+        float scaled = completeMoneyThreshold * day * 0.7f;
         SetCompleteMoneyThreshold(Mathf.Max(0, Mathf.RoundToInt(scaled)));
         UpdateCompleteThresholdDisplay();
     }
