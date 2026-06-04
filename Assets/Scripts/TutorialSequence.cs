@@ -1,0 +1,218 @@
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+
+/// <summary>
+/// シーン開始時にチュートリアル用テキストを順表示する。
+/// 左クリックで次の文章へ進み、全文章表示後はテキストボックスを隠して別ウィンドウを表示し、操作を解禁する。
+/// </summary>
+public class TutorialSequence : MonoBehaviour
+{
+    public static bool IsActive { get; private set; }
+
+    [Header("UI")]
+    [Tooltip("チュートリアル用テキストボックス（親オブジェクト）")]
+    [SerializeField] private GameObject textBoxRoot;
+
+    [Tooltip("テキストボックス内の TextMeshPro")]
+    [SerializeField] private TextMeshProUGUI tutorialText;
+
+    [Tooltip("全文章表示後に出す別ウィンドウ")]
+    [SerializeField] private GameObject postTutorialWindow;
+
+    [Header("文章（Inspector 登録順に表示）")]
+    [TextArea(2, 6)]
+    [SerializeField] private string[] tutorialLines;
+
+    [Header("操作ブロック対象（未設定時はシーン内を検索）")]
+    [SerializeField] private DeliveryStation deliveryStation;
+    [SerializeField] private FirstPersonController playerController;
+
+    private int currentLineIndex;
+    private bool sequenceFinished;
+    private readonly List<Behaviour> disabledBehaviours = new List<Behaviour>();
+
+    void Awake()
+    {
+        if (deliveryStation == null)
+        {
+            deliveryStation = FindFirstObjectByType<DeliveryStation>();
+        }
+
+        if (playerController == null)
+        {
+            playerController = FindFirstObjectByType<FirstPersonController>();
+        }
+
+        if (tutorialText == null && textBoxRoot != null)
+        {
+            tutorialText = textBoxRoot.GetComponentInChildren<TextMeshProUGUI>(true);
+        }
+    }
+
+    void Start()
+    {
+        if (postTutorialWindow != null)
+        {
+            postTutorialWindow.SetActive(false);
+        }
+
+        if (textBoxRoot != null)
+        {
+            textBoxRoot.SetActive(true);
+        }
+
+        BeginTutorial();
+    }
+
+    void OnDestroy()
+    {
+        if (IsActive)
+        {
+            IsActive = false;
+        }
+    }
+
+    void Update()
+    {
+        if (sequenceFinished || !IsActive)
+        {
+            return;
+        }
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            AdvanceLine();
+        }
+    }
+
+    void BeginTutorial()
+    {
+        sequenceFinished = false;
+        currentLineIndex = 0;
+        IsActive = true;
+
+        BlockGameplayInput();
+        ShowCursorForTutorial();
+
+        if (tutorialLines == null || tutorialLines.Length == 0)
+        {
+            FinishSequence();
+            return;
+        }
+
+        ApplyLineText();
+    }
+
+    void AdvanceLine()
+    {
+        currentLineIndex++;
+
+        if (currentLineIndex >= tutorialLines.Length)
+        {
+            FinishSequence();
+            return;
+        }
+
+        ApplyLineText();
+    }
+
+    void ApplyLineText()
+    {
+        if (tutorialText != null && currentLineIndex < tutorialLines.Length)
+        {
+            tutorialText.text = tutorialLines[currentLineIndex];
+        }
+    }
+
+    void FinishSequence()
+    {
+        if (sequenceFinished)
+        {
+            return;
+        }
+
+        sequenceFinished = true;
+        IsActive = false;
+
+        if (textBoxRoot != null)
+        {
+            textBoxRoot.SetActive(false);
+        }
+
+        if (postTutorialWindow != null)
+        {
+            postTutorialWindow.SetActive(true);
+        }
+
+        RestoreGameplayInput();
+        HideCursorForGameplay();
+    }
+
+    /// <summary>
+    /// 左クリック以外のマウス操作とキーボード操作を止める（既存 UI ブロックと同様）。
+    /// </summary>
+    void BlockGameplayInput()
+    {
+        disabledBehaviours.Clear();
+
+        DisableInputBehaviour(playerController);
+        DisableInputBehaviour(deliveryStation);
+        DisableInputBehaviour(FindFirstObjectByType<ItemPickup>());
+        DisableInputBehaviour(FindFirstObjectByType<SlotSelector>());
+        DisableInputBehaviour(FindFirstObjectByType<PutItem>());
+        DisableInputBehaviour(FindFirstObjectByType<RecipeStation>());
+    }
+
+    void RestoreGameplayInput()
+    {
+        for (int i = 0; i < disabledBehaviours.Count; i++)
+        {
+            Behaviour behaviour = disabledBehaviours[i];
+            if (behaviour != null)
+            {
+                behaviour.enabled = true;
+            }
+        }
+
+        disabledBehaviours.Clear();
+
+        if (deliveryStation != null)
+        {
+            deliveryStation.CursorActive = false;
+        }
+    }
+
+    void DisableInputBehaviour(Behaviour behaviour)
+    {
+        if (behaviour == null || !behaviour.enabled)
+        {
+            return;
+        }
+
+        behaviour.enabled = false;
+        disabledBehaviours.Add(behaviour);
+    }
+
+    void ShowCursorForTutorial()
+    {
+        if (deliveryStation != null)
+        {
+            deliveryStation.CursorActive = true;
+        }
+
+        Cursor.lockState = CursorLockMode.Confined;
+        Cursor.visible = true;
+    }
+
+    void HideCursorForGameplay()
+    {
+        if (deliveryStation != null)
+        {
+            deliveryStation.CursorActive = false;
+        }
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
+}
