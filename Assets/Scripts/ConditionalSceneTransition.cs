@@ -302,27 +302,10 @@ public class ConditionalSceneTransition : MonoBehaviour
             deliveryStation.CursorActive = true;
         }
 
-        if (playerController != null)
-        {
-            playerController.enabled = false;
-        }
-
-        DisableInputBehaviour(FindFirstObjectByType<ItemPickup>());
-        DisableInputBehaviour(FindFirstObjectByType<SlotSelector>());
-        DisableInputBehaviour(FindFirstObjectByType<PutItem>());
-        DisableInputBehaviour(deliveryStation);
-        DisableInputBehaviour(FindFirstObjectByType<RecipeStation>());
+        GameplayInputUtility.DisableStandardInput(playerController, deliveryStation);
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-    }
-
-    static void DisableInputBehaviour(Behaviour behaviour)
-    {
-        if (behaviour != null)
-        {
-            behaviour.enabled = false;
-        }
     }
 
 }

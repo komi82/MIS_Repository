@@ -147,7 +147,7 @@ public class DeliveryUIItem : MonoBehaviour
                 SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.deliverySound);
                 InventoryManager.Instance.RemoveItem(slot);
                 Debug.Log($"インベントリから '{linkedRequest.requiredItem.itemName}' を削除しました");
-                if (SceneManager.GetActiveScene().name == "tutorial4")
+                if (SceneManager.GetActiveScene().name == SceneNames.Tutorial4)
                 {
                     ConditionalSceneTransition.TriggerTransitionStatic();
                 }

@@ -42,7 +42,7 @@ public class PutItem : MonoBehaviour
 
 	private string scene;
 
-	private string[] targets = { "tutorial3", "tutorial5", "tutorial6" };
+	private string[] targets = { SceneNames.Tutorial3, SceneNames.Tutorial5, SceneNames.Tutorial6 };
 
 	// PowerGage関連の変数
 	private float powerGagePower;
@@ -226,7 +226,7 @@ public class PutItem : MonoBehaviour
 		recipePromptSuppressed = true;
 		EndPlayerUiBlock();
 
-		if (scene == "tutorial7")
+		if (scene == SceneNames.Tutorial7)
 		{
 			ConditionalSceneTransition.TriggerTransitionStatic();
 		}
@@ -716,11 +716,7 @@ public class PutItem : MonoBehaviour
 			{
 				if (washSlider.value >= 0.4 && washSlider.value <= 0.6)
 				{
-                     /*	if (washText != null)
-                         {
-                             washText.text = "Success!!";
-                         } */
-                     // 完了
+					// 完了
 					isWashCompleted = true;
 					washSlider.gameObject.SetActive(false); // スライダーを非表示
 					Debug.Log("Wash完了");

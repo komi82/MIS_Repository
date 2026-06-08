@@ -48,7 +48,7 @@ public class RequestManager : MonoBehaviour
         // 依頼がなくなった場合は強制的に1つ生成してタイマーをリセット
         if (activeRequests.Count == 0)
         {
-            if (SceneManager.GetActiveScene().name != "tutorial4")
+            if (SceneManager.GetActiveScene().name != SceneNames.Tutorial4)
             {       GenerateRequest();
                     ScheduleNextRequest();
                     return;
@@ -102,14 +102,14 @@ public class RequestManager : MonoBehaviour
         switch (type)
         {
             case RequestType.DeliverItem:
-                var item = itemDatabase.GetRandomItemByType("薬品");
+                var item = itemDatabase.GetRandomItemByType(ItemTypes.Medicine);
                 if (item == null) return;
                 newRequest.requestName = $"デリバー依頼: {item.itemName}";
                 newRequest.requiredItem = item;
                 break;
 
             case RequestType.PurifyWeapon:
-                var cursed = itemDatabase.GetRandomItemByType("穢れた武器");
+                var cursed = itemDatabase.GetRandomItemByType(ItemTypes.CursedWeapon);
                 if (cursed == null) return;
                 var purified = itemDatabase.GetPurifiedVersion(cursed);
                 if (purified == null)
@@ -125,7 +125,7 @@ public class RequestManager : MonoBehaviour
                 break;
 
             case RequestType.AddAttribute_Fire:
-                var baseWeapon_fire = itemDatabase.GetRandomItemByType("基本武器");
+                var baseWeapon_fire = itemDatabase.GetRandomItemByType(ItemTypes.BaseWeapon);
                 if (baseWeapon_fire == null) return;
                 var enhancedfire = itemDatabase.GetEnhancedFireVersion(baseWeapon_fire);
                 if (enhancedfire == null)
@@ -139,7 +139,7 @@ public class RequestManager : MonoBehaviour
                 break;
 
             case RequestType.AddAttribute_Frozen:
-                var baseWeapon_frozen = itemDatabase.GetRandomItemByType("基本武器");
+                var baseWeapon_frozen = itemDatabase.GetRandomItemByType(ItemTypes.BaseWeapon);
                 if (baseWeapon_frozen == null) return;
                 var enhancedfrozen = itemDatabase.GetEnhancedFrozenVersion(baseWeapon_frozen);
                 if (enhancedfrozen == null)
@@ -153,7 +153,7 @@ public class RequestManager : MonoBehaviour
                 break;
 
             case RequestType.AddAttribute_Wind:
-                var baseWeapon_wind = itemDatabase.GetRandomItemByType("基本武器");
+                var baseWeapon_wind = itemDatabase.GetRandomItemByType(ItemTypes.BaseWeapon);
                 if (baseWeapon_wind == null) return;
                 var enhancedwind = itemDatabase.GetEnhancedWindVersion(baseWeapon_wind);
                 if (enhancedwind == null)
@@ -167,7 +167,7 @@ public class RequestManager : MonoBehaviour
                 break;
 
             case RequestType.AddAttribute_Bright:
-                var baseWeapon_bright = itemDatabase.GetRandomItemByType("基本武器");
+                var baseWeapon_bright = itemDatabase.GetRandomItemByType(ItemTypes.BaseWeapon);
                 if (baseWeapon_bright == null) return;
                 var enhancedbright = itemDatabase.GetEnhancedBrightVersion(baseWeapon_bright);
                 if (enhancedbright == null)
@@ -181,7 +181,7 @@ public class RequestManager : MonoBehaviour
                 break;
 
             case RequestType.AddAttribute_Darkness:
-                var baseWeapon_darkness = itemDatabase.GetRandomItemByType("基本武器");
+                var baseWeapon_darkness = itemDatabase.GetRandomItemByType(ItemTypes.BaseWeapon);
                 if (baseWeapon_darkness == null) return;
                 var enhanceddarkness = itemDatabase.GetEnhancedDarknessVersion(baseWeapon_darkness);
                 if (enhanceddarkness == null)
@@ -195,14 +195,14 @@ public class RequestManager : MonoBehaviour
                 break;
 
             case RequestType.CraftWeapon:
-                var crafted = itemDatabase.GetRandomItemByType("武器");
+                var crafted = itemDatabase.GetRandomItemByType(ItemTypes.Weapon);
                 if (crafted == null) return;
                 newRequest.requestName = $"武器作成依頼: {crafted.itemName}";
                 newRequest.requiredItem = crafted;
                 break;
 
             case RequestType.RepairWeapon:
-                var broken = itemDatabase.GetRandomItemByType("壊れた武器");
+                var broken = itemDatabase.GetRandomItemByType(ItemTypes.BrokenWeapon);
                 if (broken == null) return;
                 var repaired = itemDatabase.GetRepairedVersion(broken);
                 if (repaired == null)

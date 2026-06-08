@@ -156,12 +156,7 @@ public class TutorialSequence : MonoBehaviour
     {
         disabledBehaviours.Clear();
 
-        DisableInputBehaviour(playerController);
-        DisableInputBehaviour(deliveryStation);
-        DisableInputBehaviour(FindFirstObjectByType<ItemPickup>());
-        DisableInputBehaviour(FindFirstObjectByType<SlotSelector>());
-        DisableInputBehaviour(FindFirstObjectByType<PutItem>());
-        DisableInputBehaviour(FindFirstObjectByType<RecipeStation>());
+        GameplayInputUtility.DisableStandardInput(playerController, deliveryStation, disabledBehaviours);
     }
 
     void RestoreGameplayInput()
@@ -181,17 +176,6 @@ public class TutorialSequence : MonoBehaviour
         {
             deliveryStation.CursorActive = false;
         }
-    }
-
-    void DisableInputBehaviour(Behaviour behaviour)
-    {
-        if (behaviour == null || !behaviour.enabled)
-        {
-            return;
-        }
-
-        behaviour.enabled = false;
-        disabledBehaviours.Add(behaviour);
     }
 
     void ShowCursorForTutorial()
