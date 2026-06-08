@@ -845,6 +845,7 @@ GameObject:
   - component: {fileID: 116790060}
   - component: {fileID: 116790059}
   - component: {fileID: 116790058}
+  - component: {fileID: 116790062}
   m_Layer: 5
   m_Name: arcade
   m_TagString: Untagged
@@ -985,6 +986,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 116790056}
   m_CullTransparentMesh: 1
+--- !u!114 &116790062
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 116790056}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be1e6a5ce9579ea499e84b52b5906b93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonHoverScale
+  scaleSize: 1.1
 --- !u!1 &296897988
 GameObject:
   m_ObjectHideFlags: 0
@@ -2115,6 +2129,7 @@ GameObject:
   - component: {fileID: 1733730371}
   - component: {fileID: 1733730370}
   - component: {fileID: 1733730369}
+  - component: {fileID: 1733730373}
   m_Layer: 5
   m_Name: tutorial
   m_TagString: Untagged
@@ -2155,7 +2170,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LoadTutorialScene
   sceneName: tutorial
-
   playButtonSound: 1
 --- !u!114 &1733730370
 MonoBehaviour:
@@ -2204,11 +2218,10 @@ MonoBehaviour:
       - m_Target: {fileID: 1733730369}
         m_TargetAssemblyTypeName: LoadTutorialScene, Assembly-CSharp
         m_MethodName: LoadScene
-
-        m_Mode: 1
+        m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_ObjectArgumentAssemblyTypeName: 
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -2252,6 +2265,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1733730367}
   m_CullTransparentMesh: 1
+--- !u!114 &1733730373
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1733730367}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be1e6a5ce9579ea499e84b52b5906b93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonHoverScale
+  scaleSize: 1.1
 --- !u!1001 &1741699787
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2576,6 +2602,7 @@ GameObject:
   - component: {fileID: 1786594385}
   - component: {fileID: 1786594384}
   - component: {fileID: 1786594383}
+  - component: {fileID: 1786594387}
   m_Layer: 5
   m_Name: Button (Legacy) (2)
   m_TagString: Untagged
@@ -2711,6 +2738,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1786594381}
   m_CullTransparentMesh: 1
+--- !u!114 &1786594387
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1786594381}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be1e6a5ce9579ea499e84b52b5906b93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonHoverScale
+  scaleSize: 1.1
 --- !u!1 &1789724096
 GameObject:
   m_ObjectHideFlags: 0
@@ -2937,6 +2977,7 @@ GameObject:
   - component: {fileID: 1820001231}
   - component: {fileID: 1820001230}
   - component: {fileID: 1820001233}
+  - component: {fileID: 1820001234}
   m_Layer: 5
   m_Name: Button (Legacy)
   m_TagString: Untagged
@@ -3073,6 +3114,19 @@ MonoBehaviour:
   uiToHide: {fileID: 1320067429}
   uiToShow: {fileID: 1293207108}
   playButtonSound: 1
+--- !u!114 &1820001234
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1820001228}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be1e6a5ce9579ea499e84b52b5906b93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonHoverScale
+  scaleSize: 1.1
 --- !u!1 &1968146475
 GameObject:
   m_ObjectHideFlags: 0
@@ -3162,6 +3216,7 @@ GameObject:
   - component: {fileID: 2120599995}
   - component: {fileID: 2120599994}
   - component: {fileID: 2120599993}
+  - component: {fileID: 2120599997}
   m_Layer: 5
   m_Name: back
   m_TagString: Untagged
@@ -3298,6 +3353,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2120599991}
   m_CullTransparentMesh: 1
+--- !u!114 &2120599997
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2120599991}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be1e6a5ce9579ea499e84b52b5906b93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonHoverScale
+  scaleSize: 1.1
 --- !u!1 &2464316872665626
 GameObject:
   m_ObjectHideFlags: 0

@@ -149,15 +149,15 @@ public class GameClockText : MonoBehaviour
         string nextScene;
         if (currentDay >= DayAdvanceButton.ResultDayThreshold)
         {
-            nextScene = "result";
+            nextScene = SceneNames.Result;
         }
         else if (isCompleteTransition)
         {
-            nextScene = "Shop";
+            nextScene = SceneNames.Shop;
         }
         else
         {
-            nextScene = "result";
+            nextScene = SceneNames.Result;
         }
 
         if (IsMenuScene(nextScene))
@@ -172,7 +172,7 @@ public class GameClockText : MonoBehaviour
     {
         if (string.IsNullOrEmpty(sceneName)) return false;
         string lower = sceneName.ToLowerInvariant();
-        return lower == "shop" || lower == "result";
+        return lower == SceneNames.Shop.ToLowerInvariant() || lower == SceneNames.Result;
     }
 
     static void ActivateCursorForMenuScene()
@@ -189,29 +189,12 @@ public class GameClockText : MonoBehaviour
         if (deliveryStation != null)
         {
             deliveryStation.CursorActive = false;
-            deliveryStation.enabled = false;
         }
 
-        if (playerController != null)
-        {
-            playerController.enabled = false;
-        }
-
-        DisableInputBehaviour(FindFirstObjectByType<ItemPickup>());
-        DisableInputBehaviour(FindFirstObjectByType<SlotSelector>());
-        DisableInputBehaviour(FindFirstObjectByType<PutItem>());
-        DisableInputBehaviour(FindFirstObjectByType<RecipeStation>());
+        GameplayInputUtility.DisableStandardInput(playerController, deliveryStation);
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-    }
-
-    static void DisableInputBehaviour(Behaviour behaviour)
-    {
-        if (behaviour != null)
-        {
-            behaviour.enabled = false;
-        }
     }
 
     private void DeadlineCountDown()

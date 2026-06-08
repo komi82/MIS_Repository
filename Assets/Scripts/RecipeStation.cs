@@ -80,7 +80,7 @@ public class RecipeStation : MonoBehaviour
         Cursor.visible = false;
         if (playerController != null) playerController.enabled = true;
 
-        if (SceneManager.GetActiveScene().name == "tutorial7")
+        if (SceneManager.GetActiveScene().name == SceneNames.Tutorial7)
         {
             ConditionalSceneTransition.TriggerTransitionStatic();
         }

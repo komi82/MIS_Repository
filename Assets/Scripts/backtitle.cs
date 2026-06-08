@@ -24,7 +24,7 @@ public class backtitle : MonoBehaviour
 
     public void change_button()
     {
-        FadeManager.Instance.LoadSceneWithFade("title");
+        FadeManager.Instance.LoadSceneWithFade(SceneNames.Title);
         xScoreText.text = null;
         yScoreText.text = null;
         // シーン遷移時に値を初期化しない仕様

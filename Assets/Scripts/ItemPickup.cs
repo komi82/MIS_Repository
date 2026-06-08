@@ -64,7 +64,7 @@ public class ItemPickup : MonoBehaviour
         {
 
             Debug.Log($"アイテム '{currentTargetItem.ItemData.itemName}' を取得しました");
-            if (SceneManager.GetActiveScene().name == "tutorial2")
+            if (SceneManager.GetActiveScene().name == SceneNames.Tutorial2)
             {
                 ConditionalSceneTransition.TriggerTransitionStatic();
             }
@@ -102,55 +102,4 @@ public class ItemPickup : MonoBehaviour
         currentTargetItem = null;
     }
 
-
-
 }
-
-
-
-
-
-/*
-using UnityEngine;
-using UnityEngine.InputSystem;
-
-public class ItemPickup : MonoBehaviour
-{
-    [Header("�E�A�E�C�E�e�E��E��E�擾�E�ݒ�")]
-    [SerializeField] private float pickupRange = 10f;
-    [SerializeField] private InventoryManager inventoryManager;
-    [SerializeField] private Camera mainCamera;
-
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.F))
-        {
-            TryPickupItem();
-        }
-    }
-
-    void TryPickupItem()
-    {
-        Ray ray = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
-        if (Physics.Raycast(ray, out RaycastHit hit, pickupRange))
-        {
-            ItemBehaviour item = hit.collider.GetComponent<ItemBehaviour>();
-            if (item != null)
-            {
-                bool success = inventoryManager.AddItem(item.ItemData);
-
-                if (success)
-                {
-                    Debug.Log($"�E�A�E�C�E�e�E��E� '{item.ItemData.itemName}' �E��E��E�擾�E��E��E�܂��E��E�");
-                    Destroy(item.gameObject); // �E��E��E��E��E��E��E�̂ݍ폜
-                }
-                else
-                {
-                    Debug.LogWarning("�E�C�E��E��E�x�E��E��E�g�E��E��E��E��E��E��E�t�E�ł��E�B�E�A�E�C�E�e�E��E��E�͎c�E��E�܂�");
-                    // �E��E��E��E��E�ł͉��E��E��E��E��E��E��E�A�E�A�E�C�E�e�E��E��E�͂��E�̂܂܎c�E��E�
-                }
-            }
-        }
-    }
-}
-*/
