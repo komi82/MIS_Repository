@@ -1,4 +1,6 @@
 using UnityEngine;
+using System;
+using System.Collections.Generic;
 using UnityEngine.InputSystem;
 
 /// <summary>
@@ -11,6 +13,8 @@ public class FirstPersonController : MonoBehaviour
     float mo = 0.0f;
     public float sensitivity = 2.0f;
     public Transform playerBody; // プレイヤーのオブジェクト（親）をセット
+    public float speedbaff = 0;
+    public List<BaffItemData> items;
 
     private CharacterController characterController;
     [SerializeField] private DeliveryStation deliveryStation;
@@ -24,6 +28,9 @@ public class FirstPersonController : MonoBehaviour
 
     void Start()
     {
+        speedbaff = GetTotal(BaffEffectType.speedup);
+        moveSpeed += speedbaff * 0.5f;
+
         mo = moveSpeed;
         // DeliveryStationがない場合、またはカーソルがアクティブでない場合のみロック
         if (deliveryStation == null || !deliveryStation.CursorActive)
@@ -119,6 +126,20 @@ public class FirstPersonController : MonoBehaviour
             Controller.SetBool("movement_back", false);
         }
     }
+    }
+    public int GetTotal(BaffEffectType type)
+    {
+        int total = 0;
+
+        foreach (BaffItemData item in items)
+        {
+            if (item.effecttype == type)
+            {
+                total += item.ownedCount;
+            }
+        }
+
+        return total;
     }
 }
 

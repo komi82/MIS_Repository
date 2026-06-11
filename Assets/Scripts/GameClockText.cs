@@ -1,4 +1,6 @@
 using UnityEngine;
+using System;
+using System.Collections.Generic;
 using TMPro;
 
 /// <summary>
@@ -17,13 +19,18 @@ public class GameClockText : MonoBehaviour
     [SerializeField] private GameObject transitionPanel; // 遷移用UI
     [SerializeField] private GameObject completePanel; // 目標達成時の遷移用UI
     [SerializeField] private int border = 3;
+
+    [SerializeField] public int borderbaff = 0;
+    [SerializeField] public int borderdown = 0;
     [SerializeField] private int completeMoneyThreshold = 10000; // Complete分岐の所持金しきい値
     [SerializeField] private DayAdvanceButton dayAdvanceButton;
     private static bool s_hasCompleteMoneyThreshold;
     private static int s_completeMoneyThreshold;
 
+    public List<BaffItemData> items;
+
     private bool transitionStarted = false;
-    private bool isCompleteTransition = false; // 所持金しきい値達成時（Shop遷移）かどうか
+    private bool isCompleteTransition = false; // Completeシーンへ遷移するかどうか
     [SerializeField] private DeliveryStation deliveryStation;
     [SerializeField] private FirstPersonController playerController;
     private int defaultCompleteMoneyThreshold;
@@ -49,6 +56,7 @@ public class GameClockText : MonoBehaviour
         {
             playerController = FindFirstObjectByType<FirstPersonController>();
         }
+
 
         // シーンを跨いで保持（初回だけInspector値を採用）
         if (!s_hasCompleteMoneyThreshold)
@@ -76,7 +84,11 @@ public class GameClockText : MonoBehaviour
 
     void Start()
     {
-        border = 3;
+
+        borderbaff = GetTotal(BaffEffectType.limitup);
+        borderdown = GetTotal(BaffEffectType.borderdown);
+        border += borderbaff;//ボーダー増加アイテムの所持数分ボーダーを増加
+
         transitionPanel.SetActive(false); // UI非表示
         if (completePanel != null)
         {
@@ -103,6 +115,7 @@ public class GameClockText : MonoBehaviour
             transitionStarted = true;
 
             // 目標所持金以上ならShop導線、それ以外は通常導線に分岐
+
             isCompleteTransition = MoneyManager.currentMoney >= completeMoneyThreshold;
             if (isCompleteTransition)
             {
@@ -120,6 +133,7 @@ public class GameClockText : MonoBehaviour
                 SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.timeupSound);
             }
             BlockGameplayInput();
+
             Invoke(nameof(TransitionToNextScene), 1f); //1秒後にシーン遷移
         }
 
@@ -137,6 +151,7 @@ public class GameClockText : MonoBehaviour
     {
         // arcadeシーン内で DayAdvanceButton を参照できる想定。
         // 所持金しきい値達成時は Day を進めて次回の閾値計算に反映させる。
+
         if (isCompleteTransition && dayAdvanceButton != null)
         {
             dayAdvanceButton.OnClickAdvanceDay();
@@ -233,7 +248,8 @@ public class GameClockText : MonoBehaviour
     public void UpdateCompleteThresholdByDay(int day)
     {
         if (day < 1) day = 1;
-        float scaled = completeMoneyThreshold * day * 0.7f;
+
+        float scaled = (MoneyManager.currentMoney-borderdown*100) * 0.8f * day;//所持金からボーダーダウンアイテムの所持数×100を減らして計算する
         SetCompleteMoneyThreshold(Mathf.Max(0, Mathf.RoundToInt(scaled)));
         UpdateCompleteThresholdDisplay();
     }
@@ -245,5 +261,20 @@ public class GameClockText : MonoBehaviour
     {
         if (completeThresholdText == null) return;
         completeThresholdText.text = $"Border: {completeMoneyThreshold:N0}G";
+
+    }
+    public int GetTotal(BaffEffectType type)
+    {
+        int total = 0;
+
+        foreach (BaffItemData item in items)
+        {
+            if (item.effecttype == type)
+            {
+                total += item.ownedCount;
+            }
+        }
+
+        return total;
     }
 }

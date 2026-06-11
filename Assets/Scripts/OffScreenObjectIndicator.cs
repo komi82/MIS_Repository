@@ -1,3 +1,4 @@
+
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,12 +7,14 @@ using UnityEngine;
 /// 映っている間は UI を非表示にする。
 /// インジケーター UI（Screen Space Overlay の Canvas 配下）にアタッチする。
 /// 追跡対象はリスト先頭から順に追跡し、それ以外の登録オブジェクトは非表示にする。
+
 /// </summary>
 [RequireComponent(typeof(RectTransform))]
 public class OffScreenObjectIndicator : MonoBehaviour
 {
     [Header("追跡対象")]
     [SerializeField] private List<Transform> targets = new List<Transform>();
+
 
     [Header("カメラ・Canvas")]
     [SerializeField] private Camera targetCamera;
@@ -33,6 +36,7 @@ public class OffScreenObjectIndicator : MonoBehaviour
     private bool isIndicatorVisible;
     private Transform currentTarget;
     private int currentTargetIndex = -1;
+
 
     void Awake()
     {
@@ -69,6 +73,7 @@ public class OffScreenObjectIndicator : MonoBehaviour
     void LateUpdate()
     {
         if (currentTarget == null && !TryAdvanceToNextTarget())
+
         {
             SetIndicatorVisible(false);
             return;
@@ -81,6 +86,7 @@ public class OffScreenObjectIndicator : MonoBehaviour
         }
 
         Vector3 viewportPos = targetCamera.WorldToViewportPoint(currentTarget.position);
+
         if (IsTargetInView(viewportPos))
         {
             SetIndicatorVisible(false);
@@ -169,6 +175,7 @@ public class OffScreenObjectIndicator : MonoBehaviour
             }
         }
     }
+
 
     bool IsTargetInView(Vector3 viewportPos)
     {
@@ -264,5 +271,6 @@ public class OffScreenObjectIndicator : MonoBehaviour
         }
 
         InitializeTargets();
+
     }
 }

@@ -35,13 +35,18 @@ public class ChangeScene: MonoBehaviour
 
     [Header("Arcade状態管理")]
     [Tooltip("状態保存/復元の対象となるシーン名")]
-    [SerializeField] private string arcadeSceneName = SceneNames.Arcade;
+
+    [SerializeField] private string arcadeSceneName = "arcade";
     [Tooltip("このシーンから arcade に遷移した場合は保存状態を使わず初期化する")]
     [SerializeField] private List<string> resetArcadeFromScenes = new List<string>();
     [Tooltip("Arcade状態管理のログを出力する")]
     [SerializeField] private bool debugArcadeState = false;
     
     private bool isUIVisible = false;
+
+  //  private bool isBlinking = false;
+    private Coroutine blinkCoroutine;
+    private CanvasGroup blinkCanvasGroup;
 
     // arcade の実行時状態スナップショット
     private bool hasSavedArcadeState = false;
@@ -160,7 +165,8 @@ public class ChangeScene: MonoBehaviour
         bool shouldReset;
         if (resetArcadeFromScenes == null || resetArcadeFromScenes.Count == 0)
         {
-            shouldReset = previousScene.name == SceneNames.Title;
+
+            shouldReset = previousScene.name == "title";
         }
         else
         {
@@ -288,6 +294,7 @@ public class ChangeScene: MonoBehaviour
     private void ResetArcadeRuntimeState()
     {
         OwnedProgressManager.ResetAll();
+
     }
 
     private void ClearSavedArcadeState()
@@ -376,7 +383,8 @@ public class ChangeScene: MonoBehaviour
             GameClockText.ResetPersistentState();
         }
 
-        FadeManager.Instance.LoadSceneWithFade(SceneNames.Arcade);
+
+        FadeManager.Instance.LoadSceneWithFade("Shop");
     }
     
     /// <summary>

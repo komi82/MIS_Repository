@@ -200,6 +200,7 @@ public class ConditionalSceneTransition : MonoBehaviour
         {
             Debug.LogWarning(
                 "ConditionalSceneTransition: Instance が未設定です。シーンにコンポーネントを置くか、LoadTutorialScene を配置してください。");
+
             return;
         }
 
@@ -233,6 +234,7 @@ public class ConditionalSceneTransition : MonoBehaviour
         host.AddComponent<ConditionalSceneTransition>();
         return Instance != null;
     }
+
 
     void StartTransitionSequence()
     {
@@ -303,9 +305,29 @@ public class ConditionalSceneTransition : MonoBehaviour
         }
 
         GameplayInputUtility.DisableStandardInput(playerController, deliveryStation);
+    /*    if (playerController != null)
+        {
+            playerController.enabled = false;
+        }
+
+        DisableInputBehaviour(FindFirstObjectByType<ItemPickup>());
+        DisableInputBehaviour(FindFirstObjectByType<SlotSelector>());
+        DisableInputBehaviour(FindFirstObjectByType<PutItem>());
+        DisableInputBehaviour(deliveryStation);
+        DisableInputBehaviour(FindFirstObjectByType<RecipeStation>());
+
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+    }*/
+
+
+    static void DisableInputBehaviour(Behaviour behaviour)
+    {
+        if (behaviour != null)
+        {
+            behaviour.enabled = false;
+        }
     }
 
 }

@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine.SceneManagement;
 using System.Linq;
 
+
 /// <summary>
 /// アイテム配置・クラフト入力・各作業ステーションUIを統合制御する中核クラス。
 /// `InventoryManager` `PlacementSlots` `RecipeDatabase` `SoundManager` などと連携して、
@@ -480,6 +481,7 @@ public class PutItem : MonoBehaviour
 						Instantiate(match.resultItem.prefab, pos, rot);
 			Debug.Log($"クラフト生成: {match.resultItem.itemName}");
 			if (targets.Contains(scene))
+
 			{
 				ConditionalSceneTransition.TriggerTransitionStatic();
 			}

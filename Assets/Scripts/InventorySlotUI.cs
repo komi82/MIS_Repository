@@ -83,3 +83,24 @@ public class InventorySlotUI : MonoBehaviour
         }
     }
 }
+
+
+    void SyncVisualToCurrentItem()
+    {
+        if (currentItem != null)
+        {
+            if (iconImage != null && currentItem.icon != null)
+            {
+                iconImage.sprite = currentItem.icon;
+                iconImage.enabled = true;
+            }
+            return;
+        }
+
+        if (iconImage != null)
+        {
+            iconImage.sprite = emptySlotSprite;
+            iconImage.enabled = true;
+        }
+    }
+}

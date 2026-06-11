@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: BaffItem
   m_EditorClassIdentifier: Assembly-CSharp::BaffItemData
   B_itemID: 0
-  B_itemType: amountup
+  effecttype: 0
   B_itemName: item
-  price: 100
+  price: 133
   startprice: 100
   ownedCount: 0
   prefab: {fileID: 4180995303853512323, guid: 699950b9f15f9d8408caaa2282354d84, type: 3}
