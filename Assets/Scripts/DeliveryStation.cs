@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// デリバー端末とのインタラクトを管理する。
+/// `DeliveryUIList` の更新やカーソル状態切替を通じて、納品UIの開閉を制御する。
+/// </summary>
 public class DeliveryStation : MonoBehaviour
 {
     [SerializeField] private GameObject deliveryUI; // デリバーUIパネル

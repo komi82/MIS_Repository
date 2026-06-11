@@ -2,21 +2,31 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+/// <summary>
+/// 所持金の増減とUI反映を管理する。
+/// `RequestManager` の報酬付与や `ScoreDisplay` の最終集計で参照される。
+/// </summary>
 public class MoneyManager : MonoBehaviour
 {
-    [SerializeField] public static int currentMoney;
-    [SerializeField] private TextMeshProUGUI moneyText;
+    public static MoneyManager Instance { get; private set; }
 
-    public static MoneyManager Instance;
+    [SerializeField] public static int currentMoney = 10000;
+    [SerializeField] private TextMeshProUGUI moneyText;
 
     private void Awake()
     {
         Instance = this;
     }
 
+    private void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+    }
+
     private void Start()
     {
-        currentMoney = 10000;
+        // シーン遷移で初期化しない仕様
         UpdateUI();
     }
 

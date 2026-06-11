@@ -1,6 +1,10 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+/// <summary>
+/// レシピ集合を保持し、投入アイテムの一致検索を提供するデータベース。
+/// `PutItem` から呼ばれ、クラフト可能な `RecipeData` を返す。
+/// </summary>
 [CreateAssetMenu(fileName = "RecipeDatabase", menuName = "Game/RecipeDatabase")]
 public class RecipeDatabase : ScriptableObject
 {

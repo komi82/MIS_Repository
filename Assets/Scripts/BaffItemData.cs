@@ -4,7 +4,7 @@ using UnityEngine;
 public class BaffItemData : ScriptableObject
 {
     public int B_itemID;
-    public string B_itemType;
+    public BaffEffectType effecttype;
     public string B_itemName;
     public int price;
     public int startprice;

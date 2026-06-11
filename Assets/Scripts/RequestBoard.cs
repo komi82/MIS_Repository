@@ -2,6 +2,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+/// <summary>
+/// 現在の依頼一覧を掲示板UIとして描画する。
+/// `RequestManager` の activeRequests を読み取り、依頼タイプ別の見た目を適用する。
+/// </summary>
 public class RequestBoard : MonoBehaviour
 {
     [SerializeField] private RequestManager requestManager;

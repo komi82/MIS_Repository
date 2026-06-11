@@ -6,6 +6,10 @@ using UnityEngine.UI;
 using TMPro;
 
 
+/// <summary>
+/// リザルト画面からタイトルへ戻るボタン処理を担当する。
+/// 遷移時にスコア表示や `MoneyManager` / `RequestManager` の静的値を初期化する。
+/// </summary>
 public class backtitle : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI xScoreText;
@@ -23,7 +27,6 @@ public class backtitle : MonoBehaviour
         FadeManager.Instance.LoadSceneWithFade("title");
         xScoreText.text = null;
         yScoreText.text = null;
-        MoneyManager.currentMoney = 0;
-        RequestManager.RequestCompleted=0;
+        // シーン遷移時に値を初期化しない仕様
     }
 }

@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// 旧2枠インベントリの追加・選択・削除を管理するクラス。
+/// 現行の `InventoryManager` とは別系統の簡易管理ロジックとして残っている。
+/// </summary>
 public class ItemslotManager : MonoBehaviour
 {
     [Header("管理対象のスロット（2つ）")]

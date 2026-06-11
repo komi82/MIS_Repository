@@ -2,6 +2,10 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using TMPro;
 
+/// <summary>
+/// TextMeshProのホバー/クリック色変化を提供するUI補助クラス。
+/// 必要に応じて `OnClickEvent` から他UI処理へ接続する。
+/// </summary>
 public class TextMeshProHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     [Header("TextMeshPro設定")]

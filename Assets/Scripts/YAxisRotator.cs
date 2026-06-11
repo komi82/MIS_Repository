@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// 対象オブジェクトを一定速度でY軸回転させる演出スクリプト。
+/// 他システムとは独立して見た目のアニメーションのみ担当する。
+/// </summary>
 public class YAxisRotator : MonoBehaviour
 {
     // 1回転にかかる秒数

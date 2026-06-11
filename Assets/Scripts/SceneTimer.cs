@@ -4,6 +4,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// シーン読み込み時点を基準に経過時間を提供するタイマー。
+/// 主に `RequestManager` が依頼生成間隔の判定に利用する。
+/// </summary>
 public class SceneTimer : MonoBehaviour
 {
     public static SceneTimer Instance { get; private set; }
@@ -56,7 +60,7 @@ public class SceneTimer : MonoBehaviour
     {
         if (sceneName == "result" || sceneName == "title" || sceneName == "Shop")
         {
-            // resultシーンとtitleシーンとShopシーンではカーソルを表示
+            // resultシーンとtitleシーンではカーソルを表示
             Cursor.lockState = CursorLockMode.Confined;
             Cursor.visible = true;
         }

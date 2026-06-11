@@ -2,6 +2,10 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
+/// <summary>
+/// アイテム定義の検索・変換を提供するデータベース。
+/// `RequestManager` やクラフト系処理から、タイプ別ランダム取得や派生品取得に利用される。
+/// </summary>
 [CreateAssetMenu(fileName = "ItemDatabase", menuName = "Game/ItemDatabase")]
 public class ItemDatabase : ScriptableObject
 {

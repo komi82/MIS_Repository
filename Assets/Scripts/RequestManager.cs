@@ -1,6 +1,14 @@
 using UnityEngine;
+using System;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
+
+/// <summary>
+/// 依頼の生成・保持・完了処理を統括する管理クラス。
+/// `SceneTimer` の経過時間を使って次の依頼生成タイミングを決め、
+/// 完了件数を `RequestCompleted` で全体共有する。
+/// </summary>
 public class RequestManager : MonoBehaviour
 {
     [Header("依頼生成設定")]
@@ -22,26 +30,58 @@ public class RequestManager : MonoBehaviour
     [SerializeField] private MoneyManager moneyManager;
     [SerializeField] private RequestBoard requestBoard;
 
+    public List<BaffItemData> items;
+
+    public int potionReward = 0;
+    public int weaponReward = 0;
+    public int cursedReward = 0;
+
+    public static event Action RequestComp;
     private float nextRequestTime;
     public static int RequestCompleted = 0;
 
+    public int GetTotal(BaffEffectType type)
+    {
+        int total = 0;
+
+        foreach (BaffItemData item in items)
+        {
+            if (item.effecttype == type)
+            {
+                total += item.ownedCount;
+            }
+        }
+
+        return total;
+    }
+
     void Start()
     {
-        RequestCompleted = 0;
+        // シーン遷移で初期化しない仕様
         GenerateRequest();
         ScheduleNextRequest();
+
+
     }
 
     void Update()
     {
+        //各種バフアイテムの所持数を合計する
+        potionReward = GetTotal(BaffEffectType.potionup);
+        weaponReward = GetTotal(BaffEffectType.weaponup);
+        cursedReward = GetTotal(BaffEffectType.cursedup);
+
         if (SceneTimer.Instance == null) return;
 
         // 依頼がなくなった場合は強制的に1つ生成してタイマーをリセット
         if (activeRequests.Count == 0)
         {
-            GenerateRequest();
-            ScheduleNextRequest();
-            return;
+            if (SceneManager.GetActiveScene().name != "tutorial4")
+            {       GenerateRequest();
+                    ScheduleNextRequest();
+                    return;
+            }
+
         }
 
         float elapsed = SceneTimer.Instance.GetElapsedTime();
@@ -58,7 +98,7 @@ public class RequestManager : MonoBehaviour
 
     void ScheduleNextRequest()
     {
-        float interval = Random.Range(minInterval, maxInterval);
+        float interval = UnityEngine.Random.Range(minInterval, maxInterval);
         nextRequestTime = SceneTimer.Instance.GetElapsedTime() + interval;
     }
 
@@ -66,7 +106,7 @@ public class RequestManager : MonoBehaviour
     {
         if (activeRequests.Count >= maxRequests) return;
 
-		RequestType type = requestTypesPool[Random.Range(0, requestTypesPool.Count)];
+		RequestType type = requestTypesPool[UnityEngine.Random.Range(0, requestTypesPool.Count)];
 
 		// スロット必要タイプ（Deliver/Craft以外）で空きスロットがない場合は生成を停止
 		if (type != RequestType.DeliverItem && type != RequestType.CraftWeapon)
@@ -82,8 +122,8 @@ public class RequestManager : MonoBehaviour
 		Request newRequest = ScriptableObject.CreateInstance<Request>();
         newRequest.requestType = type;
         newRequest.isCompleted = false;
-        // rewardAmount計算式: Random(150,400) * 1.1^(n+1) 最小値150以下は切り上げ
-        int baseReward = Random.Range(150, 401);
+        // rewardAmount計算式: Random(150,200) * 1.1^(n+1) 最小値150以下は切り上げ
+        int baseReward = UnityEngine.Random.Range(150, 201);
         float multiplier = Mathf.Pow(1.1f, RequestCompleted + 1);
         newRequest.rewardAmount = Mathf.FloorToInt(baseReward * multiplier);
 
@@ -94,6 +134,7 @@ public class RequestManager : MonoBehaviour
                 if (item == null) return;
                 newRequest.requestName = $"デリバー依頼: {item.itemName}";
                 newRequest.requiredItem = item;
+                newRequest.rewardAmount += Mathf.FloorToInt(potionReward * 50);
                 break;
 
             case RequestType.PurifyWeapon:
@@ -109,6 +150,7 @@ public class RequestManager : MonoBehaviour
                 newRequest.providedItem = cursed;
                 newRequest.requiredItem = purified;
                 // 浄化依頼のみ報酬を2倍
+                newRequest.rewardAmount += Mathf.FloorToInt(cursedReward * 100);
                 newRequest.rewardAmount *= 2;
                 break;
 
@@ -124,6 +166,7 @@ public class RequestManager : MonoBehaviour
                 newRequest.requestName = $"炎属性依頼: {baseWeapon_fire.itemName} → 炎の{enhancedfire.itemName}";
                 newRequest.providedItem = baseWeapon_fire;
                 newRequest.requiredItem = enhancedfire;
+                newRequest.rewardAmount += Mathf.FloorToInt(weaponReward * 75);
                 break;
 
             case RequestType.AddAttribute_Frozen:
@@ -138,6 +181,7 @@ public class RequestManager : MonoBehaviour
                 newRequest.requestName = $"氷属性依頼: {baseWeapon_frozen.itemName} → 氷の{enhancedfrozen.itemName}";
                 newRequest.providedItem = baseWeapon_frozen;
                 newRequest.requiredItem = enhancedfrozen;
+                newRequest.rewardAmount += Mathf.FloorToInt(weaponReward * 75);
                 break;
 
             case RequestType.AddAttribute_Wind:
@@ -152,6 +196,7 @@ public class RequestManager : MonoBehaviour
                 newRequest.requestName = $"風属性依頼: {baseWeapon_wind.itemName} → 風の{enhancedwind.itemName}";
                 newRequest.providedItem = baseWeapon_wind;
                 newRequest.requiredItem = enhancedwind;
+                newRequest.rewardAmount += Mathf.FloorToInt(weaponReward * 75);
                 break;
 
             case RequestType.AddAttribute_Bright:
@@ -166,6 +211,7 @@ public class RequestManager : MonoBehaviour
                 newRequest.requestName = $"光属性依頼: {baseWeapon_bright.itemName} → 光の{enhancedbright.itemName}";
                 newRequest.providedItem = baseWeapon_bright;
                 newRequest.requiredItem = enhancedbright;
+                newRequest.rewardAmount += Mathf.FloorToInt(weaponReward * 75);
                 break;
 
             case RequestType.AddAttribute_Darkness:
@@ -180,6 +226,7 @@ public class RequestManager : MonoBehaviour
                 newRequest.requestName = $"闇属性依頼: {baseWeapon_darkness.itemName} → 闇の{enhanceddarkness.itemName}";
                 newRequest.providedItem = baseWeapon_darkness;
                 newRequest.requiredItem = enhanceddarkness;
+                newRequest.rewardAmount += Mathf.FloorToInt(weaponReward * 75);
                 break;
 
             case RequestType.CraftWeapon:
@@ -187,6 +234,7 @@ public class RequestManager : MonoBehaviour
                 if (crafted == null) return;
                 newRequest.requestName = $"武器作成依頼: {crafted.itemName}";
                 newRequest.requiredItem = crafted;
+                newRequest.rewardAmount += Mathf.FloorToInt(weaponReward * 75);
                 break;
 
             case RequestType.RepairWeapon:
@@ -201,6 +249,7 @@ public class RequestManager : MonoBehaviour
                 newRequest.requestName = $"修理依頼: {broken.itemName} → 修復した{repaired.itemName}";
                 newRequest.providedItem = broken;
                 newRequest.requiredItem = repaired;
+                newRequest.rewardAmount += Mathf.FloorToInt(weaponReward * 75);
                 break;
         }
 
@@ -267,6 +316,7 @@ public class RequestManager : MonoBehaviour
             activeRequests.Remove(request);
             requestBoard.DisplayRequests();
             RequestCompleted++;
+            RequestComp?.Invoke();
             Debug.Log($"デリバー完了: {request.requestName} 報酬 {request.rewardAmount} 円");
             return true;
         }
