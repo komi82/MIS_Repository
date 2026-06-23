@@ -305,6 +305,8 @@ public class ConditionalSceneTransition : MonoBehaviour
         }
 
         GameplayInputUtility.DisableStandardInput(playerController, deliveryStation);
+    }
+
     /*    if (playerController != null)
         {
             playerController.enabled = false;

@@ -36,6 +36,11 @@ public class RequestManager : MonoBehaviour
     public int weaponReward = 0;
     public int cursedReward = 0;
 
+    private static int s_potionReward;
+    private static int s_weaponReward;
+    private static int s_cursedReward;
+    private static bool s_hasRewards;
+
     public static event Action RequestComp;
     private float nextRequestTime;
     public static int RequestCompleted = 0;
@@ -66,10 +71,28 @@ public class RequestManager : MonoBehaviour
 
     void Update()
     {
+        // OwnedProgressManager から各アイテムの所持数を同期する
+        if (items != null)
+        {
+            foreach (var item in items)
+            {
+                if (item != null)
+                {
+                    item.ownedCount = OwnedProgressManager.GetBaffOwned(item.B_itemID);
+                }
+            }
+        }
+
         //各種バフアイテムの所持数を合計する
         potionReward = GetTotal(BaffEffectType.potionup);
         weaponReward = GetTotal(BaffEffectType.weaponup);
         cursedReward = GetTotal(BaffEffectType.cursedup);
+
+        // シーンを跨いで報酬額補正を保持（基本は最新値で上書きし続ける）
+        s_potionReward = potionReward;
+        s_weaponReward = weaponReward;
+        s_cursedReward = cursedReward;
+        s_hasRewards = true;
 
         if (SceneTimer.Instance == null) return;
 

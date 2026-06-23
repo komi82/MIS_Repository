@@ -18,7 +18,9 @@ public class GameClockText : MonoBehaviour
     [SerializeField] private TextMeshProUGUI completeThresholdText; // completeMoneyThreshold表示用
     [SerializeField] private GameObject transitionPanel; // 遷移用UI
     [SerializeField] private GameObject completePanel; // 目標達成時の遷移用UI
-    [SerializeField] private int border = 3;
+    public int border = 3;
+    private static int s_border;
+    private static bool s_hasBorder;
 
     [SerializeField] public int borderbaff = 0;
     [SerializeField] public int borderdown = 0;
@@ -74,6 +76,8 @@ public class GameClockText : MonoBehaviour
     {
         s_hasCompleteMoneyThreshold = false;
         s_completeMoneyThreshold = 0;
+        s_hasBorder = false;
+        s_border = 0;
     }
 
     private void OnDestroy()
@@ -84,10 +88,37 @@ public class GameClockText : MonoBehaviour
 
     void Start()
     {
+        // OwnedProgressManager から各アイテムの所持数を同期する
+        if (items != null)
+        {
+            foreach (var item in items)
+            {
+                if (item != null)
+                {
+                    item.ownedCount = OwnedProgressManager.GetBaffOwned(item.B_itemID);
+                }
+            }
+        }
 
         borderbaff = GetTotal(BaffEffectType.limitup);
         borderdown = GetTotal(BaffEffectType.borderdown);
-        border += borderbaff;//ボーダー増加アイテムの所持数分ボーダーを増加
+
+        // シーンを跨いで border を保持
+        // ただし、s_border が 0 以下の場合は「期限切れ」状態なので、
+        // ショップから戻ってきた際などは初期値（Inspectorのborder + バフ）にリセットする必要がある
+        if (!s_hasBorder || s_border <= 0)
+        {
+            // 初期値にリセット（Inspectorの値をベースにする）
+            // border は Inspector で設定された初期値が入っている状態
+            border += borderbaff;
+            s_border = border;
+            s_hasBorder = true;
+        }
+        else
+        {
+            // 途中経過（セーブデータ復元など）がある場合はそちらを採用
+            border = s_border;
+        }
 
         transitionPanel.SetActive(false); // UI非表示
         if (completePanel != null)
@@ -215,6 +246,7 @@ public class GameClockText : MonoBehaviour
     private void DeadlineCountDown()
     {
         border--;
+        s_border = border;
     }
 
     public void ResetBorderToDefault()
