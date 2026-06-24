@@ -8,9 +8,9 @@ public class InventoryManager : MonoBehaviour
 {
     [Header("管理対象のスロット（4つ）")]
     [SerializeField] private InventorySlotUI[] slotUIs;
+    [SerializeField] private ItemDatabase itemDatabase;
     public ItemData selectedItem;
     [SerializeField] public InventorySlotUI selectedSlot;
-
 
     public static InventoryManager Instance { get; private set; }
 
@@ -22,6 +22,31 @@ public class InventoryManager : MonoBehaviour
             return;
         }
         Instance = this;
+    }
+
+    /// <summary>
+    /// アイテム名リストに基づいてインベントリを復元する
+    /// </summary>
+    public void RestoreInventory(string[] itemNames)
+    {
+        if (itemDatabase == null)
+        {
+            Debug.LogError("InventoryManager: ItemDatabase が設定されていないため復元できません");
+            return;
+        }
+
+        ClearAllSlots();
+
+        for (int i = 0; i < itemNames.Length; i++)
+        {
+            if (string.IsNullOrEmpty(itemNames[i])) continue;
+
+            ItemData item = itemDatabase.allItems.Find(it => it.itemName == itemNames[i]);
+            if (item != null)
+            {
+                AddItemToSlot(i, item);
+            }
+        }
     }
 
     /// <summary>

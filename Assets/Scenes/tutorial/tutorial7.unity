@@ -571,7 +571,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &200898201
 RectTransform:
   m_ObjectHideFlags: 0
@@ -920,6 +920,8 @@ MonoBehaviour:
   moveSpeed: 4
   sensitivity: 0.5
   playerBody: {fileID: 283417127}
+  speedbaff: 0
+  items: []
   deliveryStation: {fileID: 1981430905}
   gravity: -9.81
 --- !u!143 &283417125
@@ -1018,6 +1020,10 @@ PrefabInstance:
     - target: {fileID: 29106235857035982, guid: 87e27f4c2e61aac458cadad90223538f, type: 3}
       propertyPath: m_Name
       value: Image
+      objectReference: {fileID: 0}
+    - target: {fileID: 29106235857035982, guid: 87e27f4c2e61aac458cadad90223538f, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2692658632154067728, guid: 87e27f4c2e61aac458cadad90223538f, type: 3}
       propertyPath: m_Pivot.x
@@ -1195,6 +1201,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 20.9
       objectReference: {fileID: 0}
+    - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
+      propertyPath: offScreenIndicatorObject
+      value: 
+      objectReference: {fileID: 1665445188}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: tutorialLines.Array.size
       value: 4
@@ -1502,6 +1512,10 @@ MonoBehaviour:
   activeRequests: []
   moneyManager: {fileID: 1912912051}
   requestBoard: {fileID: 200898202}
+  items: []
+  potionReward: 0
+  weaponReward: 0
+  cursedReward: 0
 --- !u!4 &334953288
 Transform:
   m_ObjectHideFlags: 0
@@ -14316,7 +14330,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1115619631
 RectTransform:
   m_ObjectHideFlags: 0
@@ -14526,7 +14540,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5df5c7c810a5a2c46aa8cbe7d7ae77d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LoadTutorialScene
-  sceneName: tutorial8
+  sceneName: title
   playButtonSound: 1
 --- !u!114 &1153505120
 MonoBehaviour:
@@ -25969,6 +25983,7 @@ MonoBehaviour:
   - {fileID: 1367845927}
   - {fileID: 2054567648}
   - {fileID: 581602769}
+  itemDatabase: {fileID: 0}
   selectedItem: {fileID: 0}
   selectedSlot: {fileID: 0}
 --- !u!1 &1616637003
@@ -26357,6 +26372,11 @@ Transform:
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 9043943215585714988, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
   m_PrefabInstance: {fileID: 314118853}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1665445188 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 29106235857035982, guid: 87e27f4c2e61aac458cadad90223538f, type: 3}
+  m_PrefabInstance: {fileID: 285832143}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1671379491
 GameObject:
@@ -26753,8 +26773,11 @@ MonoBehaviour:
   transitionPanel: {fileID: 1485101284}
   completePanel: {fileID: 709386763}
   border: 3
+  borderbaff: 0
+  borderdown: 0
   completeMoneyThreshold: 500
   dayAdvanceButton: {fileID: 1717329647}
+  items: []
   deliveryStation: {fileID: 1981430905}
   playerController: {fileID: 0}
 --- !u!114 &1717329645
@@ -27756,7 +27779,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4314960304882123890, guid: 25788fd6a02f16442983e17bfb14dec1, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4314960304882123890, guid: 25788fd6a02f16442983e17bfb14dec1, type: 3}
       propertyPath: m_AnchorMin.x
@@ -27764,7 +27787,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4314960304882123890, guid: 25788fd6a02f16442983e17bfb14dec1, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4314960304882123890, guid: 25788fd6a02f16442983e17bfb14dec1, type: 3}
       propertyPath: m_SizeDelta.x
@@ -27804,11 +27827,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4314960304882123890, guid: 25788fd6a02f16442983e17bfb14dec1, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 4314960304882123890, guid: 25788fd6a02f16442983e17bfb14dec1, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -50
       objectReference: {fileID: 0}
     - target: {fileID: 4314960304882123890, guid: 25788fd6a02f16442983e17bfb14dec1, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -28499,8 +28522,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4278190080
+  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -28523,7 +28546,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 256
   m_textAlignment: 65535

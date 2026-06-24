@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 
 /// <summary>
 /// タイトル/ゲーム開始導線のUI表示切替とシーン遷移を担当する。
-/// `SoundManager` と `FadeManager` を利用して遷移演出を統一する。
+/// 明示的なデータ保存（ArcadeState）により、JsonUtilityによる破壊的な上書きを回避しつつ状態を維持する。
 /// </summary>
 public class ChangeScene: MonoBehaviour
 {
@@ -16,66 +16,48 @@ public class ChangeScene: MonoBehaviour
     private string lastActiveSceneName;
 
     [Serializable]
-    private class SavedComponentState
+    public class ArcadeState
     {
-        public string objectPath;
-        public string componentType;
-        public string json;
+        // Money & Request
+        public int money;
+        public int requestsCompleted;
+
+        // Inventory (ItemNames to restore)
+        public string[] inventoryItemNames = new string[4];
     }
+
     [Header("UI設定")]
-    [Tooltip("表示するUIオブジェクト")]
     public GameObject targetUI;
-    
-    [Tooltip("UI表示時のボタンクリック音を再生するか")]
     public bool playButtonSound = true;
-    
-    [Header("キー設定")]
-    [Tooltip("UIを非表示にするキー")]
     public KeyCode hideKey = KeyCode.Escape;
 
     [Header("Arcade状態管理")]
-    [Tooltip("状態保存/復元の対象となるシーン名")]
-    [SerializeField] private string arcadeSceneName = SceneNames.Arcade;
-    [Tooltip("このシーンから arcade に遷移した場合は保存状態を使わず初期化する")]
+    [SerializeField] private string arcadeSceneName = "arcade";
     [SerializeField] private List<string> resetArcadeFromScenes = new List<string>();
-    [Tooltip("Arcade状態管理のログを出力する")]
     [SerializeField] private bool debugArcadeState = false;
     
     private bool isUIVisible = false;
+    private ArcadeState savedState = null;
 
-    // arcade の実行時状態スナップショット
-    private bool hasSavedArcadeState = false;
-    private int savedMoney = 0;
-    private int savedRequestCompleted = 0;
-    private int savedDay = 1;
-    private int savedCompleteMoneyThreshold = 0;
-    private bool savedRequestBoardPlaySound = true;
-    private readonly List<SavedComponentState> savedComponentStates = new List<SavedComponentState>();
-    
     void Awake()
     {
-        // UI配下に置かれている ChangeScene は「ボタン用の入口」として残す。
-        // 常駐処理（保存/復元）は root のインスタンスだけが担当する。
         if (transform.parent != null)
         {
             if (Instance == null)
             {
                 bootstrapSource = this;
                 GameObject host = new GameObject("ChangeScene(Persistent)");
-                host.AddComponent<ChangeScene>(); // Awake内で bootstrapSource から設定を引き継ぐ
+                host.AddComponent<ChangeScene>(); 
             }
-            // UI側はDontDestroy/イベント購読しない（ボタン機能は残す）
             return;
         }
 
-        // ここに来るのは root（常駐）候補のみ
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
             return;
         }
 
-        // bootstrap（UI上）から生成された常駐側なら、設定を引き継ぐ
         if (bootstrapSource != null && bootstrapSource != this)
         {
             CopySettingsFrom(bootstrapSource);
@@ -84,23 +66,12 @@ public class ChangeScene: MonoBehaviour
 
         Instance = this;
         isPersistentInstance = true;
-        QualitySettings.vSyncCount = 1; // VSyncを無効にすることでtargetFrameRateが有効になる
-        DontDestroyOnLoad(gameObject); // シーンをまたいでも破棄されないようにする
+        QualitySettings.vSyncCount = 1; 
+        DontDestroyOnLoad(gameObject); 
         lastActiveSceneName = SceneManager.GetActiveScene().name;
 
-        if (SoundManager.Instance != null)
-        {
-            SoundManager.Instance.PlayBGM(SoundManager.Instance.soundData.gameplayBGM);
-        }
-
-        // activeSceneChanged は環境によっては期待通り追えないことがあるため、
-        // より確実な sceneLoaded を主に使って遷移を検出する。
         SceneManager.sceneLoaded += OnSceneLoaded;
-
-        if (debugArcadeState)
-        {
-            Debug.Log($"ArcadeState: Persistent Awake (active='{lastActiveSceneName}')");
-        }
+        SceneManager.sceneUnloaded += OnSceneUnloaded;
     }
 
     private void OnDestroy()
@@ -109,6 +80,16 @@ public class ChangeScene: MonoBehaviour
         if (isPersistentInstance)
         {
             SceneManager.sceneLoaded -= OnSceneLoaded;
+            SceneManager.sceneUnloaded -= OnSceneUnloaded;
+        }
+    }
+
+    private void OnSceneUnloaded(Scene scene)
+    {
+        // シーンがアンロードされる直前（オブジェクトがまだ生きている間）に保存する
+        if (string.Equals(scene.name, arcadeSceneName, StringComparison.OrdinalIgnoreCase))
+        {
+            SaveArcadeStateExplicit();
         }
     }
 
@@ -116,21 +97,11 @@ public class ChangeScene: MonoBehaviour
     {
         if (!isPersistentInstance) return;
 
-        // sceneLoaded の時点で activeScene は基本この scene になるが、
-        // 直前の activeScene 名を控えておき、擬似的に previous/next を作る。
         string previousName = lastActiveSceneName;
         string nextName = scene.name;
         lastActiveSceneName = nextName;
 
-        if (debugArcadeState)
-        {
-            Debug.Log($"ArcadeState: sceneLoaded prev='{previousName}' next='{nextName}' mode={mode}");
-        }
-
-        // 既存ロジックに合わせて Scene 構造に変換
-        Scene previousScene = SceneManager.GetSceneByName(previousName);
-        Scene nextScene = scene;
-        OnActiveSceneChanged(previousScene, nextScene);
+        OnActiveSceneChanged(previousName, nextName);
     }
 
     private void CopySettingsFrom(ChangeScene source)
@@ -144,145 +115,73 @@ public class ChangeScene: MonoBehaviour
         debugArcadeState = source.debugArcadeState;
     }
 
-    private void OnActiveSceneChanged(Scene previousScene, Scene nextScene)
+    private void OnActiveSceneChanged(string previousName, string nextName)
     {
-        // arcade を離れるタイミングで状態をスナップショット化
-        if (previousScene.name == arcadeSceneName)
-        {
-            SaveArcadeState(previousScene);
-        }
+        if (!string.Equals(nextName, arcadeSceneName, StringComparison.OrdinalIgnoreCase)) return;
 
-        if (nextScene.name != arcadeSceneName) return;
-
-        // 仕様: title から arcade に入った場合のみ初期化したい。
-        // インスペクタ側の設定漏れ/誤設定で他シーンからも初期化されないよう、
-        // リセット対象リストが空の場合は "title" のみを初期化対象にする。
-        bool shouldReset;
+        bool shouldReset = false;
         if (resetArcadeFromScenes == null || resetArcadeFromScenes.Count == 0)
         {
-            shouldReset = previousScene.name == SceneNames.Title;
+            shouldReset = string.Equals(previousName, SceneNames.Title, StringComparison.OrdinalIgnoreCase);
         }
         else
         {
-            shouldReset = resetArcadeFromScenes.Contains(previousScene.name);
+            foreach (var s in resetArcadeFromScenes)
+            {
+                if (string.Equals(previousName, s, StringComparison.OrdinalIgnoreCase))
+                {
+                    shouldReset = true;
+                    break;
+                }
+            }
         }
+
         if (shouldReset)
         {
-            // 指定シーンから arcade に入る場合は、保存状態を使わず初期状態へ
-            ClearSavedArcadeState();
+            savedState = null;
             ResetArcadeRuntimeState();
-            if (debugArcadeState) Debug.Log($"ArcadeState: '{previousScene.name}' から遷移したため初期化しました");
             return;
         }
 
-        // それ以外は保存済み状態を復元（1フレーム待って各コンポーネント初期化後に上書き）
-        StartCoroutine(RestoreArcadeStateNextFrame(nextScene));
+        StartCoroutine(RestoreArcadeStateExplicit());
     }
 
-    private void SaveArcadeState(Scene arcadeScene)
+    private void SaveArcadeStateExplicit()
     {
-        savedComponentStates.Clear();
+        savedState = new ArcadeState();
+        savedState.money = MoneyManager.currentMoney;
+        savedState.requestsCompleted = RequestManager.RequestCompleted;
 
-        // 静的状態も含めて保存（title→arcade の場合のみリセットする）
-        savedMoney = MoneyManager.currentMoney;
-        savedRequestCompleted = RequestManager.RequestCompleted;
-        savedRequestBoardPlaySound = RequestBoard.playRequestSound;
-
-        // GameClockText / DayAdvanceButton は復元が外れるケースがあるため、値を明示的に保存する
-        GameObject[] rootsForScan = arcadeScene.GetRootGameObjects();
-        for (int i = 0; i < rootsForScan.Length; i++)
+        var inv = InventoryManager.Instance;
+        if (inv != null)
         {
-            if (rootsForScan[i] == null) continue;
-
-            if (savedDay == 1)
+            for (int i = 0; i < 4; i++)
             {
-                DayAdvanceButton dayButton = rootsForScan[i].GetComponentInChildren<DayAdvanceButton>(true);
-                if (dayButton != null) savedDay = dayButton.GetDay();
-            }
-
-            if (savedCompleteMoneyThreshold == 0)
-            {
-                GameClockText clock = rootsForScan[i].GetComponentInChildren<GameClockText>(true);
-                if (clock != null) savedCompleteMoneyThreshold = clock.GetCompleteMoneyThreshold();
-            }
-
-            if (savedDay != 1 && savedCompleteMoneyThreshold != 0) break;
-        }
-
-        GameObject[] roots = arcadeScene.GetRootGameObjects();
-        for (int i = 0; i < roots.Length; i++)
-        {
-            MonoBehaviour[] behaviours = roots[i].GetComponentsInChildren<MonoBehaviour>(true);
-            for (int j = 0; j < behaviours.Length; j++)
-            {
-                MonoBehaviour behaviour = behaviours[j];
-                if (behaviour == null) continue;
-
-                string json = JsonUtility.ToJson(behaviour);
-                if (string.IsNullOrEmpty(json)) continue;
-
-                savedComponentStates.Add(new SavedComponentState
-                {
-                    objectPath = GetSceneObjectPath(behaviour.transform),
-                    componentType = behaviour.GetType().AssemblyQualifiedName,
-                    json = json
-                });
+                var slot = inv.GetSlot(i);
+                if (slot != null && slot.CurrentItem != null)
+                    savedState.inventoryItemNames[i] = slot.CurrentItem.itemName;
             }
         }
 
-        hasSavedArcadeState = true;
-        if (debugArcadeState) Debug.Log($"ArcadeState: {savedComponentStates.Count} コンポーネント分を保存しました");
+        if (debugArcadeState) Debug.Log("ArcadeState: Saved inventory and basic stats.");
     }
 
-    private IEnumerator RestoreArcadeStateNextFrame(Scene arcadeScene)
+    private IEnumerator RestoreArcadeStateExplicit()
     {
-        yield return null;
+        yield return null; 
 
-        if (!hasSavedArcadeState) yield break;
+        if (savedState == null) yield break;
 
-        MoneyManager.currentMoney = savedMoney;
-        RequestManager.RequestCompleted = savedRequestCompleted;
-        RequestBoard.playRequestSound = savedRequestBoardPlaySound;
+        MoneyManager.currentMoney = savedState.money;
+        RequestManager.RequestCompleted = savedState.requestsCompleted;
 
-        for (int i = 0; i < savedComponentStates.Count; i++)
+        var inv = InventoryManager.Instance;
+        if (inv != null)
         {
-            SavedComponentState state = savedComponentStates[i];
-            if (string.IsNullOrEmpty(state.objectPath) || string.IsNullOrEmpty(state.componentType)) continue;
-
-            Transform target = FindTransformByPath(arcadeScene, state.objectPath);
-            if (target == null) continue;
-
-            Type type = Type.GetType(state.componentType);
-            if (type == null) continue;
-
-            Component targetComponent = target.GetComponent(type);
-            MonoBehaviour targetBehaviour = targetComponent as MonoBehaviour;
-            if (targetBehaviour == null) continue;
-
-            JsonUtility.FromJsonOverwrite(state.json, targetBehaviour);
+            inv.RestoreInventory(savedState.inventoryItemNames);
         }
 
-        // 明示保存した値を最後に適用（Json復元が外れた場合でも保持させる）
-        DayAdvanceButton dayButtonAfter = FindAnyObjectByType<DayAdvanceButton>();
-        if (dayButtonAfter != null)
-        {
-            dayButtonAfter.SetDay(savedDay);
-        }
-
-        GameClockText clockAfter = FindAnyObjectByType<GameClockText>();
-        if (clockAfter != null)
-        {
-            clockAfter.SetCompleteMoneyThreshold(savedCompleteMoneyThreshold);
-        }
-
-        // 仕様: arcade に入るたび border だけは初期値へ戻す（他の変数は保存状態を維持）
-        // FadeManager 経由でも activeSceneChanged が発火するため、ここで確定的に適用する。
-        if (clockAfter != null)
-        {
-            clockAfter.ResetBorderToDefault();
-        }
-
-        if (debugArcadeState) Debug.Log("ArcadeState: 保存済み状態を復元しました");
+        if (debugArcadeState) Debug.Log("ArcadeState: Restored inventory and basic stats.");
     }
 
     private void ResetArcadeRuntimeState()
@@ -290,68 +189,8 @@ public class ChangeScene: MonoBehaviour
         OwnedProgressManager.ResetAll();
     }
 
-    private void ClearSavedArcadeState()
-    {
-        hasSavedArcadeState = false;
-        savedMoney = 0;
-        savedRequestCompleted = 0;
-        savedDay = 1;
-        savedCompleteMoneyThreshold = 0;
-        savedRequestBoardPlaySound = true;
-        savedComponentStates.Clear();
-    }
-
-    private string GetSceneObjectPath(Transform target)
-    {
-        if (target == null) return string.Empty;
-
-        string path = target.name;
-        Transform current = target.parent;
-        while (current != null)
-        {
-            path = current.name + "/" + path;
-            current = current.parent;
-        }
-        return path;
-    }
-
-    private Transform FindTransformByPath(Scene scene, string path)
-    {
-        if (string.IsNullOrEmpty(path)) return null;
-
-        string[] parts = path.Split('/');
-        if (parts.Length == 0) return null;
-
-        GameObject[] roots = scene.GetRootGameObjects();
-        Transform current = null;
-        for (int i = 0; i < roots.Length; i++)
-        {
-            if (roots[i].name == parts[0])
-            {
-                current = roots[i].transform;
-                break;
-            }
-        }
-        if (current == null) return null;
-
-        for (int i = 1; i < parts.Length; i++)
-        {
-            Transform next = current.Find(parts[i]);
-            if (next == null) return null;
-            current = next;
-        }
-        return current;
-
-    }
-    void Start()
-    {
-        // 点滅UIの初期化
-        //InitializeBlinkUI();
-    }
-    
     void Update()
     {
-        // EscキーでUIを非表示
         if (isUIVisible && Input.GetKeyDown(hideKey))
         {
             HideUI();
@@ -365,46 +204,33 @@ public class ChangeScene: MonoBehaviour
             SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.deliverySound);
         }
 
-        // title → arcade の「次のゲーム開始」だけは初期化する
-        // （それ以外の arcade 遷移では、変数を保持したままにする）
-        if (SceneManager.GetActiveScene().name == SceneNames.Title)
+        if (string.Equals(SceneManager.GetActiveScene().name, SceneNames.Title, StringComparison.OrdinalIgnoreCase))
         {
             MoneyManager.currentMoney = 0;
             RequestManager.RequestCompleted = 0;
             OwnedProgressManager.ResetAll();
             DayAdvanceButton.ResetPersistentState();
             GameClockText.ResetPersistentState();
+            savedState = null;
         }
 
-        FadeManager.Instance.LoadSceneWithFade(SceneNames.Arcade);
+        FadeManager.Instance.LoadSceneWithFade(SceneNames.Shop);
     }
     
-    /// <summary>
-    /// 特定のUIを表示し、ボタンクリック音を再生
-    /// </summary>
     public void ShowUI()
     {
-        // ボタンクリック音を再生
         if (playButtonSound && SoundManager.Instance != null)
         {
             SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.buttonClickSound);
         }
         
-        // UIを表示
         if (targetUI != null)
         {
             targetUI.SetActive(true);
             isUIVisible = true;
         }
-        else
-        {
-            Debug.LogWarning("ChangeScene: 表示するUIが設定されていません");
-        }
     }
     
-    /// <summary>
-    /// 特定のUIを非表示
-    /// </summary>
     public void HideUI()
     {
         if (targetUI != null)
@@ -414,26 +240,11 @@ public class ChangeScene: MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// UIの表示状態を切り替え
-    /// </summary>
     public void ToggleUI()
     {
-        if (isUIVisible)
-        {
-            HideUI();
-        }
-        else
-        {
-            ShowUI();
-        }
+        if (isUIVisible) HideUI();
+        else ShowUI();
     }
     
-    /// <summary>
-    /// 現在UIが表示されているかどうか
-    /// </summary>
-    public bool IsUIVisible()
-    {
-        return isUIVisible;
-    }
+    public bool IsUIVisible() => isUIVisible;
 }

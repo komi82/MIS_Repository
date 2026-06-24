@@ -44,7 +44,10 @@ public class ItemPickup : MonoBehaviour
                 currentTargetItem = item;
 
                 pickupPromptUI.SetActive(true);
-                pickupPromptText.text = $"<sprite name=F> 拾う：{item.ItemData.itemName}";
+                PromptUIUtility.SetTextAndResizeWidth(
+                    pickupPromptText,
+                    pickupPromptUI.GetComponent<RectTransform>(),
+                    $"<sprite name=F> 拾う：{item.ItemData.itemName}");
                 return;
             }
         }
@@ -64,7 +67,8 @@ public class ItemPickup : MonoBehaviour
         {
 
             Debug.Log($"アイテム '{currentTargetItem.ItemData.itemName}' を取得しました");
-            if (SceneManager.GetActiveScene().name == SceneNames.Tutorial2)
+
+            if (SceneManager.GetActiveScene().name == "tutorial2")
             {
                 ConditionalSceneTransition.TriggerTransitionStatic();
             }

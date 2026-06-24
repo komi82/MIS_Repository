@@ -55,7 +55,7 @@ public static class OwnedProgressManager
                 int count = GetBaffOwned(item.B_itemID);
                 if (count <= 0) continue;
                 hasAny = true;
-                log.AppendLine($"  Baff: {item.B_itemName} ({item.B_itemType}) x{count}");
+                log.AppendLine($"  Baff: {item.B_itemName} ({item.effecttype}) x{count}");
             }
         }
 

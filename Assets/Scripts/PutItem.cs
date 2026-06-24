@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine.SceneManagement;
 using System.Linq;
 
+
 /// <summary>
 /// アイテム配置・クラフト入力・各作業ステーションUIを統合制御する中核クラス。
 /// `InventoryManager` `PlacementSlots` `RecipeDatabase` `SoundManager` などと連携して、
@@ -43,6 +44,12 @@ public class PutItem : MonoBehaviour
 	private string scene;
 
 	private string[] targets = { SceneNames.Tutorial3, SceneNames.Tutorial5, SceneNames.Tutorial6 };
+
+	// 開発環境（60fps）での per-frame 値を基準にした秒あたりの変化量
+	private const float ReferenceFrameRate = 60f;
+	private const float PowerGageDecayPerSecond = 0.05f * ReferenceFrameRate;
+	private const float PowerGageIncreasePerSecond = 0.15f * ReferenceFrameRate;
+	private const float WashSliderMovePerSecond = 0.025f * ReferenceFrameRate;
 
 	// PowerGage関連の変数
 	private float powerGagePower;
@@ -240,7 +247,10 @@ public class PutItem : MonoBehaviour
 		if (itemToPlace != null)
 		{
 			putPromptUI.SetActive(true);
-			putPromptText.text = $"<sprite name=E> 置く：{itemToPlace.itemName}";
+			PromptUIUtility.SetTextAndResizeWidth(
+				putPromptText,
+				putPromptUI.GetComponent<RectTransform>(),
+				$"<sprite name=E> 置く：{itemToPlace.itemName}");
 		}
 		else
 		{
@@ -480,6 +490,7 @@ public class PutItem : MonoBehaviour
 						Instantiate(match.resultItem.prefab, pos, rot);
 			Debug.Log($"クラフト生成: {match.resultItem.itemName}");
 			if (targets.Contains(scene))
+
 			{
 				ConditionalSceneTransition.TriggerTransitionStatic();
 			}
@@ -644,10 +655,12 @@ public class PutItem : MonoBehaviour
 		// PowerGageミニゲームの処理
 		while (!isPowerGageCompleted)
 		{
+			float deltaTime = Time.deltaTime;
+
 			// パワーの減少
 			if (powerGagePower > 0)
 			{
-				powerGagePower -= 0.05f;
+				powerGagePower -= PowerGageDecayPerSecond * deltaTime;
 			}
 			
 			// スペースキーでパワー増加
@@ -655,7 +668,7 @@ public class PutItem : MonoBehaviour
 			{
 				if (powerGagePower < 10)
 				{
-					powerGagePower += 0.15f;
+					powerGagePower += PowerGageIncreasePerSecond * deltaTime;
 				}
 				if (powerGagePower >= 10)
 				{
@@ -696,6 +709,8 @@ public class PutItem : MonoBehaviour
 		// Washミニゲームの処理
 		while (!isWashCompleted)
 		{
+			float deltaTime = Time.deltaTime;
+
 			// スペースキーでクリック状態を切り替え
 			if (Input.GetKeyDown(KeyCode.Space))
 			{
@@ -735,13 +750,14 @@ public class PutItem : MonoBehaviour
 				isWashMaxValue = false;
 			}
 			
+			float washMove = WashSliderMovePerSecond * deltaTime;
 			if (isWashMaxValue == true)
 			{
-				washSlider.value -= 0.025f;
+				washSlider.value -= washMove;
 			}
 			else
 			{
-				washSlider.value += 0.025f;
+				washSlider.value += washMove;
 			}
 			
 			yield return null;

@@ -61,7 +61,8 @@ public class SceneTimer : MonoBehaviour
         string lower = sceneName.ToLowerInvariant();
         if (lower == SceneNames.Result || lower == SceneNames.Title || lower == SceneNames.Shop.ToLowerInvariant())
         {
-            // result / Shop / title シーンではカーソルを表示
+
+            // resultシーンとtitleシーンではカーソルを表示
             Cursor.lockState = CursorLockMode.Confined;
             Cursor.visible = true;
         }

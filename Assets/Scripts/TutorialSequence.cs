@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 /// <summary>
 /// シーン開始時にチュートリアル用テキストを順表示する。
@@ -28,6 +30,12 @@ public class TutorialSequence : MonoBehaviour
     [SerializeField] private DeliveryStation deliveryStation;
     [SerializeField] private FirstPersonController playerController;
 
+    [Header("postTutorialWindow 表示時")]
+    [Tooltip("OffScreenObjectIndicator を持つ Image オブジェクト（未設定時はシーン内検索）")]
+    [SerializeField] private GameObject offScreenIndicatorObject;
+    [SerializeField] private OffScreenObjectIndicator offScreenIndicator;
+    [SerializeField] private Volume globalVolume;
+
     private int currentLineIndex;
     private bool sequenceFinished;
     private readonly List<Behaviour> disabledBehaviours = new List<Behaviour>();
@@ -42,6 +50,21 @@ public class TutorialSequence : MonoBehaviour
         if (playerController == null)
         {
             playerController = FindFirstObjectByType<FirstPersonController>();
+        }
+
+        if (offScreenIndicator == null && offScreenIndicatorObject != null)
+        {
+            offScreenIndicator = offScreenIndicatorObject.GetComponent<OffScreenObjectIndicator>();
+        }
+
+        if (offScreenIndicator == null)
+        {
+            offScreenIndicator = FindOffScreenIndicator();
+        }
+
+        if (globalVolume == null)
+        {
+            globalVolume = FindGlobalVolume();
         }
 
         if (tutorialText == null && textBoxRoot != null)
@@ -143,10 +166,79 @@ public class TutorialSequence : MonoBehaviour
         if (postTutorialWindow != null)
         {
             postTutorialWindow.SetActive(true);
+            ApplyPostTutorialWindowEffects();
         }
 
         RestoreGameplayInput();
         HideCursorForGameplay();
+    }
+
+    void ApplyPostTutorialWindowEffects()
+    {
+        ResolveOffScreenIndicatorReference();
+
+        if (offScreenIndicator != null)
+        {
+            offScreenIndicator.ShowIndicatorIfHidden();
+        }
+
+        DisableGlobalDepthOfField();
+    }
+
+    void ResolveOffScreenIndicatorReference()
+    {
+        if (offScreenIndicator != null)
+        {
+            return;
+        }
+
+        if (offScreenIndicatorObject != null)
+        {
+            offScreenIndicator = offScreenIndicatorObject.GetComponent<OffScreenObjectIndicator>();
+        }
+
+        if (offScreenIndicator == null)
+        {
+            offScreenIndicator = FindOffScreenIndicator();
+        }
+    }
+
+    static OffScreenObjectIndicator FindOffScreenIndicator()
+    {
+        OffScreenObjectIndicator[] indicators = FindObjectsByType<OffScreenObjectIndicator>(
+            FindObjectsInactive.Include,
+            FindObjectsSortMode.None);
+
+        return indicators.Length > 0 ? indicators[0] : null;
+    }
+
+    void DisableGlobalDepthOfField()
+    {
+        Volume volume = globalVolume != null ? globalVolume : FindGlobalVolume();
+        if (volume == null)
+        {
+            return;
+        }
+
+        VolumeProfile profile = volume.profile;
+        if (profile != null && profile.TryGet(out DepthOfField depthOfField))
+        {
+            depthOfField.active = false;
+        }
+    }
+
+    static Volume FindGlobalVolume()
+    {
+        Volume[] volumes = FindObjectsByType<Volume>(FindObjectsSortMode.None);
+        for (int i = 0; i < volumes.Length; i++)
+        {
+            if (volumes[i] != null && volumes[i].isGlobal)
+            {
+                return volumes[i];
+            }
+        }
+
+        return null;
     }
 
     /// <summary>
