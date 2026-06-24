@@ -31,8 +31,8 @@ public static class PromptUIUtility
 
 	private static float MeasureTextWidthInContainerSpace(TextMeshProUGUI text, RectTransform container)
 	{
-		bool previousWrap = text.enableWordWrapping;
-		text.enableWordWrapping = false;
+		TextWrappingModes previousWrap = text.textWrappingMode;
+		text.textWrappingMode = TextWrappingModes.NoWrap;
 
 		RectTransform textRect = text.rectTransform;
 		float previousWidth = textRect.rect.width;
@@ -45,7 +45,7 @@ public static class PromptUIUtility
 		float widthInContainerSpace = contentWidth * scaleInContainer;
 
 		textRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, previousWidth);
-		text.enableWordWrapping = previousWrap;
+		text.textWrappingMode = previousWrap;
 
 		return widthInContainerSpace;
 	}
