@@ -13,11 +13,6 @@ public class ArtifactManager : MonoBehaviour
     [Header("生成数")]
     public int spawnCount = 2;
 
-    void awake()
-    {
-
-    }
-
     void Start()
     {
         InitializeArtifact();

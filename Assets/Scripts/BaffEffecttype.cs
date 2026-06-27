@@ -5,5 +5,8 @@ public enum BaffEffectType
     cursedup,
     speedup,
     limitup,
-    borderdown
+    borderdown,
+    //以降アーティファクト用タイプ
+    doublecount,
+    extramoney
 }
