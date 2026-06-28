@@ -32,9 +32,12 @@ public class RequestManager : MonoBehaviour
 
     public List<BaffItemData> items;
 
+    public int total = 0;
     public int potionReward = 0;
     public int weaponReward = 0;
     public int cursedReward = 0;
+    public int doubleCount = 0;
+    public int extramoney = 0;
 
     private static int s_potionReward;
     private static int s_weaponReward;
@@ -47,7 +50,6 @@ public class RequestManager : MonoBehaviour
 
     public int GetTotal(BaffEffectType type)
     {
-        int total = 0;
 
         foreach (BaffItemData item in items)
         {
@@ -65,7 +67,12 @@ public class RequestManager : MonoBehaviour
         // シーン遷移で初期化しない仕様
         GenerateRequest();
         ScheduleNextRequest();
-
+        //各種バフアイテムの所持数を合計する
+        potionReward = GetTotal(BaffEffectType.potionup);
+        weaponReward = GetTotal(BaffEffectType.weaponup);
+        cursedReward = GetTotal(BaffEffectType.cursedup);
+        doubleCount = GetTotal(BaffEffectType.doublecount);
+        extramoney = GetTotal(BaffEffectType.extramoney);
 
     }
 
@@ -150,7 +157,7 @@ public class RequestManager : MonoBehaviour
         // rewardAmount計算式: Random(150,200) * 1.1^(n+1) 最小値150以下は切り上げ
         int baseReward = UnityEngine.Random.Range(150, 201);
         float multiplier = Mathf.Pow(1.1f, RequestCompleted + 1);
-        newRequest.rewardAmount = Mathf.FloorToInt(baseReward * multiplier);
+        newRequest.rewardAmount = Mathf.FloorToInt(baseReward * multiplier * (doubleCount + 1) + (extramoney * 100));
 
         switch (type)
         {

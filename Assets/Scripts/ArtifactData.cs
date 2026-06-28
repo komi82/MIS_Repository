@@ -4,7 +4,7 @@ using UnityEngine;
 public class ArtifactData : ScriptableObject
 {
     public int A_itemID;
-    public string A_itemType;
+    public BaffEffectType effecttype;
     public string A_itemName;
     public int price;
     public int startprice;

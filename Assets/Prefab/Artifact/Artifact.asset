@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Artifact
   m_EditorClassIdentifier: Assembly-CSharp::ArtifactData
   A_itemID: 0
-  A_itemType: 
+  effecttype: 6
   A_itemName: itema
-  price: 708
+  price: 484
   startprice: 400
-  ownedCount: 6
+  ownedCount: 2
   prefab: {fileID: 6068648090133099813, guid: 66eda9ce847ed4d48b0714a462fe269c, type: 3}
