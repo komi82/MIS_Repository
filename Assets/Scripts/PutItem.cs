@@ -3,6 +3,8 @@ using UnityEngine.UI;
 using System.Collections;
 using TMPro;
 using UnityEngine.SceneManagement;
+using System.Linq;
+
 
 /// <summary>
 /// アイテム配置・クラフト入力・各作業ステーションUIを統合制御する中核クラス。
@@ -37,7 +39,18 @@ public class PutItem : MonoBehaviour
 	[SerializeField] private TextMeshProUGUI putPromptText; // E キーUI用テキスト
 	[SerializeField] private GameObject recipePromptUI; // Recipe タグ用UI（画面内固定位置）
 	[SerializeField] private GameObject karasuPromptUI; // karasu タグ用UI（画面内固定位置）
-	
+
+
+	private string scene;
+
+	private string[] targets = { SceneNames.Tutorial3, SceneNames.Tutorial5, SceneNames.Tutorial6 };
+
+	// 開発環境（60fps）での per-frame 値を基準にした秒あたりの変化量
+	private const float ReferenceFrameRate = 60f;
+	private const float PowerGageDecayPerSecond = 0.05f * ReferenceFrameRate;
+	private const float PowerGageIncreasePerSecond = 0.15f * ReferenceFrameRate;
+	private const float WashSliderMovePerSecond = 0.025f * ReferenceFrameRate;
+
 	// PowerGage関連の変数
 	private float powerGagePower;
 	private bool isPowerGageCompleted = false;
@@ -55,7 +68,12 @@ public class PutItem : MonoBehaviour
 	private string currentTargetTag;
 	private GameObject lastTargetObject;
 	private bool isCraftingInProgress = false; // クラフト処理中かどうか
+	private bool recipePromptSuppressed; // Esc/F で閉じたあと、視線が外れるまで再表示しない
 
+
+	void Awake(){
+		scene = SceneManager.GetActiveScene().name;
+	}
 
 	void Start()
 	{
@@ -200,6 +218,26 @@ public class PutItem : MonoBehaviour
 		currentTargetTag = "";
 		lastTargetObject = null;
 	}
+
+	private void CloseRecipePromptUI()
+	{
+		if (recipePromptUI != null)
+		{
+			recipePromptUI.SetActive(false);
+		}
+		if (currentPromptUI == recipePromptUI)
+		{
+			currentPromptUI = null;
+			currentTargetTag = "";
+		}
+		recipePromptSuppressed = true;
+		EndPlayerUiBlock();
+
+		if (scene == SceneNames.Tutorial7)
+		{
+			ConditionalSceneTransition.TriggerTransitionStatic();
+		}
+	}
 	
 	// E キー用UIを表示するメソッド
 	private void ShowPutPromptUI(ItemData itemToPlace)
@@ -209,7 +247,10 @@ public class PutItem : MonoBehaviour
 		if (itemToPlace != null)
 		{
 			putPromptUI.SetActive(true);
-			putPromptText.text = $"<sprite name=E> 置く：{itemToPlace.itemName}";
+			PromptUIUtility.SetTextAndResizeWidth(
+				putPromptText,
+				putPromptUI.GetComponent<RectTransform>(),
+				$"<sprite name=E> 置く：{itemToPlace.itemName}");
 		}
 		else
 		{
@@ -231,6 +272,13 @@ public class PutItem : MonoBehaviour
 
     void Update()
     {
+		if (!isProcessingCoroutine && recipePromptUI != null && recipePromptUI.activeSelf
+			&& Input.GetKeyDown(KeyCode.Escape))
+		{
+			CloseRecipePromptUI();
+			return;
+		}
+
         Ray ray = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
         if (Physics.Raycast(ray, out RaycastHit hit, pickupRange))
         {
@@ -245,6 +293,10 @@ public class PutItem : MonoBehaviour
 				if (slotsOnParent != null) taggedObject = slotsOnParent.gameObject;
 				
 				string objectTag = taggedObject.tag;
+				if (objectTag != "Recipe")
+				{
+					recipePromptSuppressed = false;
+				}
 				if (objectTag == "craft" || objectTag == "blacksmith" || objectTag == "wash")
 				{
 					// クラフト処理中はUIを表示しない
@@ -314,8 +366,19 @@ public class PutItem : MonoBehaviour
 				// Recipe タグの場合
 				else if (objectTag == "Recipe")
 				{
-					ShowUIForTag("Recipe");
+					if (!recipePromptSuppressed)
+					{
+						ShowUIForTag("Recipe");
+					}
 					HidePutPromptUI();
+
+					if (!isProcessingCoroutine && Input.GetKeyDown(KeyCode.F)
+						&& recipePromptUI != null && recipePromptUI.activeSelf
+						&& taggedObject.GetComponent<RecipeStation>() == null)
+					{
+						CloseRecipePromptUI();
+						return;
+					}
 				}
 				// karasu タグの場合
 				else if (objectTag == "karasu")
@@ -360,17 +423,12 @@ public class PutItem : MonoBehaviour
 						}
 					}
 					
-					// Fキーの処理も無効化
-					if (Input.GetKeyDown(KeyCode.F))
-					{
-						// Fキーの処理があればここに追加
-						// 現在は特に処理なし
-					}
 				}
 				
             }
             else
             {
+				recipePromptSuppressed = false;
                 // 範囲内にクラフト対象がない場合はUIを非表示
                 HideCurrentUI();
                 HidePutPromptUI();
@@ -378,6 +436,7 @@ public class PutItem : MonoBehaviour
         }
         else
         {
+			recipePromptSuppressed = false;
             // レイキャストが何も当たらない場合はUIを非表示
             HideCurrentUI();
             HidePutPromptUI();
@@ -430,7 +489,8 @@ public class PutItem : MonoBehaviour
 			}
 						Instantiate(match.resultItem.prefab, pos, rot);
 			Debug.Log($"クラフト生成: {match.resultItem.itemName}");
-			if (SceneManager.GetActiveScene().name == "tutorial3")
+			if (targets.Contains(scene))
+
 			{
 				ConditionalSceneTransition.TriggerTransitionStatic();
 			}
@@ -595,10 +655,12 @@ public class PutItem : MonoBehaviour
 		// PowerGageミニゲームの処理
 		while (!isPowerGageCompleted)
 		{
+			float deltaTime = Time.deltaTime;
+
 			// パワーの減少
 			if (powerGagePower > 0)
 			{
-				powerGagePower -= 0.05f;
+				powerGagePower -= PowerGageDecayPerSecond * deltaTime;
 			}
 			
 			// スペースキーでパワー増加
@@ -606,7 +668,7 @@ public class PutItem : MonoBehaviour
 			{
 				if (powerGagePower < 10)
 				{
-					powerGagePower += 0.15f;
+					powerGagePower += PowerGageIncreasePerSecond * deltaTime;
 				}
 				if (powerGagePower >= 10)
 				{
@@ -647,6 +709,8 @@ public class PutItem : MonoBehaviour
 		// Washミニゲームの処理
 		while (!isWashCompleted)
 		{
+			float deltaTime = Time.deltaTime;
+
 			// スペースキーでクリック状態を切り替え
 			if (Input.GetKeyDown(KeyCode.Space))
 			{
@@ -667,11 +731,7 @@ public class PutItem : MonoBehaviour
 			{
 				if (washSlider.value >= 0.4 && washSlider.value <= 0.6)
 				{
-                     /*	if (washText != null)
-                         {
-                             washText.text = "Success!!";
-                         } */
-                     // 完了
+					// 完了
 					isWashCompleted = true;
 					washSlider.gameObject.SetActive(false); // スライダーを非表示
 					Debug.Log("Wash完了");
@@ -690,13 +750,14 @@ public class PutItem : MonoBehaviour
 				isWashMaxValue = false;
 			}
 			
+			float washMove = WashSliderMovePerSecond * deltaTime;
 			if (isWashMaxValue == true)
 			{
-				washSlider.value -= 0.025f;
+				washSlider.value -= washMove;
 			}
 			else
 			{
-				washSlider.value += 0.025f;
+				washSlider.value += washMove;
 			}
 			
 			yield return null;

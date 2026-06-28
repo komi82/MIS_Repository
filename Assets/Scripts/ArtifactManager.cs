@@ -24,7 +24,8 @@ public class ArtifactManager : MonoBehaviour
     {
         foreach (ArtifactData A_item in ArtifactDatas)
         {
-            A_item.Resetprice();
+            A_item.ResetShopPrice();
+            A_item.ownedCount = OwnedProgressManager.GetArtifactOwned(A_item.A_itemID);
         }
     }
 
@@ -69,12 +70,13 @@ public class ArtifactManager : MonoBehaviour
                     // 購入成功時
                     if (success)
                     {
-                        selectedItem.ownedCount++;
+                        OwnedProgressManager.AddArtifact(selectedItem.A_itemID);
+                        selectedItem.ownedCount = OwnedProgressManager.GetArtifactOwned(selectedItem.A_itemID);
 
                         selectedItem.price = Mathf.RoundToInt(selectedItem.price * 1.1f);
                         Debug.Log(selectedItem.A_itemName + " を購入");
 
-                        //A_itemObj.SetActive(false);
+                        A_itemObj.SetActive(false);
                     }
                 });
             }

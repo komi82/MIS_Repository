@@ -1,21 +1,30 @@
+
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// 追跡対象がカメラに映っていないとき、対象の方向に応じて画面端へ UI を表示する。
 /// 映っている間は UI を非表示にする。
 /// インジケーター UI（Screen Space Overlay の Canvas 配下）にアタッチする。
+/// 追跡対象はリスト先頭から順に追跡し、それ以外の登録オブジェクトは非表示にする。
+
 /// </summary>
 [RequireComponent(typeof(RectTransform))]
 public class OffScreenObjectIndicator : MonoBehaviour
 {
     [Header("追跡対象")]
-    [SerializeField] private Transform target;
+    [SerializeField] private List<Transform> targets = new List<Transform>();
+
 
     [Header("カメラ・Canvas")]
     [SerializeField] private Camera targetCamera;
     [SerializeField] private RectTransform canvasRect;
 
     [Header("表示設定")]
+    [Tooltip("表示制御する Image（未設定時は同一オブジェクトの Image）")]
+    [SerializeField] private Image indicatorImage;
+
     [Tooltip("画面端からの余白（ビューポート 0〜1）")]
     [Range(0f, 0.45f)]
     [SerializeField] private float edgePadding = 0.05f;
@@ -29,14 +38,37 @@ public class OffScreenObjectIndicator : MonoBehaviour
     private RectTransform indicatorRect;
     private CanvasGroup canvasGroup;
     private bool isIndicatorVisible;
+    private bool forceDisplayIndicator;
+    private Transform currentTarget;
+    private int currentTargetIndex = -1;
+
 
     void Awake()
     {
-        indicatorRect = GetComponent<RectTransform>();
-        canvasGroup = GetComponent<CanvasGroup>();
+        EnsureInitialized();
+        InitializeTargets();
+        SetIndicatorVisible(false);
+    }
+
+    void EnsureInitialized()
+    {
+        if (indicatorRect == null)
+        {
+            indicatorRect = GetComponent<RectTransform>();
+        }
+
+        if (indicatorImage == null)
+        {
+            indicatorImage = GetComponent<Image>();
+        }
+
         if (canvasGroup == null)
         {
-            canvasGroup = gameObject.AddComponent<CanvasGroup>();
+            canvasGroup = GetComponent<CanvasGroup>();
+            if (canvasGroup == null)
+            {
+                canvasGroup = gameObject.AddComponent<CanvasGroup>();
+            }
         }
 
         if (targetCamera == null)
@@ -52,20 +84,40 @@ public class OffScreenObjectIndicator : MonoBehaviour
                 canvasRect = canvas.GetComponent<RectTransform>();
             }
         }
+    }
 
-        SetIndicatorVisible(false);
+    void OnEnable()
+    {
+        EnsureInitialized();
+        if (currentTarget == null)
+        {
+            InitializeTargets();
+        }
+    }
+
+    void OnDestroy()
+    {
+        RestoreAllTargetsVisibility();
     }
 
     void LateUpdate()
     {
-        if (target == null || targetCamera == null || canvasRect == null)
+        if (currentTarget == null && !TryAdvanceToNextTarget())
+
         {
             SetIndicatorVisible(false);
             return;
         }
 
-        Vector3 viewportPos = targetCamera.WorldToViewportPoint(target.position);
-        if (IsTargetInView(viewportPos))
+        if (targetCamera == null || canvasRect == null)
+        {
+            SetIndicatorVisible(false);
+            return;
+        }
+
+        Vector3 viewportPos = targetCamera.WorldToViewportPoint(currentTarget.position);
+
+        if (IsTargetInView(viewportPos) && !forceDisplayIndicator)
         {
             SetIndicatorVisible(false);
             return;
@@ -74,8 +126,15 @@ public class OffScreenObjectIndicator : MonoBehaviour
         Vector2 edgeViewport = GetEdgeViewportPosition(viewportPos);
         if (!TrySetIndicatorPosition(edgeViewport))
         {
-            SetIndicatorVisible(false);
-            return;
+            if (!forceDisplayIndicator)
+            {
+                SetIndicatorVisible(false);
+                return;
+            }
+        }
+        else if (forceDisplayIndicator && IsTargetInView(viewportPos))
+        {
+            forceDisplayIndicator = false;
         }
 
         SetIndicatorVisible(true);
@@ -87,6 +146,73 @@ public class OffScreenObjectIndicator : MonoBehaviour
             indicatorRect.localRotation = Quaternion.Euler(0f, 0f, angle + rotationOffset);
         }
     }
+
+    void InitializeTargets()
+    {
+        currentTargetIndex = FindFirstValidTargetIndex(0);
+        currentTarget = currentTargetIndex >= 0 ? targets[currentTargetIndex] : null;
+        ApplyTargetVisibility();
+    }
+
+    bool TryAdvanceToNextTarget()
+    {
+        int nextIndex = FindFirstValidTargetIndex(currentTargetIndex + 1);
+        if (nextIndex < 0)
+        {
+            currentTarget = null;
+            currentTargetIndex = -1;
+            return false;
+        }
+
+        currentTargetIndex = nextIndex;
+        currentTarget = targets[currentTargetIndex];
+        ApplyTargetVisibility();
+        return true;
+    }
+
+    int FindFirstValidTargetIndex(int startIndex)
+    {
+        for (int i = startIndex; i < targets.Count; i++)
+        {
+            if (targets[i] != null)
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    void ApplyTargetVisibility()
+    {
+        for (int i = 0; i < targets.Count; i++)
+        {
+            Transform t = targets[i];
+            if (t == null)
+            {
+                continue;
+            }
+
+            bool shouldShow = i == currentTargetIndex;
+            if (t.gameObject.activeSelf != shouldShow)
+            {
+                t.gameObject.SetActive(shouldShow);
+            }
+        }
+    }
+
+    void RestoreAllTargetsVisibility()
+    {
+        for (int i = 0; i < targets.Count; i++)
+        {
+            Transform t = targets[i];
+            if (t != null)
+            {
+                t.gameObject.SetActive(true);
+            }
+        }
+    }
+
 
     bool IsTargetInView(Vector3 viewportPos)
     {
@@ -171,10 +297,64 @@ public class OffScreenObjectIndicator : MonoBehaviour
         canvasGroup.alpha = visible ? 1f : 0f;
         canvasGroup.blocksRaycasts = visible;
         canvasGroup.interactable = visible;
+
+        if (indicatorImage != null)
+        {
+            indicatorImage.enabled = visible;
+        }
+    }
+
+    public void ShowIndicatorIfHidden()
+    {
+        if (!gameObject.activeSelf)
+        {
+            gameObject.SetActive(true);
+        }
+
+        EnsureInitialized();
+        InitializeTargets();
+        EnsureCurrentTargetVisible();
+        forceDisplayIndicator = true;
+        RefreshIndicatorPlacement();
+        SetIndicatorVisible(true);
+    }
+
+    void EnsureCurrentTargetVisible()
+    {
+        if (currentTarget != null && !currentTarget.gameObject.activeSelf)
+        {
+            currentTarget.gameObject.SetActive(true);
+        }
+    }
+
+    void RefreshIndicatorPlacement()
+    {
+        if (currentTarget == null || targetCamera == null || canvasRect == null)
+        {
+            return;
+        }
+
+        Vector3 viewportPos = targetCamera.WorldToViewportPoint(currentTarget.position);
+        Vector2 edgeViewport = GetEdgeViewportPosition(viewportPos);
+        TrySetIndicatorPosition(edgeViewport);
+
+        if (rotateIndicator)
+        {
+            Vector2 direction = edgeViewport - new Vector2(0.5f, 0.5f);
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            indicatorRect.localRotation = Quaternion.Euler(0f, 0f, angle + rotationOffset);
+        }
     }
 
     public void SetTarget(Transform newTarget)
     {
-        target = newTarget;
+        targets.Clear();
+        if (newTarget != null)
+        {
+            targets.Add(newTarget);
+        }
+
+        InitializeTargets();
+
     }
 }

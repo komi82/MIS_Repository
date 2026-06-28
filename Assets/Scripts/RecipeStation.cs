@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// レシピ閲覧ステーションの開閉を担当するインタラクト制御。
@@ -23,17 +24,7 @@ public class RecipeStation : MonoBehaviour
         // EscキーでUIを強制的に閉じる
         if (Input.GetKeyDown(KeyCode.Escape) && recipeUI.activeSelf)
         {
-            recipeUI.SetActive(false);
-            CursorActive = false;
-            // DeliveryStationと共有する場合
-            if (deliveryStation != null)
-            {
-                deliveryStation.CursorActive = false;
-            }
-            Cursor.lockState = CursorLockMode.Locked; // 画面中央に固定＆非表示
-            Cursor.visible = false; // カーソルを明示的に非表示
-            // プレイヤー制御を再有効化
-            if (playerController != null) playerController.enabled = true;
+            CloseRecipeUI();
             return;
         }
 
@@ -67,18 +58,7 @@ public class RecipeStation : MonoBehaviour
                 }
                 else
                 {
-                    // UIが表示されている場合は非表示にする
-                    recipeUI.SetActive(false);
-                    CursorActive = false;
-                    // DeliveryStationと共有する場合
-                    if (deliveryStation != null)
-                    {
-                        deliveryStation.CursorActive = false;
-                    }
-                    Cursor.lockState = CursorLockMode.Locked; // 画面中央に固定＆非表示
-                    Cursor.visible = false; // カーソルを明示的に非表示
-                    // プレイヤー制御を再有効化
-                    if (playerController != null) playerController.enabled = true;
+                    CloseRecipeUI();
                 }
                 return;
             }
@@ -86,5 +66,23 @@ public class RecipeStation : MonoBehaviour
 
         // レイキャストが当たらない場合はUIを非表示にしない
         // （ユーザーがFキーを押したときにのみ切り替え）
+    }
+
+    void CloseRecipeUI()
+    {
+        recipeUI.SetActive(false);
+        CursorActive = false;
+        if (deliveryStation != null)
+        {
+            deliveryStation.CursorActive = false;
+        }
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+        if (playerController != null) playerController.enabled = true;
+
+        if (SceneManager.GetActiveScene().name == SceneNames.Tutorial7)
+        {
+            ConditionalSceneTransition.TriggerTransitionStatic();
+        }
     }
 }
