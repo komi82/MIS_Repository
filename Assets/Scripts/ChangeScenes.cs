@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 /// <summary>
 /// タイトル/ゲーム開始導線のUI表示切替とシーン遷移を担当する。
@@ -119,6 +121,8 @@ public class ChangeScene: MonoBehaviour
     {
         if (!string.Equals(nextName, arcadeSceneName, StringComparison.OrdinalIgnoreCase)) return;
 
+        DisableGlobalDepthOfField();
+
         bool shouldReset = false;
         if (resetArcadeFromScenes == null || resetArcadeFromScenes.Count == 0)
         {
@@ -214,7 +218,7 @@ public class ChangeScene: MonoBehaviour
             savedState = null;
         }
 
-        FadeManager.Instance.LoadSceneWithFade(SceneNames.Shop);
+        FadeManager.Instance.LoadSceneWithFade(SceneNames.Arcade);
     }
     
     public void ShowUI()
@@ -247,4 +251,32 @@ public class ChangeScene: MonoBehaviour
     }
     
     public bool IsUIVisible() => isUIVisible;
+
+    private void DisableGlobalDepthOfField()
+    {
+        Volume volume = FindGlobalVolume();
+        if (volume == null)
+        {
+            return;
+        }
+
+        VolumeProfile profile = volume.profile;
+        if (profile != null && profile.TryGet(out DepthOfField depthOfField))
+        {
+            depthOfField.active = false;
+        }
+    }
+
+    private Volume FindGlobalVolume()
+    {
+        Volume[] volumes = FindObjectsByType<Volume>(FindObjectsSortMode.None);
+        for (int i = 0; i < volumes.Length; i++)
+        {
+            if (volumes[i] != null && volumes[i].isGlobal)
+            {
+                return volumes[i];
+            }
+        }
+        return null;
+    }
 }

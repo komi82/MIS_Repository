@@ -4,12 +4,17 @@ using UnityEngine;
 public class ArtifactData : ScriptableObject
 {
     public int A_itemID;
-    public string A_itemType;
+    public BaffEffectType effecttype;
     public string A_itemName;
     public int price;
     public int startprice;
     public float ownedCount;
     public GameObject prefab;
+
+    [Header("表示情報")]
+    public string itemName;
+    [TextArea(3, 5)]
+    public string description;
 
     /// <summary>ショップ再入場時: 価格のみ初期化（所持数は維持）</summary>
     public void ResetShopPrice()

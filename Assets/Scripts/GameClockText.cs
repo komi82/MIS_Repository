@@ -29,6 +29,9 @@ public class GameClockText : MonoBehaviour
     private static bool s_hasCompleteMoneyThreshold;
     private static int s_completeMoneyThreshold;
 
+    [Header("目標金額設定 (日ごと)")]
+    [SerializeField] private int[] dailyThresholds = new int[7] { 1000, 2000, 4000, 6000, 8000, 10000, 15000 };
+
     public List<BaffItemData> items;
 
     private bool transitionStarted = false;
@@ -125,8 +128,9 @@ public class GameClockText : MonoBehaviour
         {
             completePanel.SetActive(false);
         }
+        int currentDay = DayAdvanceButton.Instance != null ? DayAdvanceButton.Instance.GetDay() : 1;
+        UpdateCompleteThresholdByDay(currentDay);
         UpdateClockDisplay();
-        UpdateCompleteThresholdDisplay();
     }
 
     private void OnEnable()
@@ -275,14 +279,27 @@ public class GameClockText : MonoBehaviour
 
     /// <summary>
     /// Day値に応じて CompleteMoneyThreshold を更新する。
-    /// 仕様: completeMoneyThreshold = currentMoney * 0.8 * day
+    /// 仕様: インスペクターの固定値 dailyThresholds[day - 1] からボーダーダウンバフを引いて計算
     /// </summary>
     public void UpdateCompleteThresholdByDay(int day)
     {
         if (day < 1) day = 1;
 
-        float scaled = (MoneyManager.currentMoney-borderdown*100) * 0.8f * day;//所持金からボーダーダウンアイテムの所持数×100を減らして計算する
-        SetCompleteMoneyThreshold(Mathf.Max(0, Mathf.RoundToInt(scaled)));
+        int baseThreshold = 0;
+        if (dailyThresholds != null && dailyThresholds.Length > 0)
+        {
+            int index = Mathf.Clamp(day - 1, 0, dailyThresholds.Length - 1);
+            baseThreshold = dailyThresholds[index];
+        }
+        else
+        {
+            baseThreshold = defaultCompleteMoneyThreshold * day;
+        }
+
+        // ボーダーダウンアイテムの効果（所持数 × 100G 緩和）を適用
+        int finalThreshold = baseThreshold - (borderdown * 100);
+
+        SetCompleteMoneyThreshold(Mathf.Max(0, finalThreshold));
         UpdateCompleteThresholdDisplay();
     }
 

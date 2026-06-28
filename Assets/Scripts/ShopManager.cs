@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using TMPro;
 
 public class ShopManager : MonoBehaviour
 {
@@ -12,6 +13,9 @@ public class ShopManager : MonoBehaviour
 
     [Header("生成数")]
     public int spawnCount = 3;
+
+    [Header("UI要素")]
+    [SerializeField] private TextMeshProUGUI itemDetailText;
 
     void Start()
     {
@@ -55,10 +59,24 @@ public class ShopManager : MonoBehaviour
                 selectedSlot
             );
 
+            // 画像の引き延ばしを防止（アスペクト比を維持）
+            Image img = itemObj.GetComponent<Image>();
+            if (img != null)
+            {
+                img.preserveAspect = true;
+            }
+
             Debug.Log("生成: " + selectedItem.B_itemName);
 
             // Button取得
             Button button = itemObj.GetComponent<Button>();
+
+            // ホバー時の説明表示を設定
+            ShopItemDescriptionTrigger trigger = itemObj.AddComponent<ShopItemDescriptionTrigger>();
+            if (trigger != null)
+            {
+                trigger.Setup(selectedItem.itemName, selectedItem.description, itemDetailText);
+            }
 
             if (button != null)
             {
@@ -76,6 +94,11 @@ public class ShopManager : MonoBehaviour
                         selectedItem.price = Mathf.RoundToInt(selectedItem.price * 1.1f); //アイテムの価格上昇
 
                         Debug.Log(selectedItem.B_itemName + " を購入");
+
+                        if (itemDetailText != null)
+                        {
+                            itemDetailText.text = ""; // 購入時に詳細テキストをクリア
+                        }
 
                         itemObj.SetActive(false); //アイテム購入を一度きりに
                     }

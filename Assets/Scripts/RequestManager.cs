@@ -31,10 +31,13 @@ public class RequestManager : MonoBehaviour
     [SerializeField] private RequestBoard requestBoard;
 
     public List<BaffItemData> items;
+    public List<ArtifactData> artifacts;
 
     public int potionReward = 0;
     public int weaponReward = 0;
     public int cursedReward = 0;
+    public int doubleCount = 0;
+    public int extramoney = 0;
 
     private static int s_potionReward;
     private static int s_weaponReward;
@@ -49,11 +52,25 @@ public class RequestManager : MonoBehaviour
     {
         int total = 0;
 
-        foreach (BaffItemData item in items)
+        if (items != null)
         {
-            if (item.effecttype == type)
+            foreach (BaffItemData item in items)
             {
-                total += item.ownedCount;
+                if (item != null && item.effecttype == type)
+                {
+                    total += item.ownedCount;
+                }
+            }
+        }
+
+        if (artifacts != null)
+        {
+            foreach (ArtifactData artifact in artifacts)
+            {
+                if (artifact != null && artifact.effecttype == type)
+                {
+                    total += Mathf.RoundToInt(artifact.ownedCount);
+                }
             }
         }
 
@@ -62,16 +79,43 @@ public class RequestManager : MonoBehaviour
 
     void Start()
     {
+        // OwnedProgressManager から各アイテム・アーティファクトの所持数を同期する
+        if (items != null)
+        {
+            foreach (var item in items)
+            {
+                if (item != null)
+                {
+                    item.ownedCount = OwnedProgressManager.GetBaffOwned(item.B_itemID);
+                }
+            }
+        }
+
+        if (artifacts != null)
+        {
+            foreach (var artifact in artifacts)
+            {
+                if (artifact != null)
+                {
+                    artifact.ownedCount = OwnedProgressManager.GetArtifactOwned(artifact.A_itemID);
+                }
+            }
+        }
+
         // シーン遷移で初期化しない仕様
         GenerateRequest();
         ScheduleNextRequest();
-
-
+        //各種バフアイテムの所持数を合計する
+        potionReward = GetTotal(BaffEffectType.potionup);
+        weaponReward = GetTotal(BaffEffectType.weaponup);
+        cursedReward = GetTotal(BaffEffectType.cursedup);
+        doubleCount = GetTotal(BaffEffectType.doublecount);
+        extramoney = GetTotal(BaffEffectType.extramoney);
     }
 
     void Update()
     {
-        // OwnedProgressManager から各アイテムの所持数を同期する
+      /*  // OwnedProgressManager から各アイテムの所持数を同期する
         if (items != null)
         {
             foreach (var item in items)
@@ -86,7 +130,7 @@ public class RequestManager : MonoBehaviour
         //各種バフアイテムの所持数を合計する
         potionReward = GetTotal(BaffEffectType.potionup);
         weaponReward = GetTotal(BaffEffectType.weaponup);
-        cursedReward = GetTotal(BaffEffectType.cursedup);
+        cursedReward = GetTotal(BaffEffectType.cursedup);*/
 
         // シーンを跨いで報酬額補正を保持（基本は最新値で上書きし続ける）
         s_potionReward = potionReward;
@@ -150,7 +194,7 @@ public class RequestManager : MonoBehaviour
         // rewardAmount計算式: Random(150,200) * 1.1^(n+1) 最小値150以下は切り上げ
         int baseReward = UnityEngine.Random.Range(150, 201);
         float multiplier = Mathf.Pow(1.1f, RequestCompleted + 1);
-        newRequest.rewardAmount = Mathf.FloorToInt(baseReward * multiplier);
+        newRequest.rewardAmount = Mathf.FloorToInt(baseReward * multiplier * (doubleCount + 1) + (extramoney * 100));
 
         switch (type)
         {
