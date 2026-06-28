@@ -15,7 +15,9 @@ MonoBehaviour:
   B_itemID: 1
   effecttype: 1
   B_itemName: item1
-  price: 60
+  price: 50
   startprice: 50
   ownedCount: 0
   prefab: {fileID: 2981309548975973535, guid: 2ae1680edcf729c4abee824c1860f2c5, type: 3}
+  itemName: "\u9ED2\u66DC\u77F3"
+  description: "\u6B66\u5668\u306E\u4F5C\u6210\u30FB\u4FEE\u7406\u30FB\u5C5E\u6027\u4ED8\u4E0E\u306E\u4F9D\u983C\u3092\u9054\u6210\u3057\u305F\u6642\u306E\u5831\u916C\u304C75G\u5897\u52A0\u3059\u308B\u3002"

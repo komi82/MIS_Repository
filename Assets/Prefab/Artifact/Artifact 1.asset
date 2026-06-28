@@ -12,10 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75240b0abad55ad42b81fffeb8380ab0, type: 3}
   m_Name: Artifact 1
   m_EditorClassIdentifier: Assembly-CSharp::ArtifactData
-  A_itemID: 0
-  A_itemType: 
+  A_itemID: 1
+  effecttype: 7
   A_itemName: itemb
-  price: 399
+  price: 330
   startprice: 300
-  ownedCount: 3
+  ownedCount: 1
   prefab: {fileID: 2554625172957807113, guid: 393c28d6b5ccf4d4188c50cc97b8dc9d, type: 3}
+  itemName: "\u9306\u3073\u305F\u8A18\u5FF5\u786C\u8CA8"
+  description: "\u3059\u3079\u3066\u306E\u4F9D\u983C\u3092\u5B8C\u4E86\u3057\u305F\u969B\u3001\u4E00\u5F8B\u3067
+    +100 G \u306E\u8FFD\u52A0\u30DC\u30FC\u30CA\u30B9\u3092\u7372\u5F97\u3059\u308B\u3002"

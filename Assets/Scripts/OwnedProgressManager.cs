@@ -67,7 +67,7 @@ public static class OwnedProgressManager
                 int count = GetArtifactOwned(item.A_itemID);
                 if (count <= 0) continue;
                 hasAny = true;
-                log.AppendLine($"  Artifact: {item.A_itemName} ({item.A_itemType}) x{count}");
+                log.AppendLine($"  Artifact: {item.A_itemName} ({item.effecttype}) x{count}");
             }
         }
 

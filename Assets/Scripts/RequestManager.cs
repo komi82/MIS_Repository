@@ -31,6 +31,7 @@ public class RequestManager : MonoBehaviour
     [SerializeField] private RequestBoard requestBoard;
 
     public List<BaffItemData> items;
+    public List<ArtifactData> artifacts;
 
     public int total = 0;
     public int potionReward = 0;
@@ -51,11 +52,25 @@ public class RequestManager : MonoBehaviour
     public int GetTotal(BaffEffectType type)
     {
 
-        foreach (BaffItemData item in items)
+        if (items != null)
         {
-            if (item.effecttype == type)
+            foreach (BaffItemData item in items)
             {
-                total += item.ownedCount;
+                if (item != null && item.effecttype == type)
+                {
+                    total += item.ownedCount;
+                }
+            }
+        }
+
+        if (artifacts != null)
+        {
+            foreach (ArtifactData artifact in artifacts)
+            {
+                if (artifact != null && artifact.effecttype == type)
+                {
+                    total += Mathf.RoundToInt(artifact.ownedCount);
+                }
             }
         }
 
@@ -64,6 +79,29 @@ public class RequestManager : MonoBehaviour
 
     void Start()
     {
+        // OwnedProgressManager から各アイテム・アーティファクトの所持数を同期する
+        if (items != null)
+        {
+            foreach (var item in items)
+            {
+                if (item != null)
+                {
+                    item.ownedCount = OwnedProgressManager.GetBaffOwned(item.B_itemID);
+                }
+            }
+        }
+
+        if (artifacts != null)
+        {
+            foreach (var artifact in artifacts)
+            {
+                if (artifact != null)
+                {
+                    artifact.ownedCount = OwnedProgressManager.GetArtifactOwned(artifact.A_itemID);
+                }
+            }
+        }
+
         // シーン遷移で初期化しない仕様
         GenerateRequest();
         ScheduleNextRequest();
@@ -73,12 +111,11 @@ public class RequestManager : MonoBehaviour
         cursedReward = GetTotal(BaffEffectType.cursedup);
         doubleCount = GetTotal(BaffEffectType.doublecount);
         extramoney = GetTotal(BaffEffectType.extramoney);
-
     }
 
     void Update()
     {
-        // OwnedProgressManager から各アイテムの所持数を同期する
+      /*  // OwnedProgressManager から各アイテムの所持数を同期する
         if (items != null)
         {
             foreach (var item in items)
@@ -93,7 +130,7 @@ public class RequestManager : MonoBehaviour
         //各種バフアイテムの所持数を合計する
         potionReward = GetTotal(BaffEffectType.potionup);
         weaponReward = GetTotal(BaffEffectType.weaponup);
-        cursedReward = GetTotal(BaffEffectType.cursedup);
+        cursedReward = GetTotal(BaffEffectType.cursedup);*/
 
         // シーンを跨いで報酬額補正を保持（基本は最新値で上書きし続ける）
         s_potionReward = potionReward;

@@ -2238,9 +2238,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 75dd9b70c4176dd4d89162fd915d8725, type: 2}
   - {fileID: 11400000, guid: 7430427b03e0d2b44b063710b5f27158, type: 2}
   - {fileID: 11400000, guid: 98ddbc9d7ff47e648847463ab00a96cd, type: 2}
+  artifacts: []
   potionReward: 0
   weaponReward: 0
   cursedReward: 0
+  doubleCount: 0
+  extramoney: 0
 --- !u!4 &334953288
 Transform:
   m_ObjectHideFlags: 0
@@ -3172,8 +3175,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 24
+  m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -3771,8 +3774,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 24
+  m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -10534,7 +10537,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -80}
+  m_AnchoredPosition: {x: 0, y: -110}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &834241899
@@ -10584,8 +10587,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 400
-  m_fontSizeBase: 400
+  m_fontSize: 300
+  m_fontSizeBase: 300
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -22876,8 +22879,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 24
+  m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -30762,6 +30765,7 @@ MonoBehaviour:
   borderdown: 0
   completeMoneyThreshold: 500
   dayAdvanceButton: {fileID: 1717329647}
+  dailyThresholds: 2c010000d007000088130000983a000050c30000e093040040420f00
   items:
   - {fileID: 11400000, guid: 7430427b03e0d2b44b063710b5f27158, type: 2}
   - {fileID: 11400000, guid: 98ddbc9d7ff47e648847463ab00a96cd, type: 2}
