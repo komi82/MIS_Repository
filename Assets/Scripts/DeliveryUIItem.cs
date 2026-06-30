@@ -43,14 +43,14 @@ public class DeliveryUIItem : MonoBehaviour
 
         itemNameText.text = request.requiredItem.itemName;
         itemIcon.sprite = request.requiredItem.icon;
-        
+
         // 画像の比率を保持するように設定
         if (itemIcon != null)
         {
             itemIcon.preserveAspect = true;
             itemIcon.type = Image.Type.Simple;
         }
-        
+
         rewardText.text = $"{request.rewardAmount} G";
 
         // 依頼タイプに応じて文字色を変更
@@ -118,7 +118,7 @@ public class DeliveryUIItem : MonoBehaviour
         {
             itemNameText.color = targetColor;
         }
-        
+
         // 報酬テキストにも色を適用
         if (rewardText != null)
         {
@@ -147,7 +147,7 @@ public class DeliveryUIItem : MonoBehaviour
                 SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.deliverySound);
                 InventoryManager.Instance.RemoveItem(slot);
                 Debug.Log($"インベントリから '{linkedRequest.requiredItem.itemName}' を削除しました");
-                if (SceneManager.GetActiveScene().name == SceneNames.Tutorial4)
+                if (SceneManager.GetActiveScene().name == "tutorial4")
                 {
                     ConditionalSceneTransition.TriggerTransitionStatic();
                 }
@@ -160,13 +160,12 @@ public class DeliveryUIItem : MonoBehaviour
             // UI要素削除
             Destroy(gameObject);
 
-            // リスト全体を更新
-            parentList?.RefreshList();
+            // リスト全体を更新しない
+            // parentList?.RefreshList();
         }
         else
         {
-//            Debug.Log($"デリバー失敗: {linkedRequest.requiredItem.itemName}");
+            //            Debug.Log($"デリバー失敗: {linkedRequest.requiredItem.itemName}");
         }
     }
 }
-
