@@ -33,7 +33,6 @@ public class RequestManager : MonoBehaviour
     public List<BaffItemData> items;
     public List<ArtifactData> artifacts;
 
-    public int total = 0;
     public int potionReward = 0;
     public int weaponReward = 0;
     public int cursedReward = 0;
@@ -51,6 +50,7 @@ public class RequestManager : MonoBehaviour
 
     public int GetTotal(BaffEffectType type)
     {
+        int total = 0;
 
         if (items != null)
         {

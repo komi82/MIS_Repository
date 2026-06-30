@@ -1,16 +1,15 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections.Generic;
 
-/// <summary>
-/// 現在の依頼一覧を掲示板UIとして描画する。
-/// `RequestManager` の activeRequests を読み取り、依頼タイプ別の見た目を適用する。
-/// </summary>
 public class RequestBoard : MonoBehaviour
 {
     [SerializeField] private RequestManager requestManager;
     [SerializeField] private Transform requestListParent;
     [SerializeField] private GameObject requestUIPrefab;
+
+    private Dictionary<Request, GameObject> requestToUI = new Dictionary<Request, GameObject>();
 
     [Header("依頼タイプ別の色設定")]
     public Color deliverItemColor = Color.white;
@@ -23,7 +22,18 @@ public class RequestBoard : MonoBehaviour
     public Color craftWeaponColor = Color.white;
     public Color repairWeaponColor = Color.gray;
 
-    public static bool playRequestSound = true; // 鳴らしたい時だけtrue
+    public static bool playRequestSound = true;
+
+    private void Awake()
+    {
+        // 最初から置いてある見本UIを消す
+        foreach (Transform child in requestListParent)
+        {
+            Destroy(child.gameObject);
+        }
+
+        requestToUI.Clear();
+    }
 
     private void Start()
     {
@@ -32,16 +42,29 @@ public class RequestBoard : MonoBehaviour
 
     public void DisplayRequests()
     {
-        // 既存UIを削除
-        foreach (Transform child in requestListParent)
+        var activeRequests = requestManager.GetActiveRequests();
+
+        // 完了して消えた依頼のUIだけ削除
+        foreach (var pair in new List<KeyValuePair<Request, GameObject>>(requestToUI))
         {
-            Destroy(child.gameObject);
+            if (!activeRequests.Contains(pair.Key))
+            {
+                Destroy(pair.Value);
+                requestToUI.Remove(pair.Key);
+            }
         }
 
-        // 依頼を表示するUI作成
-        foreach (var request in requestManager.GetActiveRequests())
+        // 新しく増えた依頼だけ作る
+        foreach (var request in activeRequests)
         {
+            if (requestToUI.ContainsKey(request))
+            {
+                continue;
+            }
+
             var ui = Instantiate(requestUIPrefab, requestListParent);
+            requestToUI.Add(request, ui);
+
             var text = ui.GetComponentInChildren<TextMeshProUGUI>();
 
             string description = "";
@@ -57,27 +80,15 @@ public class RequestBoard : MonoBehaviour
                     break;
 
                 case RequestType.AddAttribute_Fire:
-                    description = $"属性付与:{request.requiredItem.itemName}\n報酬: {request.rewardAmount}G";
-                    break;
-
                 case RequestType.AddAttribute_Frozen:
-                    description = $"属性付与:{request.requiredItem.itemName}\n報酬: {request.rewardAmount}G";
-                    break;
-
                 case RequestType.AddAttribute_Wind:
-                    description = $"属性付与:{request.requiredItem.itemName}\n報酬: {request.rewardAmount}G";
-                    break;
-
                 case RequestType.AddAttribute_Bright:
-                    description = $"属性付与:{request.requiredItem.itemName}\n報酬: {request.rewardAmount}G";
-                    break;
-
                 case RequestType.AddAttribute_Darkness:
                     description = $"属性付与:{request.requiredItem.itemName}\n報酬: {request.rewardAmount}G";
                     break;
 
                 case RequestType.CraftWeapon:
-                    description = $"武器作成: {request.requiredItem.itemName}\n報酬: {request.rewardAmount}G";
+                    description = $"武器作成:{request.requiredItem.itemName}\n報酬: {request.rewardAmount}G";
                     break;
 
                 case RequestType.RepairWeapon:
@@ -85,21 +96,29 @@ public class RequestBoard : MonoBehaviour
                     break;
             }
 
-            text.text = description;
+            if (text != null)
+            {
+                text.text = description;
+                text.color = GetColorForRequestType(request.requestType);
+            }
+
+            Animator animator = ui.GetComponent<Animator>();
+            if (animator != null)
+            {
+                // Rebind to reset animator state, sample once, then play the named state from the start
+                animator.Rebind();
+                animator.Update(0f);
+                animator.Play("TaskSlideIn", 0, 0f);
+            }
+
             if (playRequestSound && SoundManager.Instance != null)
             {
                 SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.RequestSound);
-                playRequestSound = false; // 1回だけ再生
+                playRequestSound = false;
             }
-            // 依頼タイプに応じて文字色を変更
-            Color textColor = GetColorForRequestType(request.requestType);
-            text.color = textColor;
         }
     }
 
-    /// <summary>
-    /// 依頼タイプに応じた色を取得
-    /// </summary>
     private Color GetColorForRequestType(RequestType requestType)
     {
         switch (requestType)

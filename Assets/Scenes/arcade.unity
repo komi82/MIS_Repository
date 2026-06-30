@@ -2218,8 +2218,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemDatabase: {fileID: 11400000, guid: 77b81d8d22a8a4c4bb1a539926501bb2, type: 2}
-  minInterval: 5
-  maxInterval: 25
+  minInterval: 3
+  maxInterval: 5
   maxRequests: 4
   requestTypesPool: 000000000000000000000000000000000000000001000000010000000100000000000000020000000300000004000000050000000600000007000000070000000700000007000000070000000800000008000000080000000800000008000000
   requestSpawnSlots:
@@ -30760,12 +30760,12 @@ MonoBehaviour:
   completeThresholdText: {fileID: 1857049361}
   transitionPanel: {fileID: 1485101284}
   completePanel: {fileID: 709386763}
-  border: 3
+  border: 5
   borderbaff: 0
   borderdown: 0
-  completeMoneyThreshold: 500
+  completeMoneyThreshold: 300
   dayAdvanceButton: {fileID: 1717329647}
-  dailyThresholds: 2c010000d007000088130000983a000050c30000e093040040420f00
+  dailyThresholds: 2c010000f4010000e8030000d0070000881300001027000030750000
   items:
   - {fileID: 11400000, guid: 7430427b03e0d2b44b063710b5f27158, type: 2}
   - {fileID: 11400000, guid: 98ddbc9d7ff47e648847463ab00a96cd, type: 2}
@@ -31788,6 +31788,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2138510296}
     m_Modifications:
+    - target: {fileID: 310351066487516370, guid: 25788fd6a02f16442983e17bfb14dec1, type: 3}
+      propertyPath: m_UpdateMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 310351066487516370, guid: 25788fd6a02f16442983e17bfb14dec1, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4314960304882123890, guid: 25788fd6a02f16442983e17bfb14dec1, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
