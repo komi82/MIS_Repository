@@ -1203,23 +1203,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: tutorialLines.Array.size
-      value: 2
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[0]'
-      value: "\u3042\u3042\u3042\u3042"
+      value: "\u305D\u3046\u3044\u3084\u30DC\u30AF\u306B\u306F\n\u6BCE\u591C\u9854\u3092\u51FA\u3057\u3066\u308B\n\u4F55\u3067\u3082\u5C4B\u3055\u3093\u304C\u3042\u3063\u3066\u306D"
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[1]'
-      value: "\u30C6\u30B9\u30C8\u30C6\u30B9\u30C8"
+      value: "\u305D\u3053\u306E\u5E97\u4E3B\u3055\u3093\u3068\n\u77E5\u308A\u5408\u3044\u306A\u3093\u3060\n\u826F\u304F\u3057\u3066\u304F\u308C\u3066\u308B\u3088"
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[2]'
-      value: "\u3060\u304B\u3089\u50D5\u306F\n\u899A\u3048\u308B\u306E\u3092\u3084\u3081\u305F\u3002\n\u30EC\u30B7\u30D4\u306B\u6B8B\u3057\u305F\u3093\u3060"
+      value: "\u304A\u5E97\u306F\u307E\u3060\u5C0F\u3055\u3044\u3051\u3069\u3001\n\u8272\u3005\u306A\u7269\u304C\u58F2\u3063\u3066\u308B\n\u8CEA\u306E\u3044\u3044\u85AC\u8349\u304B\u3089\n\u3088\u304F\u308F\u304B\u3089\u306A\u3044\u7269\u307E\u3067"
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[3]'
-      value: "\u541B\u306B\u3082\u898B\u3066\u6B32\u3057\u3044\u3093\u3060\n\u5B9F\u9A13\u53F0\u306B\u7F6E\u3044\u3066\u3042\u308B\n\u304B\u3089\u898B\u3066\u307F\u3066"
+      value: "\u305F\u3060\u305D\u308C\u3089\u306F\u5168\u90E8\n\u30B4\u30DF\u3058\u3083\u306A\u3044\u3002\n\u4F55\u304B\u3068\u5F79\u7ACB\u3064\u3082\u306E\u3060\u3051\u304C\n\u3053\u3053\u306B\u306F\u58F2\u3063\u3066\u3044\u308B\u3093\u3060"
+      objectReference: {fileID: 0}
+    - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
+      propertyPath: 'tutorialLines.Array.data[4]'
+      value: "\u304A\u91D1\u306B\u4F59\u88D5\u304C\u3042\u308B\u306A\u3089\u3001\n\u4F55\u304B\u8CB7\u3063\u3066\u884C\u304F\u306E\u3082\n\u3042\u308A\u304B\u3082\u306D"
       objectReference: {fileID: 0}
     - target: {fileID: 8573119395220833042, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: m_Pivot.x

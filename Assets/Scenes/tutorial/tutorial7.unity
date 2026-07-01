@@ -1207,22 +1207,46 @@ PrefabInstance:
       objectReference: {fileID: 1665445188}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: tutorialLines.Array.size
-      value: 4
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[0]'
-      value: "\u3044\u304F\u3064\u304B\u6559\u3048\u305F\u3051\u3069\u3001\n\u5B9F\u969B\u306F\u3082\u3063\u3068\u8272\u3005\n\u4F5C\u3063\u305F\u308A\u76F4\u3057\u305F\u308A\n\u3059\u308B\u3053\u3068\u306B\u306A\u308B"
+      value: "\u3053\u306E\u304A\u5E97\u306F\u501F\u5BB6\u3067\u306D\n\u5927\u5BB6\u3055\u3093\u306B\u5229\u76CA\u3092\n\u5206\u3051\u308B\u6761\u4EF6\u3067\n\u8CB8\u3057\u3066\u3082\u3089\u3063\u3066\u308B\u3093\u3060"
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[1]'
-      value: "\u307B\u3093\u3068\u306F\u5168\u90E8\u899A\u3048\u305F\u3044\n\u3093\u3060\u3051\u3069\u3001\u4F5C\u308B\u3082\u306E\u306F\n\u3044\u3063\u3071\u3044\u3042\u308B\u304B\u3089\u306D\n\u305D\u308C\u3082\u96E3\u3057\u3044\u3093\u3060"
+      value: "\u3060\u304B\u3089\u7E41\u76DB\u3055\u305B\u306A\u3044\u3068\n\u8D64\u5B57\u3060\u3057\u3001\u304A\u5E97\u3092\n\u7D9A\u3051\u3089\u308C\u306A\u304F\u306A\u308B\n\u304B\u3082\u3057\u308C\u306A\u3044\u3002"
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[2]'
-      value: "\u3060\u304B\u3089\u50D5\u306F\n\u899A\u3048\u308B\u306E\u3092\u3084\u3081\u305F\u3002\n\u30EC\u30B7\u30D4\u306B\u6B8B\u3057\u305F\u3093\u3060"
+      value: "\u7A3C\u304C\u306A\u304D\u3083\u3044\u3051\u306A\u3044\n\u91D1\u984D\u306F\u753B\u9762\u53F3\u4E0A\u3067\n\u78BA\u8A8D\u3067\u304D\u308B"
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[3]'
+      value: "\u305D\u306E\u4E0B\u306B\u3042\u308B\u306E\u306F\n\u4ECA\u6301\u3063\u3066\u3044\u308B\u304A\u91D1\u3060\u3088\n"
+      objectReference: {fileID: 0}
+    - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
+      propertyPath: 'tutorialLines.Array.data[4]'
+      value: "\u305D\u308C\u306B\u6642\u9593\u306F\u6709\u9650\u3001\n\u4E00\u65E5\u306B\u3053\u306A\u305B\u308B\u4F9D\u983C\u306F\n\u9650\u3089\u308C\u3066\u3044\u308B\u3093\u3060"
+      objectReference: {fileID: 0}
+    - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
+      propertyPath: 'tutorialLines.Array.data[5]'
+      value: "\u3042\u3068\u3069\u308C\u304F\u3089\u3044\u4F9D\u983C\u3092\n\u3053\u306A\u305B\u308B\u304B\u3001\u753B\u9762\u53F3\u4E0B\u3067\n\u78BA\u8A8D\u3067\u304D\u308B\u3088"
+      objectReference: {fileID: 0}
+    - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
+      propertyPath: 'tutorialLines.Array.data[6]'
+      value: "\u3044\u304F\u3064\u304B\u6559\u3048\u305F\u3051\u3069\u3001\n\u5B9F\u969B\u306F\u3082\u3063\u3068\u8272\u3005\n\u4F5C\u3063\u305F\u308A\u76F4\u3057\u305F\u308A\n\u3059\u308B\u3053\u3068\u306B\u306A\u308B"
+      objectReference: {fileID: 0}
+    - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
+      propertyPath: 'tutorialLines.Array.data[7]'
+      value: "\u307B\u3093\u3068\u306F\u5168\u90E8\u899A\u3048\u305F\u3044\n\u3093\u3060\u3051\u3069\u3001\u4F5C\u308B\u3082\u306E\u306F\n\u3044\u3063\u3071\u3044\u3042\u308B\u304B\u3089\u306D\n\u305D\u308C\u3082\u96E3\u3057\u3044\u3093\u3060"
+      objectReference: {fileID: 0}
+    - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
+      propertyPath: 'tutorialLines.Array.data[8]'
+      value: "\u3060\u304B\u3089\u50D5\u306F\n\u899A\u3048\u308B\u306E\u3092\u3084\u3081\u305F\u3002\n\u30EC\u30B7\u30D4\u306B\u6B8B\u3057\u305F\u3093\u3060"
+      objectReference: {fileID: 0}
+    - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
+      propertyPath: 'tutorialLines.Array.data[9]'
       value: "\u541B\u306B\u3082\u898B\u3066\u6B32\u3057\u3044\u3093\u3060\n\u5B9F\u9A13\u53F0\u306B\u7F6E\u3044\u3066\u3042\u308B\n\u304B\u3089\u898B\u3066\u307F\u3066"
       objectReference: {fileID: 0}
     - target: {fileID: 8573119395220833042, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
@@ -26775,7 +26799,7 @@ MonoBehaviour:
   completeThresholdText: {fileID: 1857049361}
   transitionPanel: {fileID: 1485101284}
   completePanel: {fileID: 709386763}
-  border: 3
+  border: 5
   borderbaff: 0
   borderdown: 0
   completeMoneyThreshold: 500
@@ -26813,8 +26837,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 16777215
-  m_fontColor: {r: 1, g: 1, b: 1, a: 0}
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -27541,8 +27565,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 65535
-  m_fontColor: {r: 1, g: 1, b: 0, a: 0}
+    rgba: 4278255615
+  m_fontColor: {r: 1, g: 1, b: 0, a: 1}
   m_enableVertexGradient: 1
   m_colorMode: 3
   m_fontColorGradient:
@@ -27929,8 +27953,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 65535
-  m_fontColor: {r: 1, g: 1, b: 0, a: 0}
+    rgba: 4278255615
+  m_fontColor: {r: 1, g: 1, b: 0, a: 1}
   m_enableVertexGradient: 1
   m_colorMode: 3
   m_fontColorGradient:

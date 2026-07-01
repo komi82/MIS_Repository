@@ -75,7 +75,7 @@ public class ShopManager : MonoBehaviour
             ShopItemDescriptionTrigger trigger = itemObj.AddComponent<ShopItemDescriptionTrigger>();
             if (trigger != null)
             {
-                trigger.Setup(selectedItem.itemName, selectedItem.description, itemDetailText);
+                trigger.Setup(selectedItem.itemName, selectedItem.description, itemDetailText, selectedItem.price);
             }
 
             if (button != null)
