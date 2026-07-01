@@ -10,7 +10,7 @@ public class MoneyManager : MonoBehaviour
 {
     public static MoneyManager Instance { get; private set; }
 
-    [SerializeField] public static int currentMoney = 10000;
+    [SerializeField] public static int currentMoney = 0;
     [SerializeField] private TextMeshProUGUI moneyText;
 
     private void Awake()
