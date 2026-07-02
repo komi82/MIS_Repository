@@ -27,8 +27,6 @@ public class backtitle : MonoBehaviour
         FadeManager.Instance.LoadSceneWithFade(SceneNames.Title);
         xScoreText.text = null;
         yScoreText.text = null;
-        
-        // ショップで購入したアイテム・アーティファクトの所持状況をクリア
-        OwnedProgressManager.ResetAll();
+        // シーン遷移時に値を初期化しない仕様
     }
 }
