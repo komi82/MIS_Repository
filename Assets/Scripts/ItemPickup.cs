@@ -7,7 +7,6 @@ using UnityEngine.SceneManagement;
 /// <summary>
 /// 視線先アイテムの検出と取得処理を担当する。
 /// 取得時は `InventoryManager` へ追加し、必要に応じて `PlacementSlots` の占有状態を解放する。
-/// QTE中はレイキャストを無効にして、誤ったアイテム取得を防ぐ。
 /// </summary>
 public class ItemPickup : MonoBehaviour
 {
@@ -24,9 +23,6 @@ public class ItemPickup : MonoBehaviour
 
     private ItemBehaviour currentTargetItem;
 
-    // QTE中の状態を管理する静的フラグ
-    public static bool isQTEActive = false;
-
     void Update()
     {
         DetectItemInView(); 
@@ -39,14 +35,6 @@ public class ItemPickup : MonoBehaviour
 
     void DetectItemInView()
     {
-        // QTE中はレイキャスト機能を無効化
-        if (isQTEActive)
-        {
-            currentTargetItem = null;
-            pickupPromptUI.SetActive(false);
-            return;
-        }
-
         Ray ray = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
         if (Physics.Raycast(ray, out RaycastHit hit, pickupRange))
         {
