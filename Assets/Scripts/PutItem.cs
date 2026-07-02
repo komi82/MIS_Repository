@@ -449,6 +449,8 @@ public class PutItem : MonoBehaviour
 	{
 		// コルーチン処理開始時にフラグを設定
 		isProcessingCoroutine = true;
+		// QTE中フラグを有効化してレイキャストを無効化
+		ItemPickup.isQTEActive = true;
 		
 		var combo = slots.GetCombination();
 		RecipeData match = activeDB.FindMatch(combo.Item1, combo.Item2);
@@ -503,6 +505,8 @@ public class PutItem : MonoBehaviour
 		
 		// コルーチン処理終了時にフラグをリセット
 		isProcessingCoroutine = false;
+		// QTE中フラグを無効化
+		ItemPickup.isQTEActive = false;
 		// クラフト処理終了フラグを設定
 		isCraftingInProgress = false;
 	}
