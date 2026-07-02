@@ -260,7 +260,6 @@ RectTransform:
   - {fileID: 1418351933302108197}
   - {fileID: 9011742523832869910}
   - {fileID: 465846695179780357}
-  - {fileID: 827266350}
   - {fileID: 1722468078}
   - {fileID: 933047597}
   - {fileID: 1115619631}
@@ -279,6 +278,7 @@ RectTransform:
   - {fileID: 86485428}
   - {fileID: 1715830172}
   - {fileID: 33374321}
+  - {fileID: 827266350}
   - {fileID: 1196815998}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -476,8 +476,8 @@ MonoBehaviour:
   m_fontSizeMin: 0
   m_fontSizeMax: 0
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -8458,7 +8458,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &827266350
 RectTransform:
   m_ObjectHideFlags: 0
