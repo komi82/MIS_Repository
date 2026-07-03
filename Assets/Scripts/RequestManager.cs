@@ -155,10 +155,6 @@ public class RequestManager : MonoBehaviour
         float elapsed = SceneTimer.Instance.GetElapsedTime();
         if (elapsed >= nextRequestTime)
         {
-            if (SoundManager.Instance != null)
-            {
-                SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.RequestSound);
-            }
             GenerateRequest();
             ScheduleNextRequest();
         }
@@ -173,6 +169,12 @@ public class RequestManager : MonoBehaviour
     void GenerateRequest()
     {
         if (activeRequests.Count >= maxRequests) return;
+
+        // 依頼が生成される場合のみSEを再生
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.RequestSound);
+        }
 
 		RequestType type = requestTypesPool[UnityEngine.Random.Range(0, requestTypesPool.Count)];
 
