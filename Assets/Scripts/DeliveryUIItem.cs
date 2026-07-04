@@ -138,11 +138,20 @@ public class DeliveryUIItem : MonoBehaviour
             return;
         }
 
+        var slot = InventoryManager.Instance != null
+            ? InventoryManager.Instance.FindSlotByItem(linkedRequest.requiredItem)
+            : null;
+        if (slot == null)
+        {
+            Debug.LogWarning($"デリバー対象アイテム '{linkedRequest?.requiredItem?.itemName}' がインベントリに見つかりませんでした");
+            parentList?.RefreshList();
+            return;
+        }
+
         if (requestManager.TryDeliverByRequest(linkedRequest))
         {
             // インベントリからアイテムを削除
-            var slot = InventoryManager.Instance.FindSlotByItem(linkedRequest.requiredItem);
-            if (slot != null)
+            if (InventoryManager.Instance != null)
             {
                 SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.deliverySound);
                 InventoryManager.Instance.RemoveItem(slot);
@@ -152,20 +161,11 @@ public class DeliveryUIItem : MonoBehaviour
                     ConditionalSceneTransition.TriggerTransitionStatic();
                 }
             }
-            else
-            {
-                Debug.LogWarning($"デリバー対象アイテム '{linkedRequest.requiredItem.itemName}' がインベントリに見つかりませんでした");
-            }
-
-            // UI要素削除
-            Destroy(gameObject);
-
-            // リスト全体を更新しない
-            // parentList?.RefreshList();
+            parentList?.RefreshList();
         }
         else
         {
-            //            Debug.Log($"デリバー失敗: {linkedRequest.requiredItem.itemName}");
+            parentList?.RefreshList();
         }
     }
 }

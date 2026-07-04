@@ -24,7 +24,7 @@ MonoBehaviour:
   mainMenuBGM: {fileID: 0}
   gameplayBGM: {fileID: 8300000, guid: 56707644298bc1d4693bf1ab7805141a, type: 3}
   resultBGM: {fileID: 0}
-  bgmVolume: 0.3
+  bgmVolume: 0.15
   sfxVolume: 0.5
   uiVolume: 0.5
   bgmFadeTime: 0

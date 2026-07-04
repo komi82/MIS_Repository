@@ -15,6 +15,7 @@ public class ItemPickup : MonoBehaviour
     [SerializeField] private InventoryManager inventoryManager;
     [SerializeField] private Camera mainCamera;
     [SerializeField] private SlotSelector slotSelector; // スロット再選択用
+    [SerializeField] private DeliveryStation deliveryStation;
 
 
     [Header("UI設定")]
@@ -25,6 +26,16 @@ public class ItemPickup : MonoBehaviour
 
     void Update()
     {
+        if (deliveryStation != null && deliveryStation.CursorActive)
+        {
+            currentTargetItem = null;
+            if (pickupPromptUI != null)
+            {
+                pickupPromptUI.SetActive(false);
+            }
+            return;
+        }
+
         DetectItemInView(); 
 
         if (Input.GetKeyDown(KeyCode.F))

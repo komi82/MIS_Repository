@@ -7,9 +7,6 @@ using TMPro;
 /// </summary>
 public class DayAdvanceButton : MonoBehaviour
 {
-    /// <summary>この日数以上で result シーンへ遷移する。</summary>
-    public const int ResultDayThreshold = 7;
-
     public static DayAdvanceButton Instance;
     [SerializeField] private TextMeshProUGUI DayText;
 

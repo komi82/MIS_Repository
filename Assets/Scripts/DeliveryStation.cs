@@ -18,15 +18,24 @@ public class DeliveryStation : MonoBehaviour
         deliveryUI.SetActive(false);
     }
 
+    public void ForceCloseUI()
+    {
+        if (deliveryUI != null)
+        {
+            deliveryUI.SetActive(false);
+        }
+
+        CursorActive = false;
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
+
     void Update()
     {
         // EscキーでUIを強制的に閉じる
         if (Input.GetKeyDown(KeyCode.Escape) && deliveryUI.activeSelf)
         {
-            deliveryUI.SetActive(false);
-            CursorActive = false;
-            Cursor.lockState = CursorLockMode.Locked;   // 画面中央に固定＆非表示
-            Cursor.visible = false; // カーソルを明示的に非表示
+            ForceCloseUI();
             return;
         }
 
@@ -61,10 +70,7 @@ public class DeliveryStation : MonoBehaviour
                 else
                 {
                     // UIが表示されている場合は非表示にする
-                    deliveryUI.SetActive(false);
-                    CursorActive = false;
-                    Cursor.lockState = CursorLockMode.Locked;   // 画面中央に固定＆非表示
-                    Cursor.visible = false; // カーソルを明示的に非表示
+                    ForceCloseUI();
                 }
                 return;
             }
@@ -75,7 +81,9 @@ public class DeliveryStation : MonoBehaviour
   //      Cursor.lockState = CursorLockMode.Locked;   // 画面中央に固定＆非表示
 
 
-        deliveryUI.SetActive(false);
+        if (deliveryUI != null)
+        {
+            deliveryUI.SetActive(false);
+        }
     }
 }
-

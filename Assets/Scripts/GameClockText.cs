@@ -1,11 +1,10 @@
 using UnityEngine;
-using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 
 /// <summary>
-/// ゲーム進行用のカウンタ表示と、規定件数到達時のシーン遷移を担当する。
-/// `RequestManager.RequestCompleted` を参照し、表示値（border - 完了件数）を更新する。
+/// ゲーム進行用のカウンタ表示と、時間切れ時のシーン遷移を担当する。
 /// </summary>
 public class GameClockText : MonoBehaviour
 {
@@ -18,11 +17,15 @@ public class GameClockText : MonoBehaviour
     [SerializeField] private TextMeshProUGUI completeThresholdText; // completeMoneyThreshold表示用
     [SerializeField] private GameObject transitionPanel; // 遷移用UI
     [SerializeField] private GameObject completePanel; // 目標達成時の遷移用UI
-    public int border = 3;
-    private static int s_border;
-    private static bool s_hasBorder;
 
-    [SerializeField] public int borderbaff = 0;
+    [Header("時間制限")]
+    [SerializeField] private float roundTimeSeconds = 120f;
+    private static bool s_hasRemainingTime;
+    private static float s_remainingTime;
+    [SerializeField] private float carryoverTimeCapSeconds = 180f;
+    private static float s_nextRoundCarrySeconds;
+    private static float s_rewardOverflowBonusX;
+
     [SerializeField] public int borderdown = 0;
     [SerializeField] private int completeMoneyThreshold = 10000; // Complete分岐の所持金しきい値
     [SerializeField] private DayAdvanceButton dayAdvanceButton;
@@ -38,6 +41,7 @@ public class GameClockText : MonoBehaviour
     private bool isCompleteTransition = false; // Completeシーンへ遷移するかどうか
     [SerializeField] private DeliveryStation deliveryStation;
     [SerializeField] private FirstPersonController playerController;
+    [SerializeField] private Transform arcadeResetPoint;
     private int defaultCompleteMoneyThreshold;
 
     private void Awake()
@@ -79,8 +83,10 @@ public class GameClockText : MonoBehaviour
     {
         s_hasCompleteMoneyThreshold = false;
         s_completeMoneyThreshold = 0;
-        s_hasBorder = false;
-        s_border = 0;
+        s_hasRemainingTime = false;
+        s_remainingTime = 0f;
+        s_nextRoundCarrySeconds = 0f;
+        s_rewardOverflowBonusX = 0f;
     }
 
     private void OnDestroy()
@@ -103,27 +109,16 @@ public class GameClockText : MonoBehaviour
             }
         }
 
-        borderbaff = GetTotal(BaffEffectType.limitup);
         borderdown = GetTotal(BaffEffectType.borderdown);
 
-        // シーンを跨いで border を保持
-        // ただし、s_border が 0 以下の場合は「期限切れ」状態なので、
-        // ショップから戻ってきた際などは初期値（Inspectorのborder + バフ）にリセットする必要がある
-        if (!s_hasBorder || s_border <= 0)
+        if (!s_hasRemainingTime || s_remainingTime <= 0f)
         {
-            // 初期値にリセット（Inspectorの値をベースにする）
-            // border は Inspector で設定された初期値が入っている状態
-            border += borderbaff;
-            s_border = border;
-            s_hasBorder = true;
-        }
-        else
-        {
-            // 途中経過（セーブデータ復元など）がある場合はそちらを採用
-            border = s_border;
+            s_remainingTime = Mathf.Max(1f, roundTimeSeconds + s_nextRoundCarrySeconds);
+            s_nextRoundCarrySeconds = 0f;
+            s_hasRemainingTime = true;
         }
 
-        transitionPanel.SetActive(false); // UI非表示
+        if (transitionPanel != null) transitionPanel.SetActive(false); // UI非表示
         if (completePanel != null)
         {
             completePanel.SetActive(false);
@@ -133,82 +128,149 @@ public class GameClockText : MonoBehaviour
         UpdateClockDisplay();
     }
 
-    private void OnEnable()
-    {
-        RequestManager.RequestComp += DeadlineCountDown;
-    }
-
-    private void OnDisable()
-    {
-        RequestManager.RequestComp -= DeadlineCountDown;
-    }
-
     void Update()
     {
-        if (border <= 0 && !transitionStarted)
+        if (!transitionStarted)
         {
-            transitionStarted = true;
-
-            // 目標所持金以上ならShop導線、それ以外は通常導線に分岐
-
-            isCompleteTransition = MoneyManager.currentMoney >= completeMoneyThreshold;
-            if (isCompleteTransition)
+            if (MoneyManager.currentMoney >= completeMoneyThreshold)
             {
-                if (completePanel != null) completePanel.SetActive(true);
-                if (transitionPanel != null) transitionPanel.SetActive(false);
-            }
-            else
-            {
-                if (transitionPanel != null) transitionPanel.SetActive(true);
-                if (completePanel != null) completePanel.SetActive(false);
+                BeginRoundEnd(true);
+                return;
             }
 
-            if (SoundManager.Instance != null)
+            s_remainingTime -= Time.deltaTime;
+            if (s_remainingTime <= 0f)
             {
-                SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.timeupSound);
+                s_remainingTime = 0f;
+                BeginRoundEnd(false);
             }
-            BlockGameplayInput();
-
-            Invoke(nameof(TransitionToNextScene), 1f); //1秒後にシーン遷移
         }
 
         UpdateClockDisplay();
         UpdateCompleteThresholdDisplay();
-        DayAdvanceButton.Instance.Updateday();
+        if (DayAdvanceButton.Instance != null)
+        {
+            DayAdvanceButton.Instance.Updateday();
+        }
     }
 
     void UpdateClockDisplay()
     {
-        clockText.text = $"DeadLine: {border:N0}";
+        if (clockText == null) return;
+        int seconds = Mathf.CeilToInt(Mathf.Max(0f, s_remainingTime));
+        clockText.text = $"Time: {seconds:N0}";
+    }
+
+    private void BeginRoundEnd(bool completedByThreshold)
+    {
+        transitionStarted = true;
+        isCompleteTransition = completedByThreshold;
+
+        if (isCompleteTransition)
+        {
+            ApplyCarryoverBonus();
+            if (completePanel != null) completePanel.SetActive(true);
+            if (transitionPanel != null) transitionPanel.SetActive(false);
+
+            StartCoroutine(HandleCompleteDayProgression());
+            return;
+        }
+
+        s_nextRoundCarrySeconds = 0f;
+        if (transitionPanel != null) transitionPanel.SetActive(true);
+        if (completePanel != null) completePanel.SetActive(false);
+
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.timeupSound);
+        }
+        s_remainingTime = 0f;
+        s_hasRemainingTime = false;
+        BlockGameplayInput();
+        Invoke(nameof(TransitionToNextScene), 1f); //1秒後にシーン遷移
+    }
+
+    private IEnumerator HandleCompleteDayProgression()
+    {
+        var disabledBehaviours = new List<Behaviour>();
+        if (deliveryStation != null)
+        {
+            deliveryStation.ForceCloseUI();
+        }
+        GameplayInputUtility.DisableStandardInput(playerController, deliveryStation, disabledBehaviours);
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+        if (FadeManager.Instance != null)
+        {
+            FadeManager.Instance.FadeOutOnly();
+            yield return new WaitForSeconds(FadeManager.Instance.fadeTime);
+        }
+
+        DayAdvanceButton targetDayButton = dayAdvanceButton != null ? dayAdvanceButton : DayAdvanceButton.Instance;
+        if (targetDayButton != null)
+        {
+            targetDayButton.OnClickAdvanceDay();
+        }
+        if (MoneyManager.Instance != null)
+        {
+            MoneyManager.Instance.ResetMoney();
+        }
+        else
+        {
+            MoneyManager.currentMoney = 0;
+        }
+        if (playerController != null)
+        {
+            playerController.ResetToStartState(arcadeResetPoint);
+        }
+
+        s_remainingTime = Mathf.Max(1f, roundTimeSeconds + s_nextRoundCarrySeconds);
+        s_nextRoundCarrySeconds = 0f;
+        s_hasRemainingTime = true;
+
+        if (deliveryStation != null)
+        {
+            deliveryStation.ForceCloseUI();
+        }
+        if (completePanel != null) completePanel.SetActive(false);
+        if (transitionPanel != null) transitionPanel.SetActive(false);
+
+        if (FadeManager.Instance != null)
+        {
+            FadeManager.Instance.FadeInOnly();
+            yield return new WaitForSeconds(FadeManager.Instance.fadeTime);
+        }
+
+        for (int i = 0; i < disabledBehaviours.Count; i++)
+        {
+            if (disabledBehaviours[i] != null)
+            {
+                disabledBehaviours[i].enabled = true;
+            }
+        }
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+        isCompleteTransition = false;
+        transitionStarted = false;
+    }
+
+    private void ApplyCarryoverBonus()
+    {
+        float carrySource = Mathf.Max(0f, s_remainingTime) * 0.5f;
+        float carryCap = Mathf.Max(0f, carryoverTimeCapSeconds);
+        float acceptedCarry = Mathf.Min(carrySource, carryCap);
+        float overflow = Mathf.Max(0f, carrySource - carryCap);
+
+        s_nextRoundCarrySeconds = acceptedCarry;
+        s_rewardOverflowBonusX += overflow;
     }
 
     void TransitionToNextScene()
     {
-        // arcadeシーン内で DayAdvanceButton を参照できる想定。
-        // 所持金しきい値達成時は Day を進めて次回の閾値計算に反映させる。
-
-        if (isCompleteTransition && dayAdvanceButton != null)
-        {
-            dayAdvanceButton.OnClickAdvanceDay();
-        }
-
-        int currentDay = dayAdvanceButton != null
-            ? dayAdvanceButton.GetDay()
-            : 1;
-
-        string nextScene;
-        if (currentDay >= DayAdvanceButton.ResultDayThreshold)
-        {
-            nextScene = SceneNames.Result;
-        }
-        else if (isCompleteTransition)
-        {
-            nextScene = SceneNames.Shop;
-        }
-        else
-        {
-            nextScene = SceneNames.Result;
-        }
+        string nextScene = SceneNames.Result;
 
         if (IsMenuScene(nextScene))
         {
@@ -222,7 +284,7 @@ public class GameClockText : MonoBehaviour
     {
         if (string.IsNullOrEmpty(sceneName)) return false;
         string lower = sceneName.ToLowerInvariant();
-        return lower == SceneNames.Shop.ToLowerInvariant() || lower == SceneNames.Result;
+        return lower == SceneNames.Result;
     }
 
     static void ActivateCursorForMenuScene()
@@ -245,18 +307,6 @@ public class GameClockText : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-    }
-
-    private void DeadlineCountDown()
-    {
-        border--;
-        s_border = border;
-    }
-
-    public void ResetBorderToDefault()
-    {
-        transitionStarted = false;
-        UpdateClockDisplay();
     }
 
     public int GetCompleteMoneyThreshold()
@@ -288,8 +338,20 @@ public class GameClockText : MonoBehaviour
         int baseThreshold = 0;
         if (dailyThresholds != null && dailyThresholds.Length > 0)
         {
-            int index = Mathf.Clamp(day - 1, 0, dailyThresholds.Length - 1);
-            baseThreshold = dailyThresholds[index];
+            if (day <= dailyThresholds.Length)
+            {
+                int index = day - 1;
+                baseThreshold = dailyThresholds[index];
+            }
+            else
+            {
+                int lastIndex = dailyThresholds.Length - 1;
+                int lastThreshold = dailyThresholds[lastIndex];
+                int step = dailyThresholds.Length >= 2
+                    ? Mathf.Max(1, dailyThresholds[lastIndex] - dailyThresholds[lastIndex - 1])
+                    : Mathf.Max(1, defaultCompleteMoneyThreshold);
+                baseThreshold = lastThreshold + step * (day - dailyThresholds.Length);
+            }
         }
         else
         {
@@ -309,7 +371,7 @@ public class GameClockText : MonoBehaviour
     private void UpdateCompleteThresholdDisplay()
     {
         if (completeThresholdText == null) return;
-        completeThresholdText.text = $"Border: {completeMoneyThreshold:N0}G";
+        completeThresholdText.text = $"Goal: {completeMoneyThreshold:N0}G";
 
     }
     public int GetTotal(BaffEffectType type)
@@ -325,5 +387,10 @@ public class GameClockText : MonoBehaviour
         }
 
         return total;
+    }
+
+    public static float GetRewardOverflowBonusX()
+    {
+        return Mathf.Max(0f, s_rewardOverflowBonusX);
     }
 }

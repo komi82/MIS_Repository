@@ -25,6 +25,11 @@ public class FirstPersonController : MonoBehaviour
     private float verticalVelocity = 0f;
 
     private Animator Controller = null;
+    private Vector3 initialPosition;
+    private Quaternion initialRotation;
+    private Quaternion initialPlayerBodyRotation;
+    private Quaternion initialCameraLocalRotation;
+    private bool hasInitialState;
 
     void Start()
     {
@@ -41,6 +46,7 @@ public class FirstPersonController : MonoBehaviour
         characterController = GetComponent<CharacterController>(); // プレイヤーの CharacterController を取得
 
         Controller = GetComponent<Animator>();
+        CacheInitialState();
     }
 
 
@@ -141,5 +147,80 @@ public class FirstPersonController : MonoBehaviour
 
         return total;
     }
-}
 
+    private void CacheInitialState()
+    {
+        if (hasInitialState) return;
+
+        initialPosition = transform.position;
+        initialRotation = transform.rotation;
+        if (playerBody != null)
+        {
+            initialPlayerBodyRotation = playerBody.rotation;
+        }
+
+        if (Camera.main != null)
+        {
+            initialCameraLocalRotation = Camera.main.transform.localRotation;
+            xRotation = Camera.main.transform.localEulerAngles.x;
+        }
+
+        yRotation = playerBody != null ? playerBody.eulerAngles.y : transform.eulerAngles.y;
+        hasInitialState = true;
+    }
+
+    public void ResetToStartState(Transform resetPoint = null)
+    {
+        if (!hasInitialState)
+        {
+            CacheInitialState();
+        }
+
+        if (characterController == null)
+        {
+            characterController = GetComponent<CharacterController>();
+        }
+
+        if (characterController != null)
+        {
+            characterController.enabled = false;
+        }
+
+        if (resetPoint != null)
+        {
+            transform.position = resetPoint.position;
+            transform.rotation = resetPoint.rotation;
+        }
+        else
+        {
+            transform.position = initialPosition;
+            transform.rotation = initialRotation;
+        }
+
+        if (playerBody != null)
+        {
+            playerBody.rotation = resetPoint != null ? resetPoint.rotation : initialPlayerBodyRotation;
+            yRotation = playerBody.eulerAngles.y;
+        }
+
+        if (Camera.main != null)
+        {
+            Camera.main.transform.localRotation = initialCameraLocalRotation;
+            xRotation = Camera.main.transform.localEulerAngles.x;
+        }
+
+        verticalVelocity = 0f;
+        if (Controller != null)
+        {
+            Controller.SetBool("movement_forward", false);
+            Controller.SetBool("movement_left", false);
+            Controller.SetBool("movement_right", false);
+            Controller.SetBool("movement_back", false);
+        }
+
+        if (characterController != null)
+        {
+            characterController.enabled = true;
+        }
+    }
+}
