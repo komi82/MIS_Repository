@@ -155,6 +155,10 @@ public class RequestManager : MonoBehaviour
         float elapsed = SceneTimer.Instance.GetElapsedTime();
         if (elapsed >= nextRequestTime)
         {
+            if (SoundManager.Instance != null)
+            {
+                SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.RequestSound);
+            }
             GenerateRequest();
             ScheduleNextRequest();
         }
@@ -169,12 +173,6 @@ public class RequestManager : MonoBehaviour
     void GenerateRequest()
     {
         if (activeRequests.Count >= maxRequests) return;
-
-        // 依頼が生成される場合のみSEを再生
-        if (SoundManager.Instance != null)
-        {
-            SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.RequestSound);
-        }
 
 		RequestType type = requestTypesPool[UnityEngine.Random.Range(0, requestTypesPool.Count)];
 
@@ -196,7 +194,10 @@ public class RequestManager : MonoBehaviour
         // rewardAmount計算式: Random(150,200) * 1.1^(n+1) 最小値150以下は切り上げ
         int baseReward = UnityEngine.Random.Range(150, 201);
         float multiplier = Mathf.Pow(1.1f, RequestCompleted + 1);
-        newRequest.rewardAmount = Mathf.FloorToInt(baseReward * multiplier * (doubleCount + 1) + (extramoney * 100));
+        // 旧計算式（除外）
+        // newRequest.rewardAmount = Mathf.FloorToInt(baseReward * multiplier * (doubleCount + 1) + (extramoney * 100));
+        int rewardBeforeOverflowBonus = Mathf.FloorToInt(baseReward * multiplier * (doubleCount + 1) + (extramoney * 100));
+        newRequest.rewardAmount = rewardBeforeOverflowBonus;
 
         switch (type)
         {
@@ -324,6 +325,9 @@ public class RequestManager : MonoBehaviour
                 break;
         }
 
+        float x = GameClockText.GetRewardOverflowBonusX();
+        newRequest.rewardAmount = Mathf.FloorToInt(newRequest.rewardAmount * (1f + x));
+
         activeRequests.Add(newRequest);
 
 		// DeliverItem / CraftWeapon 以外は、作業対象となるアイテムのプレハブをスポーン
@@ -379,6 +383,12 @@ public class RequestManager : MonoBehaviour
 
         if (!request.isCompleted)
         {
+            if (request.requiredItem == null || InventoryManager.Instance == null || !InventoryManager.Instance.HasItem(request.requiredItem))
+            {
+                Debug.LogWarning($"デリバー失敗: 必要アイテム '{request?.requiredItem?.itemName}' を所持していません");
+                return false;
+            }
+
             request.isCompleted = true;
             moneyManager.AddMoney(request.rewardAmount);
 			// デリバー系ではrequestspawnslotsのプレハブは削除しない

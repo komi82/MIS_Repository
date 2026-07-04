@@ -58,6 +58,11 @@ public class MoneyManager : MonoBehaviour
     }
 
     public int GetMoney() => currentMoney;
-}
 
+    public void ResetMoney()
+    {
+        currentMoney = 0;
+        UpdateUI();
+    }
+}
 
