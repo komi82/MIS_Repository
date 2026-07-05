@@ -970,6 +970,7 @@ MonoBehaviour:
   inventoryManager: {fileID: 1608064549}
   mainCamera: {fileID: 330585545}
   slotSelector: {fileID: 0}
+  deliveryStation: {fileID: 0}
   pickupPromptUI: {fileID: 827266349}
   pickupPromptText: {fileID: 164558330}
 --- !u!114 &283417131
@@ -1207,11 +1208,11 @@ PrefabInstance:
       objectReference: {fileID: 1665445188}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: tutorialLines.Array.size
-      value: 10
+      value: 13
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[0]'
-      value: "\u3053\u306E\u304A\u5E97\u306F\u501F\u5BB6\u3067\u306D\n\u5927\u5BB6\u3055\u3093\u306B\u5229\u76CA\u3092\n\u5206\u3051\u308B\u6761\u4EF6\u3067\n\u8CB8\u3057\u3066\u3082\u3089\u3063\u3066\u308B\u3093\u3060"
+      value: "\u3053\u306E\u304A\u5E97\u306F\u7279\u6B8A\u3067\u306D\n\u5927\u5BB6\u3055\u3093\u306B\u652F\u63F4\u3092\n\u53D7\u3051\u3066\u3001\u5229\u76CA\u3092\n\u898B\u3066\u3082\u3089\u3063\u3066\u308B\u3093\u3060"
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[1]'
@@ -1227,27 +1228,43 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[4]'
-      value: "\u305D\u308C\u306B\u6642\u9593\u306F\u6709\u9650\u3001\n\u4E00\u65E5\u306B\u3053\u306A\u305B\u308B\u4F9D\u983C\u306F\n\u9650\u3089\u308C\u3066\u3044\u308B\u3093\u3060"
+      value: "\u305D\u308C\u306B\u6642\u9593\u306F\u6709\u9650\u3001\n\u9650\u3089\u308C\u305F\u6642\u9593\u3067\u3088\u308A\n\u591A\u304F\u7A3C\u304C\u306A\u3044\u3068\u3044\u3051\u306A\u3044"
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[5]'
-      value: "\u3042\u3068\u3069\u308C\u304F\u3089\u3044\u4F9D\u983C\u3092\n\u3053\u306A\u305B\u308B\u304B\u3001\u753B\u9762\u53F3\u4E0B\u3067\n\u78BA\u8A8D\u3067\u304D\u308B\u3088"
+      value: "\u3042\u3068\u3069\u308C\u304F\u3089\u3044\n\u6642\u9593\u304C\u6B8B\u3063\u3066\u3044\u308B\u304B\u3001\n\u753B\u9762\u53F3\u4E0B\u3067\n\u78BA\u8A8D\u3067\u304D\u308B\u3088"
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[6]'
-      value: "\u3044\u304F\u3064\u304B\u6559\u3048\u305F\u3051\u3069\u3001\n\u5B9F\u969B\u306F\u3082\u3063\u3068\u8272\u3005\n\u4F5C\u3063\u305F\u308A\u76F4\u3057\u305F\u308A\n\u3059\u308B\u3053\u3068\u306B\u306A\u308B"
+      value: "\u901F\u304F\u76EE\u6A19\u306B\u9054\u3057\u305F\u3089\n\u5E97\u3058\u307E\u3044\u3059\u308B\u3093\u3060\u3002\n\u305D\u306E\u5206\u6B21\u306E\u65E5\u306B\n\u30E1\u30EA\u30C3\u30C8\u304C\u3042\u308B"
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[7]'
-      value: "\u307B\u3093\u3068\u306F\u5168\u90E8\u899A\u3048\u305F\u3044\n\u3093\u3060\u3051\u3069\u3001\u4F5C\u308B\u3082\u306E\u306F\n\u3044\u3063\u3071\u3044\u3042\u308B\u304B\u3089\u306D\n\u305D\u308C\u3082\u96E3\u3057\u3044\u3093\u3060"
+      value: "\u55B6\u696D\u6642\u9593\u3092\u4F38\u3070\u305B\u305F\u308A\u3001\n\u5927\u5BB6\u3055\u3093\u304C\u4E0A\u8CEA\u306A\u7D20\u6750\u3092\n\u7528\u610F\u3057\u3066\u5229\u76CA\u3092\n\u4E0A\u3052\u3066\u304F\u308C\u305F\u308A\u3059\u308B\u3002"
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[8]'
-      value: "\u3060\u304B\u3089\u50D5\u306F\n\u899A\u3048\u308B\u306E\u3092\u3084\u3081\u305F\u3002\n\u30EC\u30B7\u30D4\u306B\u6B8B\u3057\u305F\u3093\u3060"
+      value: "\u3088\u308A\u65E9\u304F\u4F5C\u696D\u3057\u3066\u3001\n\u3088\u308A\u65E9\u304F\u7D0D\u54C1\u3059\u308B\u3053\u3068\u304C\n\u5E97\u3092\u7E41\u76DB\u3055\u305B\u308B\u30AB\u30AE\u3060\u306D"
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[9]'
-      value: "\u541B\u306B\u3082\u898B\u3066\u6B32\u3057\u3044\u3093\u3060\n\u5B9F\u9A13\u53F0\u306B\u7F6E\u3044\u3066\u3042\u308B\n\u304B\u3089\u898B\u3066\u307F\u3066"
+      value: "\u3044\u304F\u3064\u304B\u6559\u3048\u305F\u3051\u3069\u3001\n\u5B9F\u969B\u306F\u3082\u3063\u3068\u8272\u3005\n\u4F5C\u3063\u305F\u308A\u76F4\u3057\u305F\u308A\n\u3059\u308B\u3053\u3068\u306B\u306A\u308B"
+      objectReference: {fileID: 0}
+    - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
+      propertyPath: 'tutorialLines.Array.data[10]'
+      value: "\u307B\u3093\u3068\u306F\u5168\u90E8\u899A\u3048\u305F\u3044\n\u3093\u3060\u3051\u3069\u3001\u4F5C\u308B\u3082\u306E\u306F\n\u3044\u3063\u3071\u3044\u3042\u308B\u304B\u3089\u306D\n\u305D\u308C\u3082\u96E3\u3057\u3044\u3093\u3060"
+      objectReference: {fileID: 0}
+    - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
+      propertyPath: 'tutorialLines.Array.data[11]'
+      value: "\u3060\u304B\u3089\u50D5\u306F\n\u899A\u3048\u308B\u306E\u3092\u3084\u3081\u305F\u3002\n\u30EC\u30B7\u30D4\u306B\u6B8B\u3057\u305F\u3093\u3060"
+      objectReference: {fileID: 0}
+    - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
+      propertyPath: 'tutorialLines.Array.data[12]'
+      value: "\u50D5\u304C\u6559\u3048\u3089\u308C\u308B\u3053\u3068\u306F\n\u3053\u308C\u304F\u3089\u3044\u304B\u306A\n\u6700\u5F8C\u306B\u30EC\u30B7\u30D4\u3092\u78BA\u8A8D\n\u3057\u3066\u307F\u308B\u3068\u3044\u3044\u3088"
+      objectReference: {fileID: 0}
+    - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
+      propertyPath: 'tutorialLines.Array.data[13]'
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 8573119395220833042, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: m_Pivot.x
@@ -14567,7 +14584,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5df5c7c810a5a2c46aa8cbe7d7ae77d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LoadTutorialScene
-  sceneName: tutorial8
+  sceneName: title
   playButtonSound: 1
 --- !u!114 &1153505120
 MonoBehaviour:
@@ -26741,9 +26758,9 @@ MonoBehaviour:
   sortByItemId: 1
   sortAscending: 1
   groupByDatabase: 1
-  recipeTextColor: {r: 0, g: 0, b: 0, a: 1}
-  weaponTextColor: {r: 0.5773585, g: 0.5773585, b: 0, a: 1}
-  washTextColor: {r: 0, g: 0.5999999, b: 0.5999999, a: 1}
+  recipeTextColor: {r: 1, g: 1, b: 1, a: 1}
+  weaponTextColor: {r: 1, g: 1, b: 0, a: 1}
+  washTextColor: {r: 0, g: 1, b: 1, a: 1}
 --- !u!1 &1717329642
 GameObject:
   m_ObjectHideFlags: 0
@@ -26790,7 +26807,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1717329642}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 90ea9e67b50bba149837c39802538fd8, type: 3}
   m_Name: 
@@ -26799,8 +26816,8 @@ MonoBehaviour:
   completeThresholdText: {fileID: 1857049361}
   transitionPanel: {fileID: 1485101284}
   completePanel: {fileID: 709386763}
-  border: 5
-  borderbaff: 0
+  roundTimeSeconds: 120
+  carryoverTimeCapSeconds: 180
   borderdown: 0
   completeMoneyThreshold: 500
   dayAdvanceButton: {fileID: 1717329647}
@@ -26808,6 +26825,7 @@ MonoBehaviour:
   items: []
   deliveryStation: {fileID: 1981430905}
   playerController: {fileID: 0}
+  arcadeResetPoint: {fileID: 0}
 --- !u!114 &1717329645
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26828,7 +26846,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: New Tex
+  m_text: 'Time: xxx'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 4bfe6e9b73e64fa4da978ef21db84245, type: 2}
   m_sharedMaterial: {fileID: 7830827540676308531, guid: 4bfe6e9b73e64fa4da978ef21db84245, type: 2}
