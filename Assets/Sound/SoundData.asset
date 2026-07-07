@@ -21,11 +21,9 @@ MonoBehaviour:
   timeupSound: {fileID: 8300000, guid: e0751ba445b2f324682ffecd8a0f1ead, type: 3}
   rouletteSound: {fileID: 8300000, guid: 02a63d13224ca51419c9a6ba3c855fab, type: 3}
   displaySound: {fileID: 8300000, guid: 68caba413f603394d80523bb249b30b4, type: 3}
-  mainMenuBGM: {fileID: 0}
   gameplayBGM: {fileID: 8300000, guid: 56707644298bc1d4693bf1ab7805141a, type: 3}
-  resultBGM: {fileID: 0}
-  bgmVolume: 0.15
-  sfxVolume: 0.5
-  uiVolume: 0.5
+  bgmVolume: 1
+  sfxVolume: 1
+  uiVolume: 1
   bgmFadeTime: 0
-  maxConcurrentSFX: 5
+  maxConcurrentSFX: 10

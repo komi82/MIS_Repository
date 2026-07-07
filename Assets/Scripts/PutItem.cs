@@ -70,6 +70,9 @@ public class PutItem : MonoBehaviour
 	private bool isCraftingInProgress = false; // クラフト処理中かどうか
 	private bool recipePromptSuppressed; // Esc/F で閉じたあと、視線が外れるまで再表示しない
 
+	// 公開プロパティ
+	public bool IsCraftingInProgress => isCraftingInProgress;
+
 
 	void Awake(){
 		scene = SceneManager.GetActiveScene().name;

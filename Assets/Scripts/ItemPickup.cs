@@ -16,6 +16,7 @@ public class ItemPickup : MonoBehaviour
     [SerializeField] private Camera mainCamera;
     [SerializeField] private SlotSelector slotSelector; // スロット再選択用
     [SerializeField] private DeliveryStation deliveryStation;
+    [SerializeField] private PutItem putItem; // 作業中判定用
 
 
     [Header("UI設定")]
@@ -26,6 +27,34 @@ public class ItemPickup : MonoBehaviour
 
     void Update()
     {
+        // 作業中はレイキャストを完全にオフにする
+        if (putItem != null && putItem.IsCraftingInProgress)
+        {
+            Debug.Log($"[ItemPickup] 作業中により、レイキャストをオフ。isCraftingInProgress = {putItem.IsCraftingInProgress}");
+            currentTargetItem = null;
+            if (pickupPromptUI != null)
+            {
+                pickupPromptUI.SetActive(false);
+            }
+            return;
+        }
+
+        if (putItem == null)
+        {
+            Debug.LogWarning("[ItemPickup] putItem が設定されていません。Inspector で PutItem を割り当ててください");
+        }
+
+        // QTE中や入力が無効化されている場合はレイキャストをオフにする
+        if (!this.enabled)
+        {
+            currentTargetItem = null;
+            if (pickupPromptUI != null)
+            {
+                pickupPromptUI.SetActive(false);
+            }
+            return;
+        }
+
         if (deliveryStation != null && deliveryStation.CursorActive)
         {
             currentTargetItem = null;

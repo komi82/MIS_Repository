@@ -138,29 +138,21 @@ public class DeliveryUIItem : MonoBehaviour
             return;
         }
 
-        var slot = InventoryManager.Instance != null
-            ? InventoryManager.Instance.FindSlotByItem(linkedRequest.requiredItem)
-            : null;
-        if (slot == null)
-        {
-            Debug.LogWarning($"デリバー対象アイテム '{linkedRequest?.requiredItem?.itemName}' がインベントリに見つかりませんでした");
-            parentList?.RefreshList();
-            return;
-        }
-
         if (requestManager.TryDeliverByRequest(linkedRequest))
         {
-            // インベントリからアイテムを削除
-            if (InventoryManager.Instance != null)
+            // デリバー成功時のSE再生
+            if (SoundManager.Instance != null)
             {
                 SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.deliverySound);
-                InventoryManager.Instance.RemoveItem(slot);
-                Debug.Log($"インベントリから '{linkedRequest.requiredItem.itemName}' を削除しました");
-                if (SceneManager.GetActiveScene().name == "tutorial4")
-                {
-                    ConditionalSceneTransition.TriggerTransitionStatic();
-                }
             }
+            
+            Debug.Log($"デリバー完了: '{linkedRequest.requiredItem.itemName}' を納品しました");
+            
+            if (SceneManager.GetActiveScene().name == "tutorial4")
+            {
+                ConditionalSceneTransition.TriggerTransitionStatic();
+            }
+            
             parentList?.RefreshList();
         }
         else

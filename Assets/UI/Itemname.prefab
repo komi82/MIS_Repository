@@ -167,6 +167,12 @@ MonoBehaviour:
   currentItemName: 
   toggleDisplay: 1
   clearOtherDisplays: 1
+  resultContextImageTag: QTEtableimg
+  resultContextImageUI: {fileID: 0}
+  craftContextSprite: {fileID: 21300000, guid: f4ddb25fc1f7f3742a26f1623a6dc2cd, type: 3}
+  blacksmithContextSprite: {fileID: 21300000, guid: b899421e657737f41aaf097da6e50480, type: 3}
+  washContextSprite: {fileID: 21300000, guid: dccc618e014ee944897d90c1f99c68d9, type: 3}
+  defaultContextSprite: {fileID: 21300000, guid: 34671e99050404f44a1365b56fe68a53, type: 3}
 --- !u!114 &8746036603112200908
 MonoBehaviour:
   m_ObjectHideFlags: 0

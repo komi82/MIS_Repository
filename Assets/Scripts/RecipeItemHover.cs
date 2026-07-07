@@ -67,6 +67,8 @@ public class RecipeItemHover : MonoBehaviour, IPointerClickHandler
     /// <summary>
     /// コンポーネントの初期化（手動アタッチ時にも使用可能）
     /// </summary>
+    public string resultContextImageTag = ""; // シーン内タグで検索する場合のタグ名（Inspectorから指定可）
+
     public void InitializeComponent()
     {
         // コンポーネントの自動取得
@@ -82,6 +84,23 @@ public class RecipeItemHover : MonoBehaviour, IPointerClickHandler
         if (autoFindImages && (requiredItemImages == null || requiredItemImages.Length == 0))
         {
             FindRequiredItemImages();
+        }
+
+        // resultContextImageUI が Inspector で未設定の場合、タグ検索でシーン内から探す
+        if (resultContextImageUI == null && !string.IsNullOrEmpty(resultContextImageTag))
+        {
+            // まずこのオブジェクトの親/子を探索
+            Image found = FindImageByTag(resultContextImageTag);
+            if (found == null)
+            {
+                // シーン全体から探す（非アクティブも含む）
+                found = FindImageInSceneByTag(resultContextImageTag);
+            }
+            if (found != null)
+            {
+                resultContextImageUI = found;
+                Debug.Log($"RecipeItemHover: resultContextImageUI をタグ '{resultContextImageTag}' で自動割当しました ({found.gameObject.name})");
+            }
         }
         
     }
@@ -225,7 +244,7 @@ public class RecipeItemHover : MonoBehaviour, IPointerClickHandler
         {
             DisplayItemsByArray(recipe);
         }
-        UpdateContextText();
+        UpdateContextText(currentRecipe);
     }
     
     /// <summary>
@@ -455,7 +474,7 @@ public class RecipeItemHover : MonoBehaviour, IPointerClickHandler
         {
             req2NameText.text = "";
         }
-        UpdateContextText(clear:true);
+        UpdateContextText(null, true);
     }
     
     /// <summary>
@@ -472,35 +491,126 @@ public class RecipeItemHover : MonoBehaviour, IPointerClickHandler
                 requiredItemImages[i].gameObject.SetActive(false);
             }
         }
-        UpdateContextText(clear:true);
+        UpdateContextText(null, true);
     }
 
-    private void UpdateContextText(bool clear = false)
+    [Header("コンテキストアイコン")]
+    [Tooltip("コンテキスト表示用のImage（インスペクタで指定）")]
+    public Image resultContextImageUI;
+
+    [Tooltip("ソース別のフォールバックスプライト（Result のアイコンが無い場合に使用）")]
+    public Sprite craftContextSprite;
+    public Sprite blacksmithContextSprite;
+    public Sprite washContextSprite;
+    public Sprite defaultContextSprite;
+
+    [Tooltip("true の場合、ソース別フォールバックスプライトを優先して表示します（デフォルト: true）")]
+    public bool preferSourceSprite = true;
+
+    /// <summary>
+    /// コンテキストテキストと（必要に応じて）コンテキストアイコンを更新する
+    /// </summary>
+    /// <param name="clear">true の場合は非表示にする</param>
+    /// <param name="recipe">現在表示しているレシピ（アイコン表示に使われる）</param>
+    private void UpdateContextText(RecipeData recipe = null, bool clear = false)
     {
         var recipeContextText = GetOrFindContextText();
-        if (recipeContextText == null) return;
+        if (recipeContextText == null && resultContextImageUI == null) return;
+
         if (clear)
         {
-            recipeContextText.gameObject.SetActive(false);
-            recipeContextText.text = string.Empty;
+            if (recipeContextText != null)
+            {
+                recipeContextText.gameObject.SetActive(false);
+                recipeContextText.text = string.Empty;
+            }
+            if (resultContextImageUI != null)
+            {
+                resultContextImageUI.sprite = null;
+                resultContextImageUI.color = new Color(1f, 1f, 1f, 0f);
+                resultContextImageUI.gameObject.SetActive(false);
+            }
             return;
         }
+
+        string ctxText = string.Empty;
         switch (currentSource)
         {
             case RecipeSource.Craft:
-                recipeContextText.text = "大窯で調合(属性は重ね掛け可)";
+                ctxText = "大窯で調合(属性重ね掛け可)";
                 break;
             case RecipeSource.Wash:
-                recipeContextText.text = "洗い場で浄化";
+                ctxText = "洗い場で浄化";
                 break;
             case RecipeSource.Blacksmith:
-                recipeContextText.text = "金床で鍛冶";
+                ctxText = "金床で鍛冶";
                 break;
             default:
-                recipeContextText.text = string.Empty;
+                ctxText = string.Empty;
                 break;
         }
-        recipeContextText.gameObject.SetActive(!string.IsNullOrEmpty(recipeContextText.text));
+
+        if (recipeContextText != null)
+        {
+            recipeContextText.text = ctxText;
+            recipeContextText.gameObject.SetActive(!string.IsNullOrEmpty(ctxText));
+        }
+
+        // アイコンの表示ロジック
+        if (resultContextImageUI != null)
+        {
+            Sprite chosen = null;
+
+            if (preferSourceSprite)
+            {
+                // ソース別スプライトを優先して選択
+                switch (currentSource)
+                {
+                    case RecipeSource.Craft: chosen = craftContextSprite; break;
+                    case RecipeSource.Blacksmith: chosen = blacksmithContextSprite; break;
+                    case RecipeSource.Wash: chosen = washContextSprite; break;
+                    default: chosen = defaultContextSprite; break;
+                }
+
+                // ソース別が無ければ result アイコンをフォールバックとして使用
+                if (chosen == null && recipe != null && recipe.resultItem != null && recipe.resultItem.icon != null)
+                {
+                    chosen = recipe.resultItem.icon;
+                }
+            }
+            else
+            {
+                // 既存挙動: result アイコンを優先
+                if (recipe != null && recipe.resultItem != null && recipe.resultItem.icon != null)
+                {
+                    chosen = recipe.resultItem.icon;
+                }
+                else
+                {
+                    switch (currentSource)
+                    {
+                        case RecipeSource.Craft: chosen = craftContextSprite; break;
+                        case RecipeSource.Blacksmith: chosen = blacksmithContextSprite; break;
+                        case RecipeSource.Wash: chosen = washContextSprite; break;
+                        default: chosen = defaultContextSprite; break;
+                    }
+                }
+            }
+
+            if (chosen != null)
+            {
+                resultContextImageUI.sprite = chosen;
+                resultContextImageUI.preserveAspect = true;
+                resultContextImageUI.color = Color.white;
+                resultContextImageUI.gameObject.SetActive(true);
+            }
+            else
+            {
+                resultContextImageUI.sprite = null;
+                resultContextImageUI.color = new Color(1f, 1f, 1f, 0f);
+                resultContextImageUI.gameObject.SetActive(false);
+            }
+        }
     }
 
     private TextMeshProUGUI GetOrFindContextText()
@@ -508,6 +618,27 @@ public class RecipeItemHover : MonoBehaviour, IPointerClickHandler
         if (cachedContextText != null) return cachedContextText;
         cachedContextText = FindTextMeshProByTag(ContextTextTag);
         return cachedContextText;
+    }
+
+    /// <summary>
+    /// シーン全体から指定タグの Image を検索（非アクティブ含む）
+    /// </summary>
+    private Image FindImageInSceneByTag(string tag)
+    {
+        try
+        {
+            var allImages = UnityEngine.Object.FindObjectsOfType<Image>(true);
+            foreach (var img in allImages)
+            {
+                if (img == null || img.gameObject == null) continue;
+                if (img.CompareTag(tag)) return img;
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"RecipeItemHover: FindImageInSceneByTag failed: {ex.Message}");
+        }
+        return null;
     }
     
     /// <summary>

@@ -18,6 +18,10 @@ public class SoundManager : MonoBehaviour
     [Tooltip("デバッグログを表示するか")]
     public bool enableDebugLog = false;
     
+    [Header("自動再生")]
+    [Tooltip("シーン起動時にGamePlayBGMを自動再生するか")]
+    public bool autoPlayGameplayBGM = true;
+    
     // AudioSource管理
     private AudioSource bgmSource;
     private List<AudioSource> sfxSources;
@@ -34,6 +38,11 @@ public class SoundManager : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
             InitializeAudioSources();
+            // 自動再生設定が有効なら、GameplayBGMを再生
+            if (autoPlayGameplayBGM && soundData != null && soundData.gameplayBGM != null)
+            {
+                PlayBGM(soundData.gameplayBGM, true, true);
+            }
         }
         else
         {
