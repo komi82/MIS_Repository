@@ -155,11 +155,16 @@ public class RequestManager : MonoBehaviour
         float elapsed = SceneTimer.Instance.GetElapsedTime();
         if (elapsed >= nextRequestTime)
         {
-            if (SoundManager.Instance != null)
+            // 依頼生成が可能かどうか先に判定
+            if (activeRequests.Count < maxRequests)
             {
-                SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.RequestSound);
+                // SE再生は生成が可能な場合のみ
+                if (SoundManager.Instance != null)
+                {
+                    SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.RequestSound);
+                }
+                GenerateRequest();
             }
-            GenerateRequest();
             ScheduleNextRequest();
         }
     }
@@ -390,6 +395,14 @@ public class RequestManager : MonoBehaviour
             }
 
             request.isCompleted = true;
+            
+            // アイテムをインベントリから削除
+            var slot = InventoryManager.Instance.FindSlotByItem(request.requiredItem);
+            if (slot != null)
+            {
+                InventoryManager.Instance.RemoveItem(slot);
+            }
+            
             moneyManager.AddMoney(request.rewardAmount);
 			// デリバー系ではrequestspawnslotsのプレハブは削除しない
 			// （デリバーは依頼の完了であり、作業対象の削除ではない）

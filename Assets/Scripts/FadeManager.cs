@@ -134,9 +134,22 @@ public class FadeManager : MonoBehaviour
         // フェードアウト
         yield return StartCoroutine(FadeOut());
         
+        // シーン切り替え前にポーズを解除（PauseController がポーズUIを残さないようにする）
+        var pauseControllers = UnityEngine.Object.FindObjectsOfType<PauseController>();
+        if (pauseControllers != null && pauseControllers.Length > 0)
+        {
+            foreach (var pc in pauseControllers)
+            {
+                if (pc != null)
+                {
+                    pc.Resume();
+                }
+            }
+        }
+
         // シーン切り替え
         UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
-        
+
         // 1フレーム待機（シーン読み込み完了を待つ）
         yield return null;
         
@@ -164,10 +177,11 @@ public class FadeManager : MonoBehaviour
         float elapsedTime = 0f;
         while (elapsedTime < fadeTime)
         {
-            elapsedTime += Time.deltaTime;
-            float alpha = Mathf.Lerp(0f, 1f, elapsedTime / fadeTime);
+            // タイムスケールの影響を受けない
+            elapsedTime += Time.unscaledDeltaTime;
+            float alpha = Mathf.Lerp(0f, 1f, Mathf.Clamp01(elapsedTime / fadeTime));
             fadeImage.color = new Color(fadeColor.r, fadeColor.g, fadeColor.b, alpha);
-            yield return null;
+            yield return null; // 次フレームまで待機（フレーム自体は進む）
         }
         
         fadeImage.color = new Color(fadeColor.r, fadeColor.g, fadeColor.b, 1f);
@@ -185,8 +199,9 @@ public class FadeManager : MonoBehaviour
         float elapsedTime = 0f;
         while (elapsedTime < fadeTime)
         {
-            elapsedTime += Time.deltaTime;
-            float alpha = Mathf.Lerp(1f, 0f, elapsedTime / fadeTime);
+            // タイムスケールの影響を受けない
+            elapsedTime += Time.unscaledDeltaTime;
+            float alpha = Mathf.Lerp(1f, 0f, Mathf.Clamp01(elapsedTime / fadeTime));
             fadeImage.color = new Color(fadeColor.r, fadeColor.g, fadeColor.b, alpha);
             yield return null;
         }

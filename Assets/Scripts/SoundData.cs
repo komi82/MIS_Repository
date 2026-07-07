@@ -37,21 +37,15 @@ public class SoundData : ScriptableObject
 
 
     [Header("BGM")]
-    [Tooltip("メインメニューBGM")]
-    public AudioClip mainMenuBGM;
-    
     [Tooltip("ゲームプレイBGM")]
     public AudioClip gameplayBGM;
-    
-    [Tooltip("リザルトBGM")]
-    public AudioClip resultBGM;
     
 
     
     [Header("音量設定")]
     [Range(0f, 1f)]
     [Tooltip("BGM音量")]
-    public float bgmVolume = 0.8f;
+    public float bgmVolume = 1f;
     
     [Range(0f, 1f)]
     [Tooltip("効果音音量")]

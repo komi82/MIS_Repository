@@ -16,7 +16,8 @@ public class ScoreDisplay : MonoBehaviour
     
     [Header("ランク表示")]
     [SerializeField] private Image rankImage; // ランクを表示するImage
-    [SerializeField] private int[] rankThresholds = new int[] { 0, 5, 10, 20, 50 }; // ランクの閾値
+    [SerializeField] [Tooltip("各ランクの閾値。日数基準で設定してください。例: {1,3,5} ")]
+    private int[] rankThresholds = new int[] { 1, 3, 5, 7, 10 }; // ランクの閾値（日数基準）
     [SerializeField] private Sprite[] rankSprites; // 各ランクに対応するスプライト
 
     [Header("スコア演出設定")]
@@ -36,57 +37,48 @@ public class ScoreDisplay : MonoBehaviour
         Smooth          // 滑らかな数値変化
     }
 
-    float score = 0;
-    int finalScore = 0;
-
+    // 日数をそのまま表示する
+    int finalScore = 0; // ここでは日数を格納
 
     void Start()
     {
         // resultシーンではカーソルを表示状態にする
         Cursor.lockState = CursorLockMode.Confined;
         Cursor.visible = true;
-        
-        xScoreText.text = $"報酬金: {MoneyManager.currentMoney}";
-        yScoreText.text = $"依頼件数: {RequestManager.RequestCompleted}";
-        float re = RequestManager.RequestCompleted;
-        score = MoneyManager.currentMoney * (re * re * 0.12f); // 計算結果
-        finalScore = Mathf.FloorToInt(score);
-        
+
+        // 日数を取得（DayAdvanceButtonを参照）
+        int dayCount = 1;
+        if (DayAdvanceButton.Instance != null)
+        {
+            dayCount = DayAdvanceButton.Instance.GetDay();
+        }
+
+        // 稼いだ金額と依頼件数は従来どおり表示
+        if (xScoreText != null)
+        {
+            xScoreText.text = $"最終金額: {MoneyManager.currentMoney}G";
+        }
+
+        if (yScoreText != null)
+        {
+            yScoreText.text = $"依頼件数: {RequestManager.RequestCompleted}件";
+        }
+
+        // 日数は "Day x" 表記で表示
+        finalScore = dayCount;
+        if (aScoreText != null)
+        {
+            aScoreText.text = $"Day {finalScore}";
+        }
+
         // ランク画像を最初は非表示にする
         if (rankImage != null)
         {
             rankImage.gameObject.SetActive(false);
         }
-        
-        // ルーレット演出が有効な場合は演出を開始、無効な場合は即座に表示
-        if (enableRouletteEffect)
-        {
-            // スコアが1桁の場合は強制的にSequentialに変更
-            RouletteType effectiveRouletteType = rouletteType;
-            if (finalScore.ToString().Length == 1)
-            {
-                effectiveRouletteType = RouletteType.Sequential;
-                Debug.Log($"スコアが1桁({finalScore})のため、RouletteTypeをSequentialに変更しました");
-            }
-            
-            switch (effectiveRouletteType)
-            {
-                case RouletteType.Sequential:
-                    StartCoroutine(SequentialRoulette());
-                    break;
-                case RouletteType.AllDigits:
-                    StartCoroutine(AllDigitsRoulette());
-                    break;
-                case RouletteType.Smooth:
-                    StartCoroutine(SmoothRoulette());
-                    break;
-            }
-        }
-        else
-        {
-            aScoreText.text = finalScore.ToString("N0");
-            UpdateRank(finalScore);
-        }
+
+        // ランクを更新（閾値はインスペクターで日数基準として設定される）
+        UpdateRank(finalScore);
     }
     
     /// <summary>
@@ -374,9 +366,9 @@ public class ScoreDisplay : MonoBehaviour
     }
     
     /// <summary>
-    /// 依頼件数に応じてランクを更新
+    /// 日数に応じてランクを更新（rankThresholds は日数基準）
     /// </summary>
-    private void UpdateRank(int requestCount)
+    private void UpdateRank(int dayCount)
     {
         if (rankImage == null || rankSprites == null || rankSprites.Length == 0)
         {
@@ -397,11 +389,11 @@ public class ScoreDisplay : MonoBehaviour
             return;
         }
         
-        // 現在の依頼件数に応じたランクを決定
+        // 現在の日数に応じたランクを決定
         int currentRankIndex = 0;
         for (int i = 0; i < rankThresholds.Length; i++)
         {
-            if (requestCount >= rankThresholds[i])
+            if (dayCount >= rankThresholds[i])
             {
                 currentRankIndex = i;
             }

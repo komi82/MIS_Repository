@@ -212,14 +212,17 @@ public class GameClockText : MonoBehaviour
         {
             targetDayButton.OnClickAdvanceDay();
         }
-        if (MoneyManager.Instance != null)
-        {
-            MoneyManager.Instance.ResetMoney();
-        }
-        else
-        {
-            MoneyManager.currentMoney = 0;
-        }
+        
+        // 所持金は初期化しない仕様に変更
+        // if (MoneyManager.Instance != null)
+        // {
+        //     MoneyManager.Instance.ResetMoney();
+        // }
+        // else
+        // {
+        //     MoneyManager.currentMoney = 0;
+        // }
+        
         if (playerController != null)
         {
             playerController.ResetToStartState(arcadeResetPoint);
