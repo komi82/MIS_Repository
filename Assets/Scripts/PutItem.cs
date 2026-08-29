@@ -478,21 +478,40 @@ public class PutItem : MonoBehaviour
             // PowerGageの処理が完全に終了してから以下の処理を実行
             yield return null; // 1フレーム待機してから処理を続行
 
-			Transform anchor = slots.GetResultAnchor();
-			Vector3 pos = anchor != null ? anchor.position : hit.point + targetObject.transform.up * placementOffset;
-			Quaternion rot = anchor != null ? anchor.rotation : Quaternion.identity;
+            Transform anchor = slots.GetResultAnchor();
+            Vector3 pos = anchor != null ? anchor.position : hit.point + targetObject.transform.up * placementOffset;
+            Quaternion rot = anchor != null ? anchor.rotation : Quaternion.identity;
 
-			slots.ClearAllAndDestroyChildren();
+            // 使用した2つの素材を削除し、スロットを空にする
+            slots.ClearAllAndDestroyChildren();
 
+            // 完成品を次の調合の素材としてslot1に登録する
+            Transform resultSlot = null;
+            bool registeredResult = slots.TryPlace(match.resultItem, out resultSlot);
 
-			// 基本的な効果音再生
-			if (SoundManager.Instance != null)
-			{
-				SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.recipeCompleteSound);
-			}
-						Instantiate(match.resultItem.prefab, pos, rot);
-			Debug.Log($"クラフト生成: {match.resultItem.itemName}");
-			if (targets.Contains(scene))
+            // 基本的な効果音再生
+            if (SoundManager.Instance != null)
+            {
+                SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.recipeCompleteSound);
+            }
+
+            // 完成品を生成
+            // 見た目の位置は今まで通りresultAnchorだが、
+            // 内部的にはslot1の子にすることで次の調合素材として扱えるようにする
+            if (registeredResult && resultSlot != null)
+            {
+                Instantiate(match.resultItem.prefab, pos, rot, resultSlot);
+            }
+            else
+            {
+                // 万が一スロット登録に失敗しても完成品自体は生成する
+                Instantiate(match.resultItem.prefab, pos, rot);
+                Debug.LogWarning("完成品を次の調合用スロットに登録できませんでした");
+            }
+
+            Debug.Log($"クラフト生成: {match.resultItem.itemName}");
+
+            if (targets.Contains(scene))
 
 			{
 				ConditionalSceneTransition.TriggerTransitionStatic();
