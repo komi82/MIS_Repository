@@ -838,7 +838,7 @@ public class PutItem : MonoBehaviour
 						if (slots != null && slots.TryPlace(itemToPlace, out placeSlot) && placeSlot != null)
 						{
 							spawnPosition = placeSlot.position;
-							spawnRotation = placeSlot.rotation;
+							spawnRotation = placeSlot.rotation * itemToPlace.prefab.transform.rotation;
 						}
 						else
 						{
