@@ -56,12 +56,12 @@ public class PutItem : MonoBehaviour
 	private bool isPowerGageCompleted = false;
 	
 	// SliderMove関連の変数
-	private bool isWashClicked = false;
 	private bool isWashMaxValue = false;
 	private bool isWashCompleted = false;
-	
-	// コルーチン処理中のキー無効化用フラグ
-	private bool isProcessingCoroutine = false;
+    private bool isWashFailed = false;
+
+    // コルーチン処理中のキー無効化用フラグ
+    private bool isProcessingCoroutine = false;
 	
 	// UI表示管理用変数
 	private GameObject currentPromptUI;
@@ -464,12 +464,20 @@ public class PutItem : MonoBehaviour
 				// PowerGageの完了を待つ
 				yield return StartCoroutine(WaitForPowerGageCompletion());
 			}
-		else if (taggedObject.CompareTag("wash"))
-			{
-				// Washの完了を待つ
-				yield return StartCoroutine(WaitForWashCompletion());
-			}
-		else if (taggedObject.CompareTag("blacksmith"))
+            else if (taggedObject.CompareTag("wash"))
+            {
+                // Washの完了を待つ
+                yield return StartCoroutine(WaitForWashCompletion());
+
+                // 洗浄に失敗した場合は、素材を残したままクラフト処理を終了
+                if (isWashFailed)
+                {
+                    isProcessingCoroutine = false;
+                    isCraftingInProgress = false;
+                    yield break;
+                }
+            }
+            else if (taggedObject.CompareTag("blacksmith"))
 		{
 			// Blacksmith用のUI完了を待つ
 			yield return StartCoroutine(WaitForBlacksmithCompletion(match));
@@ -477,6 +485,7 @@ public class PutItem : MonoBehaviour
 
             // PowerGageの処理が完全に終了してから以下の処理を実行
             yield return null; // 1フレーム待機してから処理を続行
+
 
             Transform anchor = slots.GetResultAnchor();
             Vector3 pos = anchor != null ? anchor.position : hit.point + targetObject.transform.up * placementOffset;
@@ -510,6 +519,8 @@ public class PutItem : MonoBehaviour
             }
 
             Debug.Log($"クラフト生成: {match.resultItem.itemName}");
+
+
 
             if (targets.Contains(scene))
 
@@ -720,7 +731,7 @@ public class PutItem : MonoBehaviour
 		
 		// Wash処理を開始
 		isWashCompleted = false;
-		isWashClicked = false;
+        isWashFailed = false;
 		isWashMaxValue = false;
 		washSlider.value = 0;
 		washSlider.gameObject.SetActive(true); // スライダーを表示
@@ -733,37 +744,46 @@ public class PutItem : MonoBehaviour
 		{
 			float deltaTime = Time.deltaTime;
 
-			// スペースキーでクリック状態を切り替え
-			if (Input.GetKeyDown(KeyCode.Space))
-			{
-				if (isWashClicked == false)
-				{
-					Debug.Log("stop");
-					isWashClicked = true;
-				}
-				else
-				{
-					Debug.Log("start");
-					isWashClicked = false;
-				}
-			}
-			
-			// クリック状態の場合は成功判定
-			if (isWashClicked)
-			{
-				if (washSlider.value >= 0.4 && washSlider.value <= 0.6)
-				{
-					// 完了
-					isWashCompleted = true;
-					washSlider.gameObject.SetActive(false); // スライダーを非表示
-					Debug.Log("Wash完了");
-				}
-				yield return null;//失敗処理を入れるとしたらこのへん
-				continue;
-			}
-			
-			// スライダーの自動移動
-			if (washSlider.value >= 1)
+            // スペースキーを押した瞬間に成功・失敗を判定
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                Debug.Log("stop");
+
+                // 成功
+                if (washSlider.value >= 0.4f && washSlider.value <= 0.6f)
+                {
+                    isWashCompleted = true;
+                    washSlider.gameObject.SetActive(false);
+                    Debug.Log("Wash完了");
+                }
+                // 失敗
+                else
+                {
+                    isWashFailed = true;
+                    washSlider.gameObject.SetActive(false);
+                    Debug.Log("Wash失敗");
+
+                    // 失敗効果音
+                    if (SoundManager.Instance != null &&
+                        SoundManager.Instance.soundData != null &&
+                        SoundManager.Instance.soundData.washFailedSound != null)
+                    {
+                        SoundManager.Instance.PlaySFX(
+							SoundManager.Instance.soundData.washFailedSound,
+							2f
+						);
+                    }
+
+                    // プレイヤー操作を止めたまま1秒待つ
+                    yield return new WaitForSeconds(1f);
+
+                    EndPlayerUiBlock();
+                    yield break;
+                }
+            }
+
+            // スライダーの自動移動
+            if (washSlider.value >= 1)
 			{
 				isWashMaxValue = true;
 			}
@@ -838,8 +858,8 @@ public class PutItem : MonoBehaviour
 						if (slots != null && slots.TryPlace(itemToPlace, out placeSlot) && placeSlot != null)
 						{
 							spawnPosition = placeSlot.position;
-							spawnRotation = placeSlot.rotation * itemToPlace.prefab.transform.rotation;
-						}
+                            spawnRotation = placeSlot.rotation * itemToPlace.prefab.transform.rotation;
+                        }
 						else
 						{
 							// PlacementSlots が無い or 空き無し。put タグなら床配置を許可、その他は不可

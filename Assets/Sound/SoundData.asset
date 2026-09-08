@@ -18,6 +18,7 @@ MonoBehaviour:
   deliverySound: {fileID: 8300000, guid: a249e100ceb2f0849ab8c73fc53618d5, type: 3}
   RequestSound: {fileID: 8300000, guid: bc92773a79f54ad4091be43b77dd6ecb, type: 3}
   putSound: {fileID: 8300000, guid: 3afcfe46d29bb78429652a3cb023ba8f, type: 3}
+  washFailedSound: {fileID: 8300000, guid: a7163361c295bf745b456bb56328cf01, type: 3}
   timeupSound: {fileID: 8300000, guid: e0751ba445b2f324682ffecd8a0f1ead, type: 3}
   rouletteSound: {fileID: 8300000, guid: 02a63d13224ca51419c9a6ba3c855fab, type: 3}
   displaySound: {fileID: 8300000, guid: 68caba413f603394d80523bb249b30b4, type: 3}
