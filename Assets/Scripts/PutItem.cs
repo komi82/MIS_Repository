@@ -858,8 +858,8 @@ public class PutItem : MonoBehaviour
 						if (slots != null && slots.TryPlace(itemToPlace, out placeSlot) && placeSlot != null)
 						{
 							spawnPosition = placeSlot.position;
-                            spawnRotation = placeSlot.rotation * itemToPlace.prefab.transform.rotation;
-                        }
+							spawnRotation = placeSlot.rotation * itemToPlace.prefab.transform.rotation;
+						}
 						else
 						{
 							// PlacementSlots が無い or 空き無し。put タグなら床配置を許可、その他は不可

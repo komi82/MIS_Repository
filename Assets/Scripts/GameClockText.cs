@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// ゲーム進行用のカウンタ表示と、時間切れ時のシーン遷移を担当する。
@@ -19,14 +20,13 @@ public class GameClockText : MonoBehaviour
     [SerializeField] private GameObject completePanel; // 目標達成時の遷移用UI
 
     [Header("時間制限")]
-    [SerializeField] private float roundTimeSeconds = 120f;
     private static bool s_hasRemainingTime;
     private static float s_remainingTime;
-    [SerializeField] private float carryoverTimeCapSeconds = 180f;
     private static float s_nextRoundCarrySeconds;
     private static float s_rewardOverflowBonusX;
 
     [SerializeField] public int borderdown = 0;
+    [SerializeField] public int limitup = 0;
     [SerializeField] private int completeMoneyThreshold = 10000; // Complete分岐の所持金しきい値
     [SerializeField] private DayAdvanceButton dayAdvanceButton;
     private static bool s_hasCompleteMoneyThreshold;
@@ -34,6 +34,11 @@ public class GameClockText : MonoBehaviour
 
     [Header("目標金額設定 (日ごと)")]
     [SerializeField] private int[] dailyThresholds = new int[7] { 1000, 2000, 4000, 6000, 8000, 10000, 15000 };
+
+    [Header("納品件数制限")]
+    [SerializeField] private int maxDeliveriesPerDay = 3;
+    private static int s_deliveriesCount;
+    private static int s_deliveriesCountDay = -1;
 
     public List<BaffItemData> items;
 
@@ -87,6 +92,8 @@ public class GameClockText : MonoBehaviour
         s_remainingTime = 0f;
         s_nextRoundCarrySeconds = 0f;
         s_rewardOverflowBonusX = 0f;
+        s_deliveriesCount = 0;
+        s_deliveriesCountDay = -1;
     }
 
     private void OnDestroy()
@@ -109,14 +116,18 @@ public class GameClockText : MonoBehaviour
             }
         }
 
+        limitup = GetTotal(BaffEffectType.limitup);
         borderdown = GetTotal(BaffEffectType.borderdown);
 
-        if (!s_hasRemainingTime || s_remainingTime <= 0f)
-        {
-            s_remainingTime = Mathf.Max(1f, roundTimeSeconds + s_nextRoundCarrySeconds);
-            s_nextRoundCarrySeconds = 0f;
-            s_hasRemainingTime = true;
-        }
+        maxDeliveriesPerDay = 3 + limitup;
+
+        // 時間制限を削除したため、残り時間の初期化は不要
+        // if (!s_hasRemainingTime || s_remainingTime <= 0f)
+        // {
+        //     s_remainingTime = Mathf.Max(1f, roundTimeSeconds + s_nextRoundCarrySeconds);
+        //     s_nextRoundCarrySeconds = 0f;
+        //     s_hasRemainingTime = true;
+        // }
 
         if (transitionPanel != null) transitionPanel.SetActive(false); // UI非表示
         if (completePanel != null)
@@ -137,13 +148,6 @@ public class GameClockText : MonoBehaviour
                 BeginRoundEnd(true);
                 return;
             }
-
-            s_remainingTime -= Time.deltaTime;
-            if (s_remainingTime <= 0f)
-            {
-                s_remainingTime = 0f;
-                BeginRoundEnd(false);
-            }
         }
 
         UpdateClockDisplay();
@@ -157,8 +161,8 @@ public class GameClockText : MonoBehaviour
     void UpdateClockDisplay()
     {
         if (clockText == null) return;
-        int seconds = Mathf.CeilToInt(Mathf.Max(0f, s_remainingTime));
-        clockText.text = $"Time: {seconds:N0}";
+        int remaining = GetRemainingDeliveries();
+        clockText.text = $"Deadline: {remaining}";
     }
 
     private void BeginRoundEnd(bool completedByThreshold)
@@ -201,37 +205,27 @@ public class GameClockText : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
+        // completePanel を表示
+        if (completePanel != null) completePanel.SetActive(true);
+        if (transitionPanel != null) transitionPanel.SetActive(false);
+
+        // 1秒待機
+        yield return new WaitForSeconds(1f);
+
+        // フェードアウト
         if (FadeManager.Instance != null)
         {
             FadeManager.Instance.FadeOutOnly();
             yield return new WaitForSeconds(FadeManager.Instance.fadeTime);
         }
 
+        // Day 更新
         DayAdvanceButton targetDayButton = dayAdvanceButton != null ? dayAdvanceButton : DayAdvanceButton.Instance;
         if (targetDayButton != null)
         {
             targetDayButton.OnClickAdvanceDay();
         }
         
-        // 所持金は初期化しない仕様に変更
-        // if (MoneyManager.Instance != null)
-        // {
-        //     MoneyManager.Instance.ResetMoney();
-        // }
-        // else
-        // {
-        //     MoneyManager.currentMoney = 0;
-        // }
-        
-        if (playerController != null)
-        {
-            playerController.ResetToStartState(arcadeResetPoint);
-        }
-
-        s_remainingTime = Mathf.Max(1f, roundTimeSeconds + s_nextRoundCarrySeconds);
-        s_nextRoundCarrySeconds = 0f;
-        s_hasRemainingTime = true;
-
         if (deliveryStation != null)
         {
             deliveryStation.ForceCloseUI();
@@ -239,36 +233,23 @@ public class GameClockText : MonoBehaviour
         if (completePanel != null) completePanel.SetActive(false);
         if (transitionPanel != null) transitionPanel.SetActive(false);
 
-        if (FadeManager.Instance != null)
-        {
-            FadeManager.Instance.FadeInOnly();
-            yield return new WaitForSeconds(FadeManager.Instance.fadeTime);
-        }
-
-        for (int i = 0; i < disabledBehaviours.Count; i++)
-        {
-            if (disabledBehaviours[i] != null)
-            {
-                disabledBehaviours[i].enabled = true;
-            }
-        }
-
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-
         isCompleteTransition = false;
         transitionStarted = false;
+
+        // フェードアウト状態のまま Shop へ遷移（フェード処理なし）
+        TransitionToShopWithoutFade();
     }
 
     private void ApplyCarryoverBonus()
     {
-        float carrySource = Mathf.Max(0f, s_remainingTime) * 0.5f;
-        float carryCap = Mathf.Max(0f, carryoverTimeCapSeconds);
-        float acceptedCarry = Mathf.Min(carrySource, carryCap);
-        float overflow = Mathf.Max(0f, carrySource - carryCap);
-
-        s_nextRoundCarrySeconds = acceptedCarry;
-        s_rewardOverflowBonusX += overflow;
+        // 時間制限を削除したため、キャリーオーバー処理は不要
+        // float carrySource = Mathf.Max(0f, s_remainingTime) * 0.5f;
+        // float carryCap = Mathf.Max(0f, carryoverTimeCapSeconds);
+        // float acceptedCarry = Mathf.Min(carrySource, carryCap);
+        // float overflow = Mathf.Max(0f, carrySource - carryCap);
+        //
+        // s_nextRoundCarrySeconds = acceptedCarry;
+        // s_rewardOverflowBonusX += overflow;
     }
 
     void TransitionToNextScene()
@@ -281,6 +262,25 @@ public class GameClockText : MonoBehaviour
         }
 
         FadeManager.Instance.LoadSceneWithFade(nextScene);
+    }
+
+    private void TransitionToShop()
+    {
+        Debug.Log("[GameClockText] Shop へ遷移します");
+        if (ChangeScene.Instance != null)
+        {
+            ChangeScene.Instance.GoToShop();
+        }
+        else if (FadeManager.Instance != null)
+        {
+            FadeManager.Instance.LoadSceneWithFade(SceneNames.Shop);
+        }
+    }
+
+    private void TransitionToShopWithoutFade()
+    {
+        Debug.Log("[GameClockText] Shop へ遷移します（フェード状態のまま）");
+        SceneManager.LoadScene(SceneNames.Shop);
     }
 
     static bool IsMenuScene(string sceneName)
@@ -332,7 +332,8 @@ public class GameClockText : MonoBehaviour
 
     /// <summary>
     /// Day値に応じて CompleteMoneyThreshold を更新する。
-    /// 仕様: インスペクターの固定値 dailyThresholds[day - 1] からボーダーダウンバフを引いて計算
+    /// 仕様: インスペクターで指定した要素の最高点に達したら、その値の1.1倍を次の要素として自動生成。
+    /// 以降も自動生成が続く場合、前の値にさらに1.1倍を乗じて計算。
     /// </summary>
     public void UpdateCompleteThresholdByDay(int day)
     {
@@ -348,12 +349,12 @@ public class GameClockText : MonoBehaviour
             }
             else
             {
-                int lastIndex = dailyThresholds.Length - 1;
-                int lastThreshold = dailyThresholds[lastIndex];
-                int step = dailyThresholds.Length >= 2
-                    ? Mathf.Max(1, dailyThresholds[lastIndex] - dailyThresholds[lastIndex - 1])
-                    : Mathf.Max(1, defaultCompleteMoneyThreshold);
-                baseThreshold = lastThreshold + step * (day - dailyThresholds.Length);
+                // インスペクターで指定した最後の要素を基準に、1.1倍ずつ増加
+                int lastThreshold = dailyThresholds[dailyThresholds.Length - 1];
+                int autoGeneratedCount = day - dailyThresholds.Length;
+                
+                // lastThreshold × (1.1)^autoGeneratedCount で計算
+                baseThreshold = Mathf.RoundToInt(lastThreshold * Mathf.Pow(1.1f, autoGeneratedCount));
             }
         }
         else
@@ -395,5 +396,60 @@ public class GameClockText : MonoBehaviour
     public static float GetRewardOverflowBonusX()
     {
         return Mathf.Max(0f, s_rewardOverflowBonusX);
+    }
+
+    /// <summary>
+    /// 納品完了時に呼び出す。制限チェック付き。
+    /// </summary>
+    public bool TryAddDelivery()
+    {
+        int currentDay = DayAdvanceButton.Instance != null ? DayAdvanceButton.Instance.GetDay() : 1;
+        
+        // 日が変わったらカウントをリセット
+        if (currentDay != s_deliveriesCountDay)
+        {
+            s_deliveriesCount = 0;
+            s_deliveriesCountDay = currentDay;
+        }
+
+        if (s_deliveriesCount >= maxDeliveriesPerDay)
+        {
+            Debug.LogWarning($"[GameClockText] 本日の納品上限に達しています: {s_deliveriesCount}/{maxDeliveriesPerDay}");
+            return false;
+        }
+
+        s_deliveriesCount++;
+        Debug.Log($"[GameClockText] 納品完了: {s_deliveriesCount}/{maxDeliveriesPerDay}");
+        return true;
+    }
+
+    /// <summary>
+    /// 本日の残り納品回数を取得
+    /// </summary>
+    public int GetRemainingDeliveries()
+    {
+        int currentDay = DayAdvanceButton.Instance != null ? DayAdvanceButton.Instance.GetDay() : 1;
+        
+        if (currentDay != s_deliveriesCountDay)
+        {
+            return maxDeliveriesPerDay;
+        }
+
+        return Mathf.Max(0, maxDeliveriesPerDay - s_deliveriesCount);
+    }
+
+    /// <summary>
+    /// 本日の納品回数が上限に達しているか判定
+    /// </summary>
+    public bool IsDeliveryLimitReached()
+    {
+        int currentDay = DayAdvanceButton.Instance != null ? DayAdvanceButton.Instance.GetDay() : 1;
+        
+        if (currentDay != s_deliveriesCountDay)
+        {
+            return false;
+        }
+
+        return s_deliveriesCount >= maxDeliveriesPerDay;
     }
 }

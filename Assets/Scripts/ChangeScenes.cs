@@ -23,6 +23,7 @@ public class ChangeScene: MonoBehaviour
         // Money & Request
         public int money;
         public int requestsCompleted;
+        public int dayCount;
 
         // Inventory (ItemNames to restore)
         public string[] inventoryItemNames = new string[4];
@@ -140,6 +141,15 @@ public class ChangeScene: MonoBehaviour
             }
         }
 
+        // Shop からの戻り遷移は状態をリセットしない（金額・アイテムは保持）
+        if (!shouldReset && string.Equals(previousName, SceneNames.Shop, StringComparison.OrdinalIgnoreCase))
+        {
+            savedState = null;
+            // Shop での金額の変更はリアルタイムに MoneyManager.currentMoney に反映されている
+            Debug.Log("[ChangeScenes] Shop から戻ります。金額・アイテムは保持されます。");
+            return;
+        }
+
         if (shouldReset)
         {
             savedState = null;
@@ -155,6 +165,9 @@ public class ChangeScene: MonoBehaviour
         savedState = new ArcadeState();
         savedState.money = MoneyManager.currentMoney;
         savedState.requestsCompleted = RequestManager.RequestCompleted;
+        
+        // 日数を保存
+        savedState.dayCount = DayAdvanceButton.GetDayStatic();
 
         var inv = InventoryManager.Instance;
         if (inv != null)
@@ -178,6 +191,15 @@ public class ChangeScene: MonoBehaviour
 
         MoneyManager.currentMoney = savedState.money;
         RequestManager.RequestCompleted = savedState.requestsCompleted;
+        
+        // 日数を復元
+        if (savedState.dayCount > 0)
+        {
+            if (DayAdvanceButton.Instance != null)
+            {
+                DayAdvanceButton.Instance.SetDay(savedState.dayCount);
+            }
+        }
 
         var inv = InventoryManager.Instance;
         if (inv != null)
@@ -191,6 +213,22 @@ public class ChangeScene: MonoBehaviour
     private void ResetArcadeRuntimeState()
     {
         OwnedProgressManager.ResetAll();
+    }
+
+    /// <summary>
+    /// Arcade から Shop シーンへ遷移する
+    /// </summary>
+    public void GoToShop()
+    {
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.buttonClickSound);
+        }
+
+        // Arcade の状態を保存してから Shop へ遷移
+        SaveArcadeStateExplicit();
+        FadeManager.Instance.LoadSceneWithFade(SceneNames.Shop);
+        Debug.Log("[ChangeScenes] Shop へ遷移します");
     }
 
     void Update()
