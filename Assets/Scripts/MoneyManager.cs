@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections;
 
 /// <summary>
 /// 所持金の増減とUI反映を管理する。
@@ -12,6 +13,7 @@ public class MoneyManager : MonoBehaviour
 
     [SerializeField] public static int currentMoney = 0;
     [SerializeField] private TextMeshProUGUI moneyText;
+    [SerializeField] private TextMeshProUGUI gainMoneyText;
 
     private void Awake()
     {
@@ -28,12 +30,17 @@ public class MoneyManager : MonoBehaviour
     {
         // シーン遷移で初期化しない仕様
         UpdateUI();
+        if (gainMoneyText != null)
+        {
+            gainMoneyText.gameObject.SetActive(false);
+        }
     }
 
     public void AddMoney(int amount)
     {
         currentMoney += amount;
         UpdateUI();
+        StartCoroutine(ShowGainMoney(amount));
     }
 
     public bool SpendMoney(int amount)
@@ -55,6 +62,21 @@ public class MoneyManager : MonoBehaviour
         {
             moneyText.text = $"{currentMoney:N0}G";
         }
+    }
+
+    private IEnumerator ShowGainMoney(int amount)
+    {
+        if (gainMoneyText == null)
+        {
+            yield break;
+        }
+
+        gainMoneyText.text = $"+{amount:N0}G";
+        gainMoneyText.gameObject.SetActive(true);
+
+        yield return new WaitForSeconds(1.5f);
+
+        gainMoneyText.gameObject.SetActive(false);
     }
 
     public int GetMoney() => currentMoney;
