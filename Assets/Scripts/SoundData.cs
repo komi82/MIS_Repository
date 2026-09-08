@@ -26,6 +26,9 @@ public class SoundData : ScriptableObject
     [Tooltip("設置音")]
     public AudioClip putSound;
 
+    [Tooltip("洗い場失敗音")]
+    public AudioClip washFailedSound;
+
     [Tooltip("時間切れ音")]
     public AudioClip timeupSound;
 
