@@ -50,6 +50,14 @@ public class DayAdvanceButton : MonoBehaviour
         return s_hasDay ? s_day : day;
     }
 
+    /// <summary>
+    /// 静的にDayCountを取得するメソッド（resultシーンなどInstance がない場所で使用）
+    /// </summary>
+    public static int GetDayStatic()
+    {
+        return s_hasDay ? s_day : 1;
+    }
+
     public void SetDay(int value)
     {
         s_day = Mathf.Max(1, value);
