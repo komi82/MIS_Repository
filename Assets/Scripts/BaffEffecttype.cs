@@ -12,5 +12,6 @@ public enum BaffEffectType
     // 調合の長押し時間短縮（既存の番号を変えないため末尾に追加）
     craftHoldShortening,
     blacksmithClickReduction,
-    purificationWindowExpansion
+    purificationWindowExpansion,
+    dailyIncome
 }
