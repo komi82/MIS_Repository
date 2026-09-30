@@ -26488,7 +26488,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be3dc07d9ae899146bd99342495abb84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ControlGuideVisibilityController
-  controlGuideObjects: []
+  controlGuideObjects:
+  - {fileID: 0}
   useTagSearch: 1
   guideTagName: ControlGuide
   canvasGroup: {fileID: 1304759083}
@@ -35161,12 +35162,11 @@ MonoBehaviour:
   completeThresholdText: {fileID: 1857049361}
   transitionPanel: {fileID: 1485101284}
   completePanel: {fileID: 709386763}
-  roundTimeSeconds: 120
-  carryoverTimeCapSeconds: 300
   borderdown: 0
+  limitup: 0
   completeMoneyThreshold: 300
   dayAdvanceButton: {fileID: 1717329647}
-  dailyThresholds: 640000002c010000f4010000ee020000e8030000dc050000d0070000b80b0000a00f0000881300004c1d000010270000983a0000204e00003075000050c30000f8240100a0860100d0fb01001098020070820300e0930400801a060020a1070010eb090000350c0040420f00d012130060e3160080841e00a0252600c0c62d007038390020aa440060ec5300a02e630000127a008096980020bcbe00c0e1e40080a8120180b14f0180ba8c0180c3c901c00e1602005a620280f0fa0240d2df0300b4c40400e1f505
+  dailyThresholds: 64000000f4010000e8030000d0070000b80b00008813000010270000204e0000b888000003d90000f8240100a0860100d508020020bf020090d0030015160500d0dd0600c027090031de0b0040420f0045941500d26d1a0080841e00a0252600d5dc320020aa4400808d5b00f1ad7600809698004e61bc00872ef300002d310140787d0180c3c901005a620280f0fa0240d2df0300b4c40400e1f505
   items:
   - {fileID: 11400000, guid: 7430427b03e0d2b44b063710b5f27158, type: 2}
   - {fileID: 11400000, guid: 98ddbc9d7ff47e648847463ab00a96cd, type: 2}
@@ -36305,6 +36305,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MoneyManager
   moneyText: {fileID: 1857049361}
+  gainMoneyText: {fileID: 0}
 --- !u!114 &1857049361
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -38573,6 +38574,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MoneyManager
   moneyText: {fileID: 2022247819}
+  gainMoneyText: {fileID: 0}
 --- !u!114 &2022247819
 MonoBehaviour:
   m_ObjectHideFlags: 0
