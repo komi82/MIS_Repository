@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -12,10 +13,12 @@ public class OwnedItemsHUD : MonoBehaviour
     [SerializeField] private BaffItemDatabase baffItemDatabase;
     [SerializeField] private ArtifactDatabase artifactDatabase;
 
-    [Header("表示スロット（空の UI RectTransform を指定）")]
+    [Header("表示パネルとスロットの親")]
+    [Tooltip("BringBaff配下の表示パネルを指定してください（このスクリプトを付けたオブジェクト自身は指定しないでください）")]
     [SerializeField] private GameObject window;
-    [SerializeField] private RectTransform[] baffItemSlots;
-    [SerializeField] private RectTransform[] artifactSlots;
+    [SerializeField] private RectTransform baffItemSlotsParent;
+    [SerializeField] private RectTransform artifactSlotsParent;
+    [SerializeField] private TextMeshProUGUI benefitsText;
 
     [Header("入力")]
     [SerializeField] private KeyCode showKey = KeyCode.Tab;
@@ -23,14 +26,15 @@ public class OwnedItemsHUD : MonoBehaviour
     [Header("見た目")]
     [SerializeField] private Vector2 countTextOffset = new Vector2(-8f, 8f);
     [SerializeField] private int countFontSize = 24;
+    [SerializeField] private Vector2 slotSize = new Vector2(64f, 64f);
+    [SerializeField] private Vector2 slotSpacing = new Vector2(8f, 8f);
+    [SerializeField] private int slotsPerRow = 6;
 
     private readonly List<SlotWidget> baffWidgets = new List<SlotWidget>();
     private readonly List<SlotWidget> artifactWidgets = new List<SlotWidget>();
-    private bool widgetsBuilt;
 
     private class SlotWidget
     {
-        public RectTransform slot;
         public GameObject root;
         public Image icon;
         public TextMeshProUGUI countText;
@@ -39,8 +43,22 @@ public class OwnedItemsHUD : MonoBehaviour
     void Start()
     {
         OwnedProgressManager.LogOwnedInventory(baffItemDatabase, artifactDatabase);
-        BuildWidgetsIfNeeded();
+
+        if (baffItemDatabase == null || artifactDatabase == null)
+            Debug.LogError("OwnedItemsHUD: BaffItemDatabase と ArtifactDatabase を設定してください。", this);
+        if (benefitsText == null)
+            Debug.LogError("OwnedItemsHUD: 効果一覧を表示する TextMeshProUGUI を設定してください。", this);
+        if (baffItemSlotsParent == null || artifactSlotsParent == null)
+            Debug.LogError("OwnedItemsHUD: BaffItemとArtifactのスロット親RectTransformを設定してください。", this);
+        if (window == null)
+            Debug.LogError("OwnedItemsHUD: BringBaff配下の表示パネルをwindowに設定してください。", this);
+        if (window == gameObject)
+            Debug.LogError("OwnedItemsHUD: BringBaff自身ではなく、表示パネルの子オブジェクトをwindowに設定してください。", this);
+
+        ConfigureGrid(baffItemSlotsParent);
+        ConfigureGrid(artifactSlotsParent);
         SetDisplayVisible(false);
+        SetWindowVisible(false);
     }
 
     void Update()
@@ -49,46 +67,53 @@ public class OwnedItemsHUD : MonoBehaviour
         {
             RefreshDisplay();
             SetDisplayVisible(true);
-            window.SetActive(true);
+            SetWindowVisible(true);
         }
         else
         {
             SetDisplayVisible(false);
-            window.SetActive(false);
+            SetWindowVisible(false);
         }
     }
 
-    private void BuildWidgetsIfNeeded()
+    private void ConfigureGrid(RectTransform parent)
     {
-        if (widgetsBuilt) return;
+        if (parent == null) return;
 
-        BuildWidgetsForSlots(baffItemSlots, baffWidgets);
-        BuildWidgetsForSlots(artifactSlots, artifactWidgets);
-        widgetsBuilt = true;
+        GridLayoutGroup grid = parent.GetComponent<GridLayoutGroup>();
+        if (grid == null)
+            grid = parent.gameObject.AddComponent<GridLayoutGroup>();
+
+        grid.cellSize = slotSize;
+        grid.spacing = slotSpacing;
+        grid.startCorner = GridLayoutGroup.Corner.UpperLeft;
+        grid.startAxis = GridLayoutGroup.Axis.Horizontal;
+        grid.childAlignment = TextAnchor.UpperLeft;
+        grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        grid.constraintCount = Mathf.Max(1, slotsPerRow);
     }
 
-    private void BuildWidgetsForSlots(RectTransform[] slots, List<SlotWidget> widgetList)
+    private void EnsureWidgetCount(RectTransform parent, List<SlotWidget> widgets, int count)
     {
-        widgetList.Clear();
-        if (slots == null) return;
+        if (parent == null) return;
 
-        for (int i = 0; i < slots.Length; i++)
+        while (widgets.Count < count)
         {
-            RectTransform slot = slots[i];
-            if (slot == null) continue;
-
-            SlotWidget widget = new SlotWidget { slot = slot };
+            GameObject slotObject = new GameObject("OwnedItemSlot", typeof(RectTransform));
+            slotObject.transform.SetParent(parent, false);
+            RectTransform slotRect = slotObject.GetComponent<RectTransform>();
+            slotRect.localScale = Vector3.one;
 
             GameObject iconObj = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            iconObj.transform.SetParent(slot, false);
+            iconObj.transform.SetParent(slotRect, false);
             RectTransform iconRect = iconObj.GetComponent<RectTransform>();
             StretchFull(iconRect);
-            widget.icon = iconObj.GetComponent<Image>();
-            widget.icon.raycastTarget = false;
-            widget.icon.preserveAspect = true;
+            Image icon = iconObj.GetComponent<Image>();
+            icon.raycastTarget = false;
+            icon.preserveAspect = true;
 
             GameObject countObj = new GameObject("Count", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
-            countObj.transform.SetParent(slot, false);
+            countObj.transform.SetParent(slotRect, false);
             RectTransform countRect = countObj.GetComponent<RectTransform>();
             countRect.anchorMin = new Vector2(1f, 0f);
             countRect.anchorMax = new Vector2(1f, 0f);
@@ -96,15 +121,25 @@ public class OwnedItemsHUD : MonoBehaviour
             countRect.anchoredPosition = countTextOffset;
             countRect.sizeDelta = new Vector2(80f, 40f);
 
-            widget.countText = countObj.GetComponent<TextMeshProUGUI>();
-            widget.countText.alignment = TextAlignmentOptions.BottomRight;
-            widget.countText.fontSize = countFontSize;
-            widget.countText.color = Color.white;
-            widget.countText.raycastTarget = false;
+            TextMeshProUGUI countText = countObj.GetComponent<TextMeshProUGUI>();
+            countText.alignment = TextAlignmentOptions.BottomRight;
+            countText.fontSize = countFontSize;
+            countText.color = Color.white;
+            countText.raycastTarget = false;
 
-            widget.root = slot.gameObject;
-            widget.root.SetActive(false);
-            widgetList.Add(widget);
+            widgets.Add(new SlotWidget
+            {
+                root = slotObject,
+                icon = icon,
+                countText = countText
+            });
+        }
+
+        while (widgets.Count > count)
+        {
+            int lastIndex = widgets.Count - 1;
+            Destroy(widgets[lastIndex].root);
+            widgets.RemoveAt(lastIndex);
         }
     }
 
@@ -118,13 +153,47 @@ public class OwnedItemsHUD : MonoBehaviour
 
     private void RefreshDisplay()
     {
-        BuildWidgetsIfNeeded();
-
         List<BaffItemData> ownedBaff = CollectOwnedBaff();
         List<ArtifactData> ownedArtifacts = CollectOwnedArtifacts();
 
+        EnsureWidgetCount(baffItemSlotsParent, baffWidgets, ownedBaff.Count);
+        EnsureWidgetCount(artifactSlotsParent, artifactWidgets, ownedArtifacts.Count);
         PopulateSlots(ownedBaff, baffWidgets, item => GetSpriteFromPrefab(item.prefab), item => OwnedProgressManager.GetBaffOwned(item.B_itemID));
         PopulateSlots(ownedArtifacts, artifactWidgets, item => GetSpriteFromPrefab(item.prefab), item => OwnedProgressManager.GetArtifactOwned(item.A_itemID));
+        RefreshBenefitsText(ownedBaff, ownedArtifacts);
+    }
+
+    private void RefreshBenefitsText(List<BaffItemData> ownedBaff, List<ArtifactData> ownedArtifacts)
+    {
+        if (benefitsText == null) return;
+
+        StringBuilder text = new StringBuilder();
+        AppendBenefits(text, ownedBaff, item => OwnedProgressManager.GetBaffOwned(item.B_itemID), item => item.itemName, item => item.description, item => item.effecttype.ToString());
+        AppendBenefits(text, ownedArtifacts, item => OwnedProgressManager.GetArtifactOwned(item.A_itemID), item => item.itemName, item => item.description, item => item.effecttype.ToString());
+        benefitsText.text = text.Length > 0 ? text.ToString() : "・所持している効果はありません";
+    }
+
+    private static void AppendBenefits<T>(
+        StringBuilder text,
+        List<T> items,
+        System.Func<T, int> getCount,
+        System.Func<T, string> getName,
+        System.Func<T, string> getDescription,
+        System.Func<T, string> getFallback)
+    {
+        foreach (T item in items)
+        {
+            string description = getDescription(item);
+            if (string.IsNullOrWhiteSpace(description))
+                description = getFallback(item);
+
+            text.Append("・")
+                .Append(getName(item))
+                .Append(" x")
+                .Append(getCount(item))
+                .Append(": ")
+                .AppendLine(description);
+        }
     }
 
     private List<BaffItemData> CollectOwnedBaff()
@@ -181,10 +250,6 @@ public class OwnedItemsHUD : MonoBehaviour
             }
         }
 
-        if (ownedItems.Count > widgets.Count)
-        {
-            Debug.LogWarning($"OwnedItemsHUD: スロット数({widgets.Count})より多くの所持品({ownedItems.Count})があります。表示しきれない分があります。");
-        }
     }
 
     private static Sprite GetSpriteFromPrefab(GameObject prefab)
@@ -202,6 +267,14 @@ public class OwnedItemsHUD : MonoBehaviour
     {
         SetWidgetListVisible(baffWidgets, visible);
         SetWidgetListVisible(artifactWidgets, visible);
+    }
+
+    private void SetWindowVisible(bool visible)
+    {
+        if (window == null) return;
+        if (window == gameObject) return;
+
+        window.SetActive(visible);
     }
 
     private static void SetWidgetListVisible(List<SlotWidget> widgets, bool visible)
