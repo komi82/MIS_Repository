@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb8c58d17a0b3cf47a3b2804f727de77, type: 3}
+  m_Name: CraftHoldShortening
+  m_EditorClassIdentifier: Assembly-CSharp::BaffItemData
+  B_itemID: 6
+  effecttype: 8
+  B_itemName: craftHoldShortening
+  price: 150
+  startprice: 150
+  ownedCount: 0
+  prefab: {fileID: 2756731529982582935, guid: 8b3066405a7c42dca3ba86a8a1ab4cb7, type: 3}
+  itemName: "調合師の羽（仮）"
+  description: "調合の長押し時間を1個につき20%短縮する。複数所持で重複し、最短は通常の40%。"
