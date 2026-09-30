@@ -179,7 +179,14 @@ public class RequestManager : MonoBehaviour
     {
         if (activeRequests.Count >= maxRequests) return;
 
-		RequestType type = requestTypesPool[UnityEngine.Random.Range(0, requestTypesPool.Count)];
+		RequestType type;
+#if UNITY_EDITOR
+        if (SceneManager.GetActiveScene().name == SceneNames.Arcade &&
+            UnityEditor.SessionState.GetBool("MIS.PurificationOnlyTest", false))
+            type = RequestType.PurifyWeapon;
+        else
+#endif
+            type = requestTypesPool[UnityEngine.Random.Range(0, requestTypesPool.Count)];
 
 		// スロット必要タイプ（Deliver/Craft以外）で空きスロットがない場合は生成を停止
 		if (type != RequestType.DeliverItem && type != RequestType.CraftWeapon)

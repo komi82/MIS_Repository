@@ -196,48 +196,23 @@ public class GameClockText : MonoBehaviour
 
     private IEnumerator HandleCompleteDayProgression()
     {
-        var disabledBehaviours = new List<Behaviour>();
-        if (deliveryStation != null)
-        {
-            deliveryStation.ForceCloseUI();
-        }
-        GameplayInputUtility.DisableStandardInput(playerController, deliveryStation, disabledBehaviours);
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-
-        // completePanel を表示
+        BlockGameplayInput();
+        if (deliveryStation != null) deliveryStation.ForceCloseUI();
         if (completePanel != null) completePanel.SetActive(true);
         if (transitionPanel != null) transitionPanel.SetActive(false);
-
-        // 1秒待機
         yield return new WaitForSeconds(1f);
 
-        // フェードアウト
-        if (FadeManager.Instance != null)
-        {
-            FadeManager.Instance.FadeOutOnly();
-            yield return new WaitForSeconds(FadeManager.Instance.fadeTime);
-        }
+        // mainの納品回数による進行を維持し、日数を一度だけ更新する。
+        DayAdvanceButton target = dayAdvanceButton != null ? dayAdvanceButton : DayAdvanceButton.Instance;
+        if (target != null) target.OnClickAdvanceDay();
 
-        // Day 更新
-        DayAdvanceButton targetDayButton = dayAdvanceButton != null ? dayAdvanceButton : DayAdvanceButton.Instance;
-        if (targetDayButton != null)
-        {
-            targetDayButton.OnClickAdvanceDay();
-        }
-        
-        if (deliveryStation != null)
-        {
-            deliveryStation.ForceCloseUI();
-        }
-        if (completePanel != null) completePanel.SetActive(false);
-        if (transitionPanel != null) transitionPanel.SetActive(false);
-
-        isCompleteTransition = false;
-        transitionStarted = false;
-
-        // フェードアウト状態のまま Shop へ遷移（フェード処理なし）
-        TransitionToShopWithoutFade();
+        // シーン破棄前に所持品を保存する。切替中はtransitionStartedを維持する。
+        if (ChangeScene.Instance != null)
+            ChangeScene.Instance.GoToShop();
+        else if (FadeManager.Instance != null)
+            FadeManager.Instance.LoadSceneWithFade(SceneNames.Shop);
+        else
+            SceneManager.LoadScene(SceneNames.Shop);
     }
 
     private void ApplyCarryoverBonus()

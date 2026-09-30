@@ -2971,7 +2971,9 @@ MonoBehaviour:
   weaponRecipeDatabase: {fileID: 11400000, guid: 5ec72eacf2d5c0646a3229248aec511b, type: 2}
   washRecipeDatabase: {fileID: 11400000, guid: 4fe5f4c574ff5734eaca2f507bd13478, type: 2}
   powerGageSlider: {fileID: 754845518}
+  craftingBaffItems: {fileID: 11400000, guid: b9e307d28efdd0c43803a5fdefff2e01, type: 2}
   washSlider: {fileID: 963971735}
+  washSuccessArea: {fileID: 393322934}
   blacksmithImageA: {fileID: 1622633372}
   blacksmithImagesB:
   - {fileID: 1936691275}
