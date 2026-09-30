@@ -192,72 +192,31 @@ public class GameClockText : MonoBehaviour
 
     private IEnumerator HandleCompleteDayProgression()
     {
-        var disabledBehaviours = new List<Behaviour>();
-        if (deliveryStation != null)
-        {
-            deliveryStation.ForceCloseUI();
-        }
-        GameplayInputUtility.DisableStandardInput(playerController, deliveryStation, disabledBehaviours);
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        BlockGameplayInput();
+        if (deliveryStation != null) deliveryStation.ForceCloseUI();
 
-        if (FadeManager.Instance != null)
-        {
-            FadeManager.Instance.FadeOutOnly();
-            yield return new WaitForSeconds(FadeManager.Instance.fadeTime);
-        }
-
+        // 達成表示を見せてから、日数と次の日の持ち時間を確定する。
+        yield return new WaitForSeconds(1f);
         DayAdvanceButton targetDayButton = dayAdvanceButton != null ? dayAdvanceButton : DayAdvanceButton.Instance;
-        if (targetDayButton != null)
-        {
-            targetDayButton.OnClickAdvanceDay();
-        }
-        
-        // 所持金は初期化しない仕様に変更
-        // if (MoneyManager.Instance != null)
-        // {
-        //     MoneyManager.Instance.ResetMoney();
-        // }
-        // else
-        // {
-        //     MoneyManager.currentMoney = 0;
-        // }
-        
-        if (playerController != null)
-        {
-            playerController.ResetToStartState(arcadeResetPoint);
-        }
+        if (targetDayButton != null) targetDayButton.OnClickAdvanceDay();
 
         s_remainingTime = Mathf.Max(1f, roundTimeSeconds + s_nextRoundCarrySeconds);
         s_nextRoundCarrySeconds = 0f;
         s_hasRemainingTime = true;
 
-        if (deliveryStation != null)
+        // transitionStarted は立てたままにし、切替待ち中の二重達成を防ぐ。
+        if (ChangeScene.Instance != null)
         {
-            deliveryStation.ForceCloseUI();
+            ChangeScene.Instance.GoToShop();
         }
-        if (completePanel != null) completePanel.SetActive(false);
-        if (transitionPanel != null) transitionPanel.SetActive(false);
-
-        if (FadeManager.Instance != null)
+        else if (FadeManager.Instance != null)
         {
-            FadeManager.Instance.FadeInOnly();
-            yield return new WaitForSeconds(FadeManager.Instance.fadeTime);
+            FadeManager.Instance.LoadSceneWithFade(SceneNames.Shop);
         }
-
-        for (int i = 0; i < disabledBehaviours.Count; i++)
+        else
         {
-            if (disabledBehaviours[i] != null)
-            {
-                disabledBehaviours[i].enabled = true;
-            }
+            UnityEngine.SceneManagement.SceneManager.LoadScene(SceneNames.Shop);
         }
-
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-
-        isCompleteTransition = false;
-        transitionStarted = false;
     }
 
     private void ApplyCarryoverBonus()

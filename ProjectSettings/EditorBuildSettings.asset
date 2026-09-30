@@ -4,6 +4,45 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/title.unity
+    guid: a321b69bc29a0e647b6becb115ea0c79
+  - enabled: 1
+    path: Assets/Scenes/arcade.unity
+    guid: 99c9720ab356a0642a771bea13969a05
+  - enabled: 1
+    path: Assets/Scenes/result.unity
+    guid: 7d435b0aaf7f72d42bc575bdd2be213a
+  - enabled: 1
+    path: Assets/Scenes/Complete.unity
+    guid: 10ed02972bce8584c8de206a7241a527
+  - enabled: 1
+    path: Assets/Scenes/tutorial/tutorial.unity
+    guid: 603da2f2e97943e46b35ae71cab868ae
+  - enabled: 1
+    path: Assets/Scenes/tutorial/tutorial2.unity
+    guid: 32849be135a42a540963e810b671ae55
+  - enabled: 1
+    path: Assets/Scenes/tutorial/tutorial3.unity
+    guid: 57d513f6acebc594dbf11faa42104906
+  - enabled: 1
+    path: Assets/Scenes/tutorial/tutorial4.unity
+    guid: 8da96bf161bf3f84b8cbf6d6d7b09d3e
+  - enabled: 1
+    path: Assets/Scenes/tutorial/tutorial5.unity
+    guid: a118e5b11121c134caa5a9ddcad09053
+  - enabled: 1
+    path: Assets/Scenes/tutorial/tutorial6.unity
+    guid: 1a6571d8d1f2b3b4b938d49e9b5fe120
+  - enabled: 1
+    path: Assets/Scenes/tutorial/tutorial7.unity
+    guid: a9bcf7a9a91c9d54090fb85a38e6bbcd
+  - enabled: 1
+    path: Assets/Scenes/tutorial/tutorial8.unity
+    guid: 69cd4909968439a489b3e5a601edad0f
+  - enabled: 1
+    path: Assets/Scenes/Shop.unity
+    guid: 4d31c18fe3fc14a4d9f1e89749e675a5
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0
