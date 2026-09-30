@@ -17,11 +17,26 @@ public class ShopManager : MonoBehaviour
     [Header("UI要素")]
     [SerializeField] private TextMeshProUGUI itemDetailText;
 
+    [Header("Arcade戻りボタン")]
+    [SerializeField] private Button backToArcadeButton;
+
     void Start()
     {
         InitializeItem(); //アイテム価格の初期値化
 
         SpawnItems(); //ショップにアイテムを生成
+
+        // Arcade戻りボタンを設定
+        if (backToArcadeButton != null)
+        {
+            backToArcadeButton.onClick.AddListener(() => ReturnToArcade());
+        }
+
+        // フェードイン（フェードアウト状態から復帰）
+        if (FadeManager.Instance != null)
+        {
+            FadeManager.Instance.FadeInOnly();
+        }
     }
 
     void InitializeItem()
@@ -109,5 +124,11 @@ public class ShopManager : MonoBehaviour
             availableSlots.RemoveAt(slotIndex);
             availableItems.RemoveAt(itemIndex);
         }
+    }
+
+    void ReturnToArcade()
+    {
+        Debug.Log("[ShopManager] Arcade シーンに戻ります");
+        FadeManager.Instance.LoadSceneWithFade(SceneNames.Arcade);
     }
 }

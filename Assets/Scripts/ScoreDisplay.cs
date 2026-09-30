@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections;
+using unityroom.Api;
 
 /// <summary>
 /// リザルト画面のスコア演出とランク表示を担当する。
@@ -46,17 +47,17 @@ public class ScoreDisplay : MonoBehaviour
         Cursor.lockState = CursorLockMode.Confined;
         Cursor.visible = true;
 
-        // 日数を取得（DayAdvanceButtonを参照）
-        int dayCount = 1;
-        if (DayAdvanceButton.Instance != null)
-        {
-            dayCount = DayAdvanceButton.Instance.GetDay();
-        }
+        // 日数を取得（DayAdvanceButton.Instance がない場合は static メソッドを使用）
+        int dayCount = DayAdvanceButton.GetDayStatic();
 
         // 稼いだ金額と依頼件数は従来どおり表示
         if (xScoreText != null)
         {
             xScoreText.text = $"最終金額: {MoneyManager.currentMoney}G";
+#if UNITY_WEBGL && !UNITY_EDITOR
+            var moneyClient = UnityroomApiClient.Instance;
+            if (moneyClient != null) moneyClient.SendScore(2, MoneyManager.currentMoney, ScoreboardWriteMode.HighScoreDesc);
+#endif
         }
 
         if (yScoreText != null)
@@ -69,6 +70,10 @@ public class ScoreDisplay : MonoBehaviour
         if (aScoreText != null)
         {
             aScoreText.text = $"Day {finalScore}";
+#if UNITY_WEBGL && !UNITY_EDITOR
+            var dayClient = UnityroomApiClient.Instance;
+            if (dayClient != null) dayClient.SendScore(1, finalScore, ScoreboardWriteMode.HighScoreDesc);
+#endif
         }
 
         // ランク画像を最初は非表示にする
