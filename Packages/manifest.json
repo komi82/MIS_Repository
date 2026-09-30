@@ -1,5 +1,9 @@
 {
   "dependencies": {
+    "com.unityroom.client": "https://github.com/naichilab/unityroom-client-library.git?path=Assets/unityroom#c4dea57e1c27567bac512e090a356b08abf83d0b",
+    "com.unity.inputsystem": "1.14.2",
+    "com.unity.render-pipelines.universal": "17.2.0",
+    "com.unity.ugui": "2.0.0",
     "com.unity.multiplayer.center": "1.0.0",
     "com.unity.modules.accessibility": "1.0.0",
     "com.unity.modules.ai": "1.0.0",

@@ -1,1 +1,10 @@
 Assets/UI/Font
+
+/Library/
+/Temp/
+/Obj/
+/Build/
+/Builds/
+/Logs/
+/UserSettings/
+/MemoryCaptures/
