@@ -24,7 +24,9 @@ public class PutItem : MonoBehaviour
 	[SerializeField] private RecipeDatabase weaponRecipeDatabase; // blacksmith 用
 	[SerializeField] private RecipeDatabase washRecipeDatabase;   // wash 用
 	[SerializeField] private Slider powerGageSlider;
+	[SerializeField] private BaffItemDatabase craftingBaffItems;
 	[SerializeField] private Slider washSlider;
+	[SerializeField] private RectTransform washSuccessArea;
 	//[SerializeField] private TMPro.TextMeshProUGUI washText;
 	[SerializeField] private Image blacksmithImageA; // 画像A（レシピresultItemのiconを表示）
 	[SerializeField] private Image[] blacksmithImagesB; // 画像B群（複数指定可）
@@ -553,19 +555,43 @@ public class PutItem : MonoBehaviour
 			blacksmithImageA.gameObject.SetActive(true);
 		}
 
-		// 画像B群を表示
+		int reductionCount = 0;
+		if (scene == SceneNames.Arcade && craftingBaffItems != null && craftingBaffItems.allBaffItems != null)
+		{
+			foreach (BaffItemData item in craftingBaffItems.allBaffItems)
+			{
+				if (item != null && item.effecttype == BaffEffectType.blacksmithClickReduction)
+					reductionCount += OwnedProgressManager.GetBaffOwned(item.B_itemID);
+			}
+		}
+
+		// 未設定の画像は数えず、有効なマークを最低1個残す。
+		int availableTargets = 0;
 		if (blacksmithImagesB != null)
 		{
-			for (int i = 0; i < blacksmithImagesB.Length; i++)
+			foreach (Image target in blacksmithImagesB)
+				if (target != null) availableTargets++;
+		}
+		int requiredTargets = availableTargets == 0 ? 0 : Mathf.Max(1, availableTargets - reductionCount);
+		int shownTargets = 0;
+		if (blacksmithImagesB != null)
+		{
+			foreach (Image target in blacksmithImagesB)
 			{
-				if (blacksmithImagesB[i] != null)
+				if (target == null) continue;
+				bool show = shownTargets < requiredTargets;
+				// 前回のクリックや所持数にかかわらず、毎回表示を作り直す。
+				target.gameObject.SetActive(show);
+				if (show)
 				{
-					blacksmithImagesB[i].gameObject.SetActive(true);
-					// 画像Aの不透明領域上にランダム配置
-					TryPlaceImageBOnOpaqueOfA(blacksmithImagesB[i], blacksmithImageA);
+					TryPlaceImageBOnOpaqueOfA(target, blacksmithImageA);
+					shownTargets++;
 				}
 			}
 		}
+#if UNITY_EDITOR
+		Debug.Log($"[鍛冶計測] 開始：槌 {reductionCount}個 / 通常 {availableTargets}マーク → 今回 {shownTargets}マーク（最低1個）");
+#endif
 
 		while (true)
 		{
@@ -585,6 +611,9 @@ public class PutItem : MonoBehaviour
 			// 0で終了
 			if (count == 0)
 			{
+#if UNITY_EDITOR
+				Debug.Log($"[鍛冶計測] 完了：槌 {reductionCount}個 / {shownTargets}マークを処理" );
+#endif
 				if (blacksmithImageA != null) blacksmithImageA.gameObject.SetActive(false);
 				EndPlayerUiBlock();
 				break;
@@ -668,6 +697,23 @@ public class PutItem : MonoBehaviour
 		return false;
 	}
 
+	// 購入数の保存先から直接読むことで、他コンポーネントの初期化順序に依存しない。
+	private float GetCraftHoldDurationMultiplier(out int count)
+	{
+		count = 0;
+		if (scene != SceneNames.Arcade || craftingBaffItems == null || craftingBaffItems.allBaffItems == null)
+			return 1f;
+
+		foreach (BaffItemData item in craftingBaffItems.allBaffItems)
+		{
+			if (item != null && item.effecttype == BaffEffectType.craftHoldShortening)
+				count += OwnedProgressManager.GetBaffOwned(item.B_itemID);
+		}
+
+		// 仮バランス: 1個につき残り時間を20%短縮、最短は通常の40%。
+		return Mathf.Max(0.4f, Mathf.Pow(0.8f, count));
+	}
+
 	private IEnumerator WaitForPowerGageCompletion()
 	{
 		// PowerGageのnullチェック
@@ -683,13 +729,35 @@ public class PutItem : MonoBehaviour
 		powerGageSlider.gameObject.SetActive(true);
 		BeginPlayerUiBlock();
 		
+		// 減衰を差し引いた実際の上昇速度を補正する。未所持時は元の速度。
+		float durationMultiplier = GetCraftHoldDurationMultiplier(out int shorteningItemCount);
+		float increasePerSecond = PowerGageDecayPerSecond
+			+ (PowerGageIncreasePerSecond - PowerGageDecayPerSecond) / durationMultiplier;
+
 		Debug.Log("PowerGage開始");
+#if UNITY_EDITOR
+		float heldSeconds = 0f;
+		int holdFrames = 0;
+		int interruptions = 0;
+		bool wasHolding = false;
+		Debug.Log($"[調合計測] 開始：羽 {shorteningItemCount}個 / 短縮率 {(1f - durationMultiplier) * 100f:F0}% / 押し続けた場合の目安 {10f / (increasePerSecond - PowerGageDecayPerSecond):F2}秒");
+#endif
 		
 		// PowerGageミニゲームの処理
 		while (!isPowerGageCompleted)
 		{
 			float deltaTime = Time.deltaTime;
 
+#if UNITY_EDITOR
+			bool isHolding = Input.GetKey(KeyCode.Space);
+			if (isHolding && deltaTime > 0f)
+			{
+				heldSeconds += deltaTime;
+				holdFrames++;
+			}
+			if (wasHolding && !isHolding) interruptions++;
+			wasHolding = isHolding;
+#endif
 			// パワーの減少
 			if (powerGagePower > 0)
 			{
@@ -701,7 +769,7 @@ public class PutItem : MonoBehaviour
 			{
 				if (powerGagePower < 10)
 				{
-					powerGagePower += PowerGageIncreasePerSecond * deltaTime;
+					powerGagePower += increasePerSecond * deltaTime;
 				}
 				if (powerGagePower >= 10)
 				{
@@ -709,6 +777,9 @@ public class PutItem : MonoBehaviour
 					isPowerGageCompleted = true;
 					powerGageSlider.gameObject.SetActive(false);
 					Debug.Log("PowerGage完了");
+#if UNITY_EDITOR
+					Debug.Log($"[調合計測] 完了：羽 {shorteningItemCount}個 / 実測長押し {heldSeconds:F3}秒 / {holdFrames}フレーム / 途中で離した回数 {interruptions} / 目安 {10f / (increasePerSecond - PowerGageDecayPerSecond):F2}秒");
+#endif
 				}
 			}
 			
@@ -720,6 +791,30 @@ public class PutItem : MonoBehaviour
 		EndPlayerUiBlock();
 	}
 
+    private void GetWashSuccessRange(out int ownedCount, out float lower, out float upper)
+    {
+        ownedCount = 0;
+        if (scene == SceneNames.Arcade && craftingBaffItems != null && craftingBaffItems.allBaffItems != null)
+        {
+            foreach (BaffItemData item in craftingBaffItems.allBaffItems)
+                if (item != null && item.effecttype == BaffEffectType.purificationWindowExpansion)
+                    ownedCount += OwnedProgressManager.GetBaffOwned(item.B_itemID);
+        }
+        float halfWidth = 0.1f + 0.05f * Mathf.Clamp(ownedCount, 0, 4);
+        lower = 0.5f - halfWidth;
+        upper = 0.5f + halfWidth;
+    }
+
+    private void UpdateWashSuccessArea(float lower, float upper)
+    {
+        if (washSuccessArea == null) return;
+        // arcadeの成功帯とハンドルは同じ親Rect上にあり、正規化座標が一致する。
+        washSuccessArea.localScale = Vector3.one;
+        washSuccessArea.anchorMin = new Vector2(lower, 0f);
+        washSuccessArea.anchorMax = new Vector2(upper, 1f);
+        washSuccessArea.offsetMin = Vector2.zero;
+        washSuccessArea.offsetMax = Vector2.zero;
+    }
 	private IEnumerator WaitForWashCompletion()
 	{
 		// Wash Sliderのnullチェック
@@ -733,7 +828,12 @@ public class PutItem : MonoBehaviour
 		isWashCompleted = false;
         isWashFailed = false;
 		isWashMaxValue = false;
-		washSlider.value = 0;
+        GetWashSuccessRange(out int charmCount, out float successLower, out float successUpper);
+        UpdateWashSuccessArea(successLower, successUpper);
+#if UNITY_EDITOR
+        Debug.Log($"[浄化計測] 開始：お守り {charmCount}個 / 成功範囲 {successLower:F2}～{successUpper:F2} / 幅 {(successUpper - successLower) * 100f:F0}%");
+#endif
+        washSlider.value = 0;
 		washSlider.gameObject.SetActive(true); // スライダーを表示
 		BeginPlayerUiBlock();
 		
@@ -750,11 +850,14 @@ public class PutItem : MonoBehaviour
                 Debug.Log("stop");
 
                 // 成功
-                if (washSlider.value >= 0.4f && washSlider.value <= 0.6f)
+                if (washSlider.normalizedValue >= successLower && washSlider.normalizedValue <= successUpper)
                 {
                     isWashCompleted = true;
                     washSlider.gameObject.SetActive(false);
                     Debug.Log("Wash完了");
+#if UNITY_EDITOR
+                    Debug.Log($"[浄化計測] 完了：お守り {charmCount}個 / 停止位置 {washSlider.normalizedValue:F3} / 成功範囲 {successLower:F2}～{successUpper:F2}");
+#endif
                 }
                 // 失敗
                 else
@@ -762,6 +865,9 @@ public class PutItem : MonoBehaviour
                     isWashFailed = true;
                     washSlider.gameObject.SetActive(false);
                     Debug.Log("Wash失敗");
+#if UNITY_EDITOR
+                    Debug.Log($"[浄化計測] 失敗：お守り {charmCount}個 / 停止位置 {washSlider.normalizedValue:F3} / 成功範囲 {successLower:F2}～{successUpper:F2}");
+#endif
 
                     // 失敗効果音
                     if (SoundManager.Instance != null &&

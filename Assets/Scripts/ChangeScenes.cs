@@ -160,8 +160,23 @@ public class ChangeScene: MonoBehaviour
         StartCoroutine(RestoreArcadeStateExplicit());
     }
 
+    public void GoToShop()
+    {
+        // インベントリが破棄される前に保存する。
+        SaveArcadeStateExplicit();
+        Cursor.lockState = CursorLockMode.Confined;
+        Cursor.visible = true;
+        if (FadeManager.Instance != null)
+            FadeManager.Instance.LoadSceneWithFade(SceneNames.Shop);
+        else
+            SceneManager.LoadScene(SceneNames.Shop);
+    }
+
     private void SaveArcadeStateExplicit()
     {
+        // sceneUnloaded は破棄後にも呼ばれるため、事前に保存した持ち物を空で上書きしない。
+        if (InventoryManager.Instance == null) return;
+
         savedState = new ArcadeState();
         savedState.money = MoneyManager.currentMoney;
         savedState.requestsCompleted = RequestManager.RequestCompleted;
@@ -189,7 +204,7 @@ public class ChangeScene: MonoBehaviour
 
         if (savedState == null) yield break;
 
-        MoneyManager.currentMoney = savedState.money;
+        // 所持金はstaticで維持される。ショップで使った分を入店前の値に戻さない。
         RequestManager.RequestCompleted = savedState.requestsCompleted;
         
         // 日数を復元
@@ -213,22 +228,6 @@ public class ChangeScene: MonoBehaviour
     private void ResetArcadeRuntimeState()
     {
         OwnedProgressManager.ResetAll();
-    }
-
-    /// <summary>
-    /// Arcade から Shop シーンへ遷移する
-    /// </summary>
-    public void GoToShop()
-    {
-        if (SoundManager.Instance != null)
-        {
-            SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.buttonClickSound);
-        }
-
-        // Arcade の状態を保存してから Shop へ遷移
-        SaveArcadeStateExplicit();
-        FadeManager.Instance.LoadSceneWithFade(SceneNames.Shop);
-        Debug.Log("[ChangeScenes] Shop へ遷移します");
     }
 
     void Update()

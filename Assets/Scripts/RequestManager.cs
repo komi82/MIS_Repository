@@ -179,7 +179,14 @@ public class RequestManager : MonoBehaviour
     {
         if (activeRequests.Count >= maxRequests) return;
 
-		RequestType type = requestTypesPool[UnityEngine.Random.Range(0, requestTypesPool.Count)];
+		RequestType type;
+#if UNITY_EDITOR
+        if (SceneManager.GetActiveScene().name == SceneNames.Arcade &&
+            UnityEditor.SessionState.GetBool("MIS.PurificationOnlyTest", false))
+            type = RequestType.PurifyWeapon;
+        else
+#endif
+            type = requestTypesPool[UnityEngine.Random.Range(0, requestTypesPool.Count)];
 
 		// スロット必要タイプ（Deliver/Craft以外）で空きスロットがない場合は生成を停止
 		if (type != RequestType.DeliverItem && type != RequestType.CraftWeapon)
@@ -386,16 +393,6 @@ public class RequestManager : MonoBehaviour
     {
         if (request == null) return false;
 
-        // 1日3回の納品制限チェック
-        if (GameClockText.Instance != null)
-        {
-            if (GameClockText.Instance.IsDeliveryLimitReached())
-            {
-                Debug.LogWarning($"[RequestManager] 本日の納品上限に達しています。残り: {GameClockText.Instance.GetRemainingDeliveries()}/3");
-                return false;
-            }
-        }
-
         if (!request.isCompleted)
         {
             if (request.requiredItem == null || InventoryManager.Instance == null || !InventoryManager.Instance.HasItem(request.requiredItem))
@@ -421,12 +418,6 @@ public class RequestManager : MonoBehaviour
             requestBoard.DisplayRequests();
             RequestCompleted++;
             RequestComp?.Invoke();
-
-            // 納品回数をカウント
-            if (GameClockText.Instance != null)
-            {
-                GameClockText.Instance.TryAddDelivery();
-            }
 
             Debug.Log($"デリバー完了: {request.requestName} 報酬 {request.rewardAmount} 円");
             return true;

@@ -54,7 +54,10 @@ public class ScoreDisplay : MonoBehaviour
         if (xScoreText != null)
         {
             xScoreText.text = $"最終金額: {MoneyManager.currentMoney}G";
-            UnityroomApiClient.Instance.SendScore(2, MoneyManager.currentMoney, ScoreboardWriteMode.HighScoreDesc);
+#if UNITY_WEBGL && !UNITY_EDITOR
+            var moneyClient = UnityroomApiClient.Instance;
+            if (moneyClient != null) moneyClient.SendScore(2, MoneyManager.currentMoney, ScoreboardWriteMode.HighScoreDesc);
+#endif
         }
 
         if (yScoreText != null)
@@ -67,7 +70,10 @@ public class ScoreDisplay : MonoBehaviour
         if (aScoreText != null)
         {
             aScoreText.text = $"Day {finalScore}";
-            UnityroomApiClient.Instance.SendScore(1, finalScore, ScoreboardWriteMode.HighScoreDesc);
+#if UNITY_WEBGL && !UNITY_EDITOR
+            var dayClient = UnityroomApiClient.Instance;
+            if (dayClient != null) dayClient.SendScore(1, finalScore, ScoreboardWriteMode.HighScoreDesc);
+#endif
         }
 
         // ランク画像を最初は非表示にする
