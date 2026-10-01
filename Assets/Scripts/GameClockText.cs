@@ -168,8 +168,9 @@ public class GameClockText : MonoBehaviour
             dailyIncomeNotice.color = Color.yellow;
             dailyIncomeNotice.raycastTarget = false;
             var rect = dailyIncomeNotice.rectTransform;
-            rect.anchorMin = new Vector2(0.2f, 0.78f);
-            rect.anchorMax = new Vector2(0.8f, 0.9f);
+            // Keep notices below the owned-item descriptions and above the inventory slots.
+            rect.anchorMin = new Vector2(0.2f, 0.18f);
+            rect.anchorMax = new Vector2(0.8f, 0.28f);
             rect.offsetMin = rect.offsetMax = Vector2.zero;
         }
         if (dailyIncomeNotice != null) dailyIncomeNotice.text = message;
