@@ -14,6 +14,19 @@ public class MoneyManager : MonoBehaviour
     [SerializeField] public static int currentMoney = 0;
     [SerializeField] private TextMeshProUGUI moneyText;
     [SerializeField] private TextMeshProUGUI gainMoneyText;
+    private int displayedMoney;
+
+    private void OnEnable()
+    {
+        UpdateUI();
+    }
+
+    private void LateUpdate()
+    {
+        // Multiple panels have their own MoneyManager but share one balance.
+        // Refresh each visible label even when another instance changes the balance.
+        if (displayedMoney != currentMoney) UpdateUI();
+    }
 
     private void Awake()
     {
@@ -61,6 +74,7 @@ public class MoneyManager : MonoBehaviour
         if (moneyText != null)
         {
             moneyText.text = $"{currentMoney:N0}G";
+            displayedMoney = currentMoney;
         }
     }
 

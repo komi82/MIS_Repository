@@ -417,6 +417,8 @@ public class RequestManager : MonoBehaviour
             activeRequests.Remove(request);
             requestBoard.DisplayRequests();
             RequestCompleted++;
+            if (GameClockText.Instance != null)
+                GameClockText.Instance.RecordSuccessfulDelivery();
             RequestComp?.Invoke();
 
             Debug.Log($"デリバー完了: {request.requestName} 報酬 {request.rewardAmount} 円");

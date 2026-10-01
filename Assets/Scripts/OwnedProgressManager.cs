@@ -13,6 +13,7 @@ public static class OwnedProgressManager
     public static void ResetAll()
     {
         baffOwnedById.Clear();
+        DailyIncomeState.Reset();
         artifactOwnedById.Clear();
     }
 
@@ -20,7 +21,7 @@ public static class OwnedProgressManager
     {
         if (amount <= 0) return;
         baffOwnedById.TryGetValue(itemId, out int current);
-        baffOwnedById[itemId] = current + amount;
+        baffOwnedById[itemId] = itemId == DailyIncomeState.ItemId ? 1 : current + amount;
     }
 
     public static void AddArtifact(int itemId, int amount = 1)

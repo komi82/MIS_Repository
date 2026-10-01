@@ -36,6 +36,11 @@ public class GameClockText : MonoBehaviour
 
     public List<BaffItemData> items;
 
+    private static int s_deliveriesCount;
+    private static int s_deliveriesCountDay = -1;
+    private TextMeshProUGUI dailyIncomeNotice;
+    private float dailyIncomeNoticeUntil;
+    private bool dailyIncomeInitialized;
     private bool transitionStarted = false;
     private bool isCompleteTransition = false; // Completeシーンへ遷移するかどうか
     [SerializeField] private DeliveryStation deliveryStation;
@@ -83,6 +88,8 @@ public class GameClockText : MonoBehaviour
         s_hasCompleteMoneyThreshold = false;
         s_completeMoneyThreshold = 0;
         s_rewardOverflowBonusX = 0f;
+        s_deliveriesCount = 0;
+        s_deliveriesCountDay = -1;
     }
 
     private void OnDestroy()
@@ -91,7 +98,7 @@ public class GameClockText : MonoBehaviour
     }
 
 
-    void Start()
+    IEnumerator Start()
     {
         // OwnedProgressManager から各アイテムの所持数を同期する
         if (items != null)
@@ -118,13 +125,64 @@ public class GameClockText : MonoBehaviour
         int currentDay = DayAdvanceButton.Instance != null ? DayAdvanceButton.Instance.GetDay() : 1;
         UpdateCompleteThresholdByDay(currentDay);
         UpdateClockDisplay();
+        // Let every Start finish (MoneyManager hides its gain label during Start).
+        yield return null;
+        if (MoneyManager.Instance != null && DailyIncomeState.TryClaim(currentDay,
+            OwnedProgressManager.GetBaffOwned(DailyIncomeState.ItemId)))
+        {
+            int moneyBeforeReward = MoneyManager.currentMoney;
+            MoneyManager.Instance.AddMoney(DailyIncomeState.Reward);
+            dailyIncomeNoticeUntil = Time.unscaledTime + 4f;
+            Debug.Log($"[貯金箱] Day {currentDay}: +{DailyIncomeState.Reward}G、所持金 {moneyBeforeReward}G → {MoneyManager.currentMoney}G（本日受取済み）");
+        }
+        dailyIncomeInitialized = true;
+        UpdateDailyIncomeNotice();
+    }
+
+    private bool WaitingForFirstDelivery()
+    {
+        int day = DayAdvanceButton.Instance != null ? DayAdvanceButton.Instance.GetDay() : 1;
+        int delivered = s_deliveriesCountDay == day ? s_deliveriesCount : 0;
+        return DailyIncomeState.RequiresDelivery(day, delivered);
+    }
+
+    private void UpdateDailyIncomeNotice()
+    {
+        bool waiting = MoneyManager.currentMoney >= completeMoneyThreshold && WaitingForFirstDelivery();
+        bool received = Time.unscaledTime < dailyIncomeNoticeUntil;
+        string message = received ? "貯金箱の効果 ＋50G" : "";
+        if (waiting) message += (received ? "\n" : "") + "目標金額達成！ あと1件納品しよう";
+        if (transitionStarted) message = "";
+        if (dailyIncomeNotice == null && message.Length > 0 && clockText != null)
+        {
+            Canvas canvas = clockText.GetComponentInParent<Canvas>();
+            if (canvas == null) return;
+            // Copy only font styling; no scene object or script is cloned.
+            var obj = new GameObject("DailyIncomeNotice", typeof(RectTransform));
+            obj.transform.SetParent(canvas.rootCanvas.transform, false);
+            dailyIncomeNotice = obj.AddComponent<TextMeshProUGUI>();
+            dailyIncomeNotice.font = clockText.font;
+            dailyIncomeNotice.fontSharedMaterial = clockText.fontSharedMaterial;
+            dailyIncomeNotice.fontSize = 30;
+            dailyIncomeNotice.alignment = TextAlignmentOptions.Center;
+            dailyIncomeNotice.color = Color.yellow;
+            dailyIncomeNotice.raycastTarget = false;
+            var rect = dailyIncomeNotice.rectTransform;
+            // Keep notices below the owned-item descriptions and above the inventory slots.
+            rect.anchorMin = new Vector2(0.2f, 0.18f);
+            rect.anchorMax = new Vector2(0.8f, 0.28f);
+            rect.offsetMin = rect.offsetMax = Vector2.zero;
+        }
+        if (dailyIncomeNotice != null) dailyIncomeNotice.text = message;
     }
 
     void Update()
     {
+        if (!dailyIncomeInitialized) return;
+        UpdateDailyIncomeNotice();
         if (transitionStarted) return;
 
-        if (MoneyManager.currentMoney >= completeMoneyThreshold)
+        if (MoneyManager.currentMoney >= completeMoneyThreshold && !WaitingForFirstDelivery())
         {
             BeginRoundEnd(true);
             return;
@@ -191,7 +249,7 @@ public class GameClockText : MonoBehaviour
         if (transitionPanel != null) transitionPanel.SetActive(false);
         yield return new WaitForSeconds(1f);
 
-        // mainの納品回数による進行を維持し、日数を一度だけ更新する。
+        // 目標達成後、日数を一度だけ更新してショップへ進む。
         DayAdvanceButton target = dayAdvanceButton != null ? dayAdvanceButton : DayAdvanceButton.Instance;
         if (target != null) target.OnClickAdvanceDay();
 
@@ -350,4 +408,15 @@ public class GameClockText : MonoBehaviour
         return Mathf.Max(0f, s_rewardOverflowBonusX);
     }
 
+    // Track successful deliveries only; the 120-second round has no delivery cap.
+    public void RecordSuccessfulDelivery()
+    {
+        int day = DayAdvanceButton.Instance != null ? DayAdvanceButton.Instance.GetDay() : 1;
+        if (s_deliveriesCountDay != day)
+        {
+            s_deliveriesCountDay = day;
+            s_deliveriesCount = 0;
+        }
+        s_deliveriesCount++;
+    }
 }
