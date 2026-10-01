@@ -9,6 +9,32 @@ public static class DailyIncomeTestMenu
 
     private const string GoalPath = "MIS/テスト/貯金箱/所持金を目標金額まで増やす";
 
+    private const string OwnedEffectsPath = "MIS/テスト/所持効果の表示確認用に2種類追加";
+
+    [MenuItem(OwnedEffectsPath)]
+    private static void AddOwnedEffects()
+    {
+        if (!CanAddOwnedEffects()) return;
+        var bank = AssetDatabase.LoadAssetAtPath<BaffItemData>("Assets/Prefab/BaffItem/DailyIncome.asset");
+        var feather = AssetDatabase.LoadAssetAtPath<BaffItemData>("Assets/Prefab/BaffItem/CraftHoldShortening.asset");
+        if (bank == null || feather == null)
+        {
+            Debug.LogWarning("[所持効果テスト] 貯金箱または調合師の羽のデータが見つかりません。");
+            return;
+        }
+        if (OwnedProgressManager.GetBaffOwned(bank.B_itemID) == 0)
+            OwnedProgressManager.AddBaffItem(bank.B_itemID);
+        if (OwnedProgressManager.GetBaffOwned(feather.B_itemID) == 0)
+            OwnedProgressManager.AddBaffItem(feather.B_itemID);
+        Debug.Log("[所持効果テスト] 貯金箱と調合師の羽を所持状態にしました。Game画面をクリックしてTabを押し続けると、2種類の効果説明を確認できます。");
+    }
+
+    [MenuItem(OwnedEffectsPath, true)]
+    private static bool CanAddOwnedEffects()
+    {
+        return EditorApplication.isPlaying && SceneManager.GetActiveScene().name == SceneNames.Arcade;
+    }
+
     [MenuItem(GoalPath)]
     private static void ReachGoal()
     {
