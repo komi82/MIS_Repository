@@ -7,6 +7,35 @@ public static class DailyIncomeTestMenu
 {
     private const string Path = "MIS/テスト/貯金箱/ショップに貯金箱を並べる";
 
+    private const string GoalPath = "MIS/テスト/貯金箱/所持金を目標金額まで増やす";
+
+    [MenuItem(GoalPath)]
+    private static void ReachGoal()
+    {
+        if (!CanReachGoal()) return;
+        int day = DayAdvanceButton.Instance.GetDay();
+        if (!DailyIncomeState.RequiresDelivery(day, 0))
+        {
+            Debug.LogWarning("[貯金箱テスト] 貯金箱を購入した翌朝、50Gを受け取ってから実行してください。");
+            return;
+        }
+        int before = MoneyManager.currentMoney;
+        int goal = GameClockText.Instance.GetCompleteMoneyThreshold();
+        int amount = Mathf.Max(0, goal - before);
+        if (amount > 0) MoneyManager.Instance.AddMoney(amount);
+        Debug.Log($"[貯金箱テスト] 所持金 {before}G → {MoneyManager.currentMoney}G（目標{goal}G）。今日まだ納品していなければ待機し、実際に1件納品するとショップへ進むことを確認してください。");
+    }
+
+    [MenuItem(GoalPath, true)]
+    private static bool CanReachGoal()
+    {
+        return EditorApplication.isPlaying &&
+            GameClockText.Instance != null && MoneyManager.Instance != null &&
+            DayAdvanceButton.Instance != null &&
+            SceneManager.GetActiveScene().name == "arcade" &&
+            OwnedProgressManager.GetBaffOwned(DailyIncomeState.ItemId) > 0;
+    }
+
     [MenuItem(Path)]
     private static void ShowBank()
     {
