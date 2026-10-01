@@ -393,16 +393,6 @@ public class RequestManager : MonoBehaviour
     {
         if (request == null) return false;
 
-        // 1日3回の納品制限チェック
-        if (GameClockText.Instance != null)
-        {
-            if (GameClockText.Instance.IsDeliveryLimitReached())
-            {
-                Debug.LogWarning($"[RequestManager] 本日の納品上限に達しています。残り: {GameClockText.Instance.GetRemainingDeliveries()}/3");
-                return false;
-            }
-        }
-
         if (!request.isCompleted)
         {
             if (request.requiredItem == null || InventoryManager.Instance == null || !InventoryManager.Instance.HasItem(request.requiredItem))
@@ -427,13 +417,9 @@ public class RequestManager : MonoBehaviour
             activeRequests.Remove(request);
             requestBoard.DisplayRequests();
             RequestCompleted++;
-            RequestComp?.Invoke();
-
-            // 納品回数をカウント
             if (GameClockText.Instance != null)
-            {
-                GameClockText.Instance.TryAddDelivery();
-            }
+                GameClockText.Instance.RecordSuccessfulDelivery();
+            RequestComp?.Invoke();
 
             Debug.Log($"デリバー完了: {request.requestName} 報酬 {request.rewardAmount} 円");
             return true;
