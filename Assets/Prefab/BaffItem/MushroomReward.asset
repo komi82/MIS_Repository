@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb8c58d17a0b3cf47a3b2804f727de77, type: 3}
+  m_Name: MushroomReward
+  m_EditorClassIdentifier: Assembly-CSharp::BaffItemData
+  B_itemID: 10
+  effecttype: 12
+  B_itemName: mushroomReward
+  price: 150
+  startprice: 150
+  ownedCount: 0
+  prefab: {fileID: 2981309548975973535, guid: 1baf7b8153454e66a12b2b1b3cd94d7a, type: 3}
+  itemName: "キノコ採りの籠（仮）"
+  description: "爆薬・劇毒薬・睡眠薬の納品依頼の報酬が1個につき100G増加する。複数所持で重複する。"
+  rewardBonusPerOwnedItem: 100
+  rewardTargetItems:
+  - {fileID: 11400000, guid: 3b2252a359385934c9753abe26608e36, type: 2}
+  - {fileID: 11400000, guid: fc83a99c29018754fa4cba6f46f823fc, type: 2}
+  - {fileID: 11400000, guid: cac05d8185e7f65408749c9eb2916817, type: 2}
