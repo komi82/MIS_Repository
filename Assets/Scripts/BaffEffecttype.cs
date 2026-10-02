@@ -14,5 +14,6 @@ public enum BaffEffectType
     blacksmithClickReduction,
     purificationWindowExpansion,
     dailyIncome,
-    mushroomReward
+    mushroomReward,
+    blacksmithFrequency
 }
