@@ -33,6 +33,7 @@ public class RequestManager : MonoBehaviour
     [SerializeField] private BaffItemData mushroomRewardItem;
     [SerializeField] private BaffItemData blacksmithFrequencyItem;
     [SerializeField] private BaffItemData purificationFrequencyItem;
+    [SerializeField] private BaffItemData mixingFrequencyItem;
 
     public List<BaffItemData> items;
     public List<ArtifactData> artifacts;
@@ -504,7 +505,8 @@ public class RequestManager : MonoBehaviour
         var modifiers = new[]
         {
             GetFrequencyModifier(blacksmithFrequencyItem, BaffEffectType.blacksmithFrequency),
-            GetFrequencyModifier(purificationFrequencyItem, BaffEffectType.purificationFrequency)
+            GetFrequencyModifier(purificationFrequencyItem, BaffEffectType.purificationFrequency),
+            GetFrequencyModifier(mixingFrequencyItem, BaffEffectType.mixingFrequency)
         };
         return RequestTypeLottery.Pick(requestTypesPool, modifiers, roll);
     }
