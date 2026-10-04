@@ -32,6 +32,7 @@ public class RequestManager : MonoBehaviour
 
     [SerializeField] private BaffItemData mushroomRewardItem;
     [SerializeField] private BaffItemData blacksmithFrequencyItem;
+    [SerializeField] private BaffItemData purificationFrequencyItem;
 
     public List<BaffItemData> items;
     public List<ArtifactData> artifacts;
@@ -488,20 +489,24 @@ public class RequestManager : MonoBehaviour
 		requestToSlot.Remove(request);
 	}
 
-    private BaffItemData GetActiveBlacksmithFrequencyEffect()
+    private static RequestTypeLottery.WeightModifier GetFrequencyModifier(BaffItemData effect, BaffEffectType expectedType)
     {
-        if (SceneManager.GetActiveScene().name != SceneNames.Arcade || blacksmithFrequencyItem == null ||
-            blacksmithFrequencyItem.effecttype != BaffEffectType.blacksmithFrequency) return null;
-        return blacksmithFrequencyItem;
+        if (effect == null || effect.effecttype != expectedType) return default;
+        return new RequestTypeLottery.WeightModifier(effect.requestWeightTargetTypes,
+            effect.requestWeightIncreasePerItem, OwnedProgressManager.GetBaffOwned(effect.B_itemID));
     }
 
     public RequestType SelectRequestTypeForRoll(double roll)
     {
-        BaffItemData effect = GetActiveBlacksmithFrequencyEffect();
-        return RequestTypeLottery.Pick(requestTypesPool,
-            effect != null ? effect.requestWeightTargetTypes : null,
-            effect != null ? effect.requestWeightIncreasePerItem : 0f,
-            effect != null ? OwnedProgressManager.GetBaffOwned(effect.B_itemID) : 0, roll);
+        if (SceneManager.GetActiveScene().name != SceneNames.Arcade)
+            return RequestTypeLottery.Pick(requestTypesPool, null, roll);
+
+        var modifiers = new[]
+        {
+            GetFrequencyModifier(blacksmithFrequencyItem, BaffEffectType.blacksmithFrequency),
+            GetFrequencyModifier(purificationFrequencyItem, BaffEffectType.purificationFrequency)
+        };
+        return RequestTypeLottery.Pick(requestTypesPool, modifiers, roll);
     }
 
     public static int CalculateMushroomRewardBonus(BaffItemData effect, RequestType type, ItemData requiredItem, int ownedCount)
