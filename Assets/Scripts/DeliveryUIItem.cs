@@ -32,6 +32,12 @@ public class DeliveryUIItem : MonoBehaviour
     private RequestManager requestManager;
     private DeliveryUIList parentList; // リスト全体の管理クラス
 
+    private void Update()
+    {
+        if (linkedRequest != null && requestManager != null && rewardText != null)
+            rewardText.text = requestManager.GetDeliveryRewardText(linkedRequest);
+    }
+
     /// <summary>
     /// UI要素の初期化
     /// </summary>
@@ -51,7 +57,7 @@ public class DeliveryUIItem : MonoBehaviour
             itemIcon.type = Image.Type.Simple;
         }
 
-        rewardText.text = $"{request.rewardAmount} G";
+        rewardText.text = manager.GetDeliveryRewardText(request);
 
         // 依頼タイプに応じて文字色を変更
         UpdateTextColor(request.requestType);

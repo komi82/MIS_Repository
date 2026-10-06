@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb8c58d17a0b3cf47a3b2804f727de77, type: 3}
+  m_Name: OreRetention
+  m_EditorClassIdentifier: Assembly-CSharp::BaffItemData
+  B_itemID: 16
+  effecttype: 18
+  B_itemName: oreRetention
+  price: 150
+  startprice: 150
+  ownedCount: 0
+  prefab: {fileID: 2981309548975973535, guid: 880fbcc8cf5e4aa099c91c1a75b8b345, type: 3}
+  itemName: "鉱石返しの袋（仮）"
+  description: "対象鉱石を作業で使った時、その実物ごとに1回だけ返却する。再使用時は消費。持ち物が満杯なら作業台の横へ戻る。重複購入なし。"
+  upgradeBonusRate: 0
+  upgradePenaltyRate: 0
+  upgradeMaxBonus: 1
+  upgradeChance: 0.2
+  uniquePurchase: 1
+  upgradeTargetItems:
+  - {fileID: 11400000, guid: 4591a8d5f99a502438d999ecf57e6e04, type: 2}
+  - {fileID: 11400000, guid: a3a057b642b13e74da15bdb7324d5b5f, type: 2}
+  - {fileID: 11400000, guid: 449c9306d483e4241ac4997142cc9709, type: 2}

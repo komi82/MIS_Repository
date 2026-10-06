@@ -34,6 +34,12 @@ public class RequestManager : MonoBehaviour
     [SerializeField] private BaffItemData blacksmithFrequencyItem;
     [SerializeField] private BaffItemData purificationFrequencyItem;
     [SerializeField] private BaffItemData mixingFrequencyItem;
+    [SerializeField] private BaffItemDatabase upgradeDatabase;
+    private Request upcomingRequest;
+    private readonly DeliveryStreakState deliveryStreak = new DeliveryStreakState();
+    private int streakDay = -1;
+
+    private void Awake() { FestivalUpgradeRuntime.Configure(upgradeDatabase); }
 
     public List<BaffItemData> items;
     public List<ArtifactData> artifacts;
@@ -217,19 +223,33 @@ public class RequestManager : MonoBehaviour
             type = RequestType.PurifyWeapon;
         else
 #endif
-            type = SelectRequestTypeForRoll(UnityEngine.Random.value);
+            type = upcomingRequest != null ? upcomingRequest.requestType : SelectRequestTypeForRoll(UnityEngine.Random.value);
 
-		// スロット必要タイプ（Deliver/Craft以外）で空きスロットがない場合は生成を停止
+        bool forced = false;
+#if UNITY_EDITOR
+        forced = editorDeliveryTestItem != null || UnityEditor.SessionState.GetBool("MIS.PurificationOnlyTest", false);
+#endif
+        Request newRequest = !forced && upcomingRequest != null ? upcomingRequest : BuildRequest(type);
+        if (newRequest == null) return;
+        type = newRequest.requestType;
+        if (type != RequestType.DeliverItem && type != RequestType.CraftWeapon && FindFreeSpawnSlot() == null)
+        {
+            if (newRequest != upcomingRequest) Destroy(newRequest);
+            return;
+        }
+        if (newRequest == upcomingRequest) upcomingRequest = null;
+        activeRequests.Add(newRequest);
+
+		// DeliverItem / CraftWeapon 以外は、作業対象となるアイテムのプレハブをスポーン
 		if (type != RequestType.DeliverItem && type != RequestType.CraftWeapon)
 		{
-			Transform free = FindFreeSpawnSlot();
-			if (free == null)
-			{
-				Debug.Log("Request 生成停止: Request Spawn Slots に空きがありません");
-				return;
-			}
+			SpawnRequestTarget(newRequest);
 		}
+        requestBoard.DisplayRequests();
+    }
 
+    private Request BuildRequest(RequestType type)
+    {
 		Request newRequest = ScriptableObject.CreateInstance<Request>();
         newRequest.requestType = type;
         newRequest.isCompleted = false;
@@ -250,7 +270,7 @@ public class RequestManager : MonoBehaviour
 #else
                 var item = itemDatabase.GetRandomItemByType(ItemTypes.Medicine);
 #endif
-                if (item == null) return;
+                if (item == null) return null;
                 newRequest.requestName = $"デリバー依頼: {item.itemName}";
                 newRequest.requiredItem = item;
                 newRequest.rewardAmount += Mathf.FloorToInt(potionReward * 50);
@@ -258,12 +278,12 @@ public class RequestManager : MonoBehaviour
 
             case RequestType.PurifyWeapon:
                 var cursed = itemDatabase.GetRandomItemByType(ItemTypes.CursedWeapon);
-                if (cursed == null) return;
+                if (cursed == null) return null;
                 var purified = itemDatabase.GetPurifiedVersion(cursed);
                 if (purified == null)
                 {
                     Debug.LogWarning($"浄化依頼: {cursed.itemName} に対応する浄化されたアイテムが見つかりません");
-                    return;
+                    return null;
                 }
                 newRequest.requestName = $"浄化依頼: {cursed.itemName} → 浄化された{purified.itemName}";
                 newRequest.providedItem = cursed;
@@ -275,12 +295,12 @@ public class RequestManager : MonoBehaviour
 
             case RequestType.AddAttribute_Fire:
                 var baseWeapon_fire = itemDatabase.GetRandomItemByType(ItemTypes.BaseWeapon);
-                if (baseWeapon_fire == null) return;
+                if (baseWeapon_fire == null) return null;
                 var enhancedfire = itemDatabase.GetEnhancedFireVersion(baseWeapon_fire);
                 if (enhancedfire == null)
                 {
                     Debug.LogWarning($"炎属性依頼: {baseWeapon_fire.itemName} に対応する炎属性アイテムが見つかりません");
-                    return;
+                    return null;
                 }
                 newRequest.requestName = $"炎属性依頼: {baseWeapon_fire.itemName} → 炎の{enhancedfire.itemName}";
                 newRequest.providedItem = baseWeapon_fire;
@@ -290,12 +310,12 @@ public class RequestManager : MonoBehaviour
 
             case RequestType.AddAttribute_Frozen:
                 var baseWeapon_frozen = itemDatabase.GetRandomItemByType(ItemTypes.BaseWeapon);
-                if (baseWeapon_frozen == null) return;
+                if (baseWeapon_frozen == null) return null;
                 var enhancedfrozen = itemDatabase.GetEnhancedFrozenVersion(baseWeapon_frozen);
                 if (enhancedfrozen == null)
                 {
                     Debug.LogWarning($"氷属性依頼: {baseWeapon_frozen.itemName} に対応する氷属性アイテムが見つかりません");
-                    return;
+                    return null;
                 }
                 newRequest.requestName = $"氷属性依頼: {baseWeapon_frozen.itemName} → 氷の{enhancedfrozen.itemName}";
                 newRequest.providedItem = baseWeapon_frozen;
@@ -305,12 +325,12 @@ public class RequestManager : MonoBehaviour
 
             case RequestType.AddAttribute_Wind:
                 var baseWeapon_wind = itemDatabase.GetRandomItemByType(ItemTypes.BaseWeapon);
-                if (baseWeapon_wind == null) return;
+                if (baseWeapon_wind == null) return null;
                 var enhancedwind = itemDatabase.GetEnhancedWindVersion(baseWeapon_wind);
                 if (enhancedwind == null)
                 {
                     Debug.LogWarning($"風属性依頼: {baseWeapon_wind.itemName} に対応する風属性アイテムが見つかりません");
-                    return;
+                    return null;
                 }
                 newRequest.requestName = $"風属性依頼: {baseWeapon_wind.itemName} → 風の{enhancedwind.itemName}";
                 newRequest.providedItem = baseWeapon_wind;
@@ -320,12 +340,12 @@ public class RequestManager : MonoBehaviour
 
             case RequestType.AddAttribute_Bright:
                 var baseWeapon_bright = itemDatabase.GetRandomItemByType(ItemTypes.BaseWeapon);
-                if (baseWeapon_bright == null) return;
+                if (baseWeapon_bright == null) return null;
                 var enhancedbright = itemDatabase.GetEnhancedBrightVersion(baseWeapon_bright);
                 if (enhancedbright == null)
                 {
                     Debug.LogWarning($"光属性依頼: {baseWeapon_bright.itemName} に対応する光属性アイテムが見つかりません");
-                    return;
+                    return null;
                 }
                 newRequest.requestName = $"光属性依頼: {baseWeapon_bright.itemName} → 光の{enhancedbright.itemName}";
                 newRequest.providedItem = baseWeapon_bright;
@@ -335,12 +355,12 @@ public class RequestManager : MonoBehaviour
 
             case RequestType.AddAttribute_Darkness:
                 var baseWeapon_darkness = itemDatabase.GetRandomItemByType(ItemTypes.BaseWeapon);
-                if (baseWeapon_darkness == null) return;
+                if (baseWeapon_darkness == null) return null;
                 var enhanceddarkness = itemDatabase.GetEnhancedDarknessVersion(baseWeapon_darkness);
                 if (enhanceddarkness == null)
                 {
                     Debug.LogWarning($"闇属性依頼: {baseWeapon_darkness.itemName} に対応する闇属性アイテムが見つかりません");
-                    return;
+                    return null;
                 }
                 newRequest.requestName = $"闇属性依頼: {baseWeapon_darkness.itemName} → 闇の{enhanceddarkness.itemName}";
                 newRequest.providedItem = baseWeapon_darkness;
@@ -350,7 +370,7 @@ public class RequestManager : MonoBehaviour
 
             case RequestType.CraftWeapon:
                 var crafted = itemDatabase.GetRandomItemByType(ItemTypes.Weapon);
-                if (crafted == null) return;
+                if (crafted == null) return null;
                 newRequest.requestName = $"武器作成依頼: {crafted.itemName}";
                 newRequest.requiredItem = crafted;
                 newRequest.rewardAmount += Mathf.FloorToInt(weaponReward * 75);
@@ -358,12 +378,12 @@ public class RequestManager : MonoBehaviour
 
             case RequestType.RepairWeapon:
                 var broken = itemDatabase.GetRandomItemByType(ItemTypes.BrokenWeapon);
-                if (broken == null) return;
+                if (broken == null) return null;
                 var repaired = itemDatabase.GetRepairedVersion(broken);
                 if (repaired == null)
                 {
                     Debug.LogWarning($"修理依頼: {broken.itemName} に対応する修復されたアイテムが見つかりません");
-                    return;
+                    return null;
                 }
                 newRequest.requestName = $"修理依頼: {broken.itemName} → 修復した{repaired.itemName}";
                 newRequest.providedItem = broken;
@@ -391,14 +411,38 @@ public class RequestManager : MonoBehaviour
             Debug.Log($"[キノコ報酬テスト] {newRequest.requiredItem.itemName}: 通常{newRequest.rewardAmount - bonus}G + 籠{bonus}G = 掲示・納品報酬{newRequest.rewardAmount}G");
         }
 #endif
-        activeRequests.Add(newRequest);
+        newRequest.rewardAmount = FestivalUpgradeRuntime.GenerationReward(newRequest.rewardAmount, type);
+        return newRequest;
+    }
 
-		// DeliverItem / CraftWeapon 以外は、作業対象となるアイテムのプレハブをスポーン
-		if (type != RequestType.DeliverItem && type != RequestType.CraftWeapon)
-		{
-			SpawnRequestTarget(newRequest);
-		}
-        requestBoard.DisplayRequests();
+    public Request GetUpcomingRequest()
+    {
+        if (FestivalUpgradeRuntime.Owned(BaffEffectType.requestForecast) == null) return null;
+        if (upcomingRequest == null && requestTypesPool != null && requestTypesPool.Count > 0)
+            upcomingRequest = BuildRequest(SelectRequestTypeForRoll(UnityEngine.Random.value));
+        return upcomingRequest;
+    }
+
+    public int GetDeliveryReward(Request request, InventorySlotUI slot = null)
+    {
+        if (request == null) return 0;
+        int day = DayAdvanceButton.GetDayStatic();
+        if (day != streakDay) { deliveryStreak.Reset(); streakDay = day; }
+        if (slot == null && InventoryManager.Instance != null) slot = InventoryManager.Instance.FindSlotByItem(request.requiredItem);
+        return FestivalUpgradeRuntime.DeliveryReward(request.rewardAmount, request.requestType, deliveryStreak, slot?.InstanceState);
+    }
+
+    public string GetDeliveryRewardText(Request request)
+    {
+        string text = $"{GetDeliveryReward(request)}G";
+        var lucky = FestivalUpgradeRuntime.Owned(BaffEffectType.luckyDelivery);
+        if (lucky != null) text += $"（{100f * lucky.upgradeChance:0}%で追加ボーナス）";
+        return text;
+    }
+
+    private void OnDestroy()
+    {
+        if (upcomingRequest != null) Destroy(upcomingRequest);
     }
 
 	private void SpawnRequestTarget(Request request)
@@ -442,7 +486,7 @@ public class RequestManager : MonoBehaviour
 
     public bool TryDeliverByRequest(Request request)
     {
-        if (request == null) return false;
+        if (request == null || !activeRequests.Contains(request) || moneyManager == null) return false;
 
         if (!request.isCompleted)
         {
@@ -452,16 +496,22 @@ public class RequestManager : MonoBehaviour
                 return false;
             }
 
+            var deliverySlot = InventoryManager.Instance.FindSlotByItem(request.requiredItem);
+            if (deliverySlot == null) return false;
+            int payment = GetDeliveryReward(request, deliverySlot);
+            if (FestivalUpgradeRuntime.Owned(BaffEffectType.luckyDelivery) != null)
+                payment = FestivalUpgradeRuntime.LuckyReward(payment, UnityEngine.Random.value);
             request.isCompleted = true;
             
             // アイテムをインベントリから削除
-            var slot = InventoryManager.Instance.FindSlotByItem(request.requiredItem);
+            var slot = deliverySlot;
             if (slot != null)
             {
                 InventoryManager.Instance.RemoveItem(slot);
             }
             
-            moneyManager.AddMoney(request.rewardAmount);
+            moneyManager.AddMoney(payment);
+            deliveryStreak.Complete(request.requestType);
 			// デリバー系ではrequestspawnslotsのプレハブは削除しない
 			// （デリバーは依頼の完了であり、作業対象の削除ではない）
 			// ReleaseSpawnSlot(request); // コメントアウト
@@ -472,7 +522,7 @@ public class RequestManager : MonoBehaviour
                 GameClockText.Instance.RecordSuccessfulDelivery();
             RequestComp?.Invoke();
 
-            Debug.Log($"デリバー完了: {request.requestName} 報酬 {request.rewardAmount} 円");
+            Debug.Log($"デリバー完了: {request.requestName} 報酬 {payment} G");
             return true;
         }
         return false;

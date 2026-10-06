@@ -27,7 +27,7 @@ public class InventoryManager : MonoBehaviour
     /// <summary>
     /// アイテム名リストに基づいてインベントリを復元する
     /// </summary>
-    public void RestoreInventory(string[] itemNames)
+    public void RestoreInventory(string[] itemNames, ItemInstanceState[] states = null)
     {
         if (itemDatabase == null)
         {
@@ -44,7 +44,7 @@ public class InventoryManager : MonoBehaviour
             ItemData item = itemDatabase.allItems.Find(it => it.itemName == itemNames[i]);
             if (item != null)
             {
-                AddItemToSlot(i, item);
+                AddItemToSlot(i, item, states != null && i < states.Length ? states[i]?.Copy() : null);
             }
         }
     }
@@ -52,13 +52,13 @@ public class InventoryManager : MonoBehaviour
     /// <summary>
     /// アイテムを最初の空スロットに追加する
     /// </summary>
-    public bool AddItem(ItemData item)
+    public bool AddItem(ItemData item, ItemInstanceState state = null)
     {
         foreach (var slot in slotUIs)
         {
             if (!slot.IsOccupied)
             {
-                slot.AssignItem(item);
+                slot.AssignItem(item, state);
 
                 return true;
             }
@@ -71,7 +71,7 @@ public class InventoryManager : MonoBehaviour
     /// <summary>
     /// 指定スロットにアイテムを追加（インデックス指定）
     /// </summary>
-    public bool AddItemToSlot(int index, ItemData item)
+    public bool AddItemToSlot(int index, ItemData item, ItemInstanceState state = null)
     {
         if (index < 0 || index >= slotUIs.Length)
         {
@@ -83,7 +83,7 @@ public class InventoryManager : MonoBehaviour
             return false;
         }
 
-        slotUIs[index].AssignItem(item);
+        slotUIs[index].AssignItem(item, state);
 
         return true;
     }

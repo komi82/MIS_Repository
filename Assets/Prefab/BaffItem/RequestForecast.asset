@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb8c58d17a0b3cf47a3b2804f727de77, type: 3}
+  m_Name: RequestForecast
+  m_EditorClassIdentifier: Assembly-CSharp::BaffItemData
+  B_itemID: 18
+  effecttype: 20
+  B_itemName: requestForecast
+  price: 150
+  startprice: 150
+  ownedCount: 0
+  prefab: {fileID: 2981309548975973535, guid: 614fc45f00134a378c6c648641b9a777, type: 3}
+  itemName: "先読みの水晶（仮）"
+  description: "次に届く依頼の作業種類と完成品が見える。重複購入なし。"
+  upgradeBonusRate: 0
+  upgradePenaltyRate: 0
+  upgradeMaxBonus: 1
+  upgradeChance: 0.2
+  uniquePurchase: 1
+  upgradeTargetItems: []

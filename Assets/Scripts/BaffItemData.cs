@@ -25,6 +25,14 @@ public class BaffItemData : ScriptableObject
     [Min(0f)] public float requestWeightIncreasePerItem = 0.5f;
     public RequestType[] requestWeightTargetTypes;
 
+    [Header("追加効果の調整（建学祭の仮設定）")]
+    [Min(0f)] public float upgradeBonusRate;
+    [Min(0f)] public float upgradePenaltyRate;
+    [Min(0f)] public float upgradeMaxBonus = 1f;
+    [Range(0f, 1f)] public float upgradeChance = 0.2f;
+    public ItemData[] upgradeTargetItems;
+    public bool uniquePurchase;
+
     /// <summary>ショップ再入場時: 価格のみ初期化（所持数は維持）</summary>
     public void ResetShopPrice()
     {

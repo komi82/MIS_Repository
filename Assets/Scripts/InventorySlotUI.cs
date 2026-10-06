@@ -17,6 +17,12 @@ public class InventorySlotUI : MonoBehaviour
     [SerializeField] private bool clearCurrentItemOnStart = true;
 
     public ItemData CurrentItem => currentItem;
+    private ItemInstanceState instanceState;
+    public ItemInstanceState InstanceState
+    {
+        get => currentItem == null ? null : instanceState ?? (instanceState = new ItemInstanceState());
+        private set => instanceState = value;
+    }
 
     // このスロットがアイテムで埋まっているかどうか
     public bool IsOccupied => currentItem != null;
@@ -36,7 +42,13 @@ public class InventorySlotUI : MonoBehaviour
     // アイテムをこのスロットに格納する
     public void AssignItem(ItemData item)
     {
+        AssignItem(item, new ItemInstanceState());
+    }
+
+    public void AssignItem(ItemData item, ItemInstanceState state)
+    {
         currentItem = item;
+        InstanceState = state ?? new ItemInstanceState();
 
         if (iconImage != null && item.icon != null)
         {
@@ -51,6 +63,7 @@ public class InventorySlotUI : MonoBehaviour
     public void ClearSlot()
     {
         currentItem = null;
+        InstanceState = null;
 
         if (iconImage != null)
         {

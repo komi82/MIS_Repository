@@ -3543,6 +3543,7 @@ MonoBehaviour:
   blacksmithFrequencyItem: {fileID: 11400000, guid: b4ec74d9f254490f8e493a51ebf6ed8b, type: 2}
   purificationFrequencyItem: {fileID: 11400000, guid: e29613a8d8e444dd8ed1df8f8c115c2c, type: 2}
   mixingFrequencyItem: {fileID: 11400000, guid: c451ec719bca4308a1535673f80b3014, type: 2}
+  upgradeDatabase: {fileID: 11400000, guid: b9e307d28efdd0c43803a5fdefff2e01, type: 2}
   m_Name: 
   m_EditorClassIdentifier: 
   itemDatabase: {fileID: 11400000, guid: 77b81d8d22a8a4c4bb1a539926501bb2, type: 2}

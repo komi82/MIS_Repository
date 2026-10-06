@@ -101,7 +101,9 @@ public class ItemPickup : MonoBehaviour
     {
         if (currentTargetItem == null) return;
 
-        bool success = inventoryManager.AddItem(currentTargetItem.ItemData);
+        // Infinite sources create a fresh physical item; movable objects retain their state.
+        bool success = inventoryManager.AddItem(currentTargetItem.ItemData,
+            currentTargetItem.CompareTag("Infinity") ? new ItemInstanceState() : currentTargetItem.InstanceState);
 
         if (success)
         {

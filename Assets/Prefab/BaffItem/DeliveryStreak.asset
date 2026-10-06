@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb8c58d17a0b3cf47a3b2804f727de77, type: 3}
+  m_Name: DeliveryStreak
+  m_EditorClassIdentifier: Assembly-CSharp::BaffItemData
+  B_itemID: 14
+  effecttype: 16
+  B_itemName: deliveryStreak
+  price: 150
+  startprice: 150
+  ownedCount: 0
+  prefab: {fileID: 2981309548975973535, guid: faec144dd1214f87a16e42e75440e05c, type: 3}
+  itemName: "職人の連続手帳（仮）"
+  description: "同じ作業の依頼を連続で納品すると、2件目から1回につき報酬+10%。最大+100%。別の作業を納品するか日が変わるとリセット。"
+  upgradeBonusRate: 0.1
+  upgradePenaltyRate: 0
+  upgradeMaxBonus: 1
+  upgradeChance: 0.2
+  uniquePurchase: 0
+  upgradeTargetItems: []

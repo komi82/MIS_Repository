@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb8c58d17a0b3cf47a3b2804f727de77, type: 3}
+  m_Name: BlacksmithSpecialist
+  m_EditorClassIdentifier: Assembly-CSharp::BaffItemData
+  B_itemID: 21
+  effecttype: 23
+  B_itemName: blacksmithSpecialist
+  price: 150
+  startprice: 150
+  ownedCount: 0
+  prefab: {fileID: 2981309548975973535, guid: 7c52d714cba94c7ebdbfe839414519e1, type: 3}
+  itemName: "鍛冶専業の証（仮）"
+  description: "新しい武器作成・修理依頼の報酬+50%、他の作業は-20%。複数所持で加算。"
+  upgradeBonusRate: 0.5
+  upgradePenaltyRate: 0.2
+  upgradeMaxBonus: 1
+  upgradeChance: 0.2
+  uniquePurchase: 0
+  upgradeTargetItems: []
