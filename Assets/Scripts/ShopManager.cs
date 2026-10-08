@@ -76,6 +76,8 @@ public class ShopManager : MonoBehaviour
                 selectedSlot
             );
 
+            ShopDisplaySlot.ConfigureItem(selectedSlot, itemObj);
+
             // 画像の引き延ばしを防止（アスペクト比を維持）
             Image img = itemObj.GetComponent<Image>();
             if (img != null)
@@ -102,6 +104,7 @@ public class ShopManager : MonoBehaviour
                     // Recheck at purchase so repeated callbacks never charge for a second bank.
                     if ((selectedItem.B_itemID == DailyIncomeState.ItemId || selectedItem.uniquePurchase) &&
                         OwnedProgressManager.GetBaffOwned(selectedItem.B_itemID) > 0) return;
+                    if (!itemObj.activeSelf) return; // Sold offers cannot be charged twice.
                     // ゴールド消費
                     bool success = MoneyManager.Instance.SpendMoney(selectedItem.price);
 

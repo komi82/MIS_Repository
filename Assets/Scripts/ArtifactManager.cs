@@ -59,6 +59,8 @@ public class ArtifactManager : MonoBehaviour
                 selectedSlot
             );
 
+            ShopDisplaySlot.ConfigureItem(selectedSlot, A_itemObj);
+
             // 画像の引き延ばしを防止（アスペクト比を維持）
             Image img = A_itemObj.GetComponent<Image>();
             if (img != null)
@@ -82,6 +84,7 @@ public class ArtifactManager : MonoBehaviour
             {
                 button.onClick.AddListener(() =>
                 {
+                    if (!A_itemObj.activeSelf) return; // Sold offers cannot be charged twice.
                     // ゴールド消費
                     bool success = MoneyManager.Instance.SpendMoney(selectedItem.price);
 
