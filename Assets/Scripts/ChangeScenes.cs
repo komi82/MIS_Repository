@@ -145,9 +145,9 @@ public class ChangeScene: MonoBehaviour
         // Shop からの戻り遷移は状態をリセットしない（金額・アイテムは保持）
         if (!shouldReset && string.Equals(previousName, SceneNames.Shop, StringComparison.OrdinalIgnoreCase))
         {
-            savedState = null;
-            // Shop での金額の変更はリアルタイムに MoneyManager.currentMoney に反映されている
-            Debug.Log("[ChangeScenes] Shop から戻ります。金額・アイテムは保持されます。");
+            // Keep the saved inventory and per-item state. Money is already current after shopping.
+            StartCoroutine(RestoreArcadeStateExplicit());
+            Debug.Log("[ChangeScenes] Shop から戻ります。購入後の所持金と保存した持ち物を引き継ぎます。");
             return;
         }
 
