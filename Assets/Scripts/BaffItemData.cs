@@ -16,6 +16,10 @@ public class BaffItemData : ScriptableObject
     [TextArea(3, 5)]
     public string description;
 
+    [Header("キノコ依頼の報酬設定")]
+    [Min(0)] public int rewardBonusPerOwnedItem = 100;
+    public ItemData[] rewardTargetItems;
+
     /// <summary>ショップ再入場時: 価格のみ初期化（所持数は維持）</summary>
     public void ResetShopPrice()
     {

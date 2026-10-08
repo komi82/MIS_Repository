@@ -13,5 +13,6 @@ public enum BaffEffectType
     craftHoldShortening,
     blacksmithClickReduction,
     purificationWindowExpansion,
-    dailyIncome
+    dailyIncome,
+    mushroomReward
 }

@@ -30,6 +30,8 @@ public class RequestManager : MonoBehaviour
     [SerializeField] private MoneyManager moneyManager;
     [SerializeField] private RequestBoard requestBoard;
 
+    [SerializeField] private BaffItemData mushroomRewardItem;
+
     public List<BaffItemData> items;
     public List<ArtifactData> artifacts;
 
@@ -175,13 +177,34 @@ public class RequestManager : MonoBehaviour
         nextRequestTime = SceneTimer.Instance.GetElapsedTime() + interval;
     }
 
+#if UNITY_EDITOR
+    private ItemData editorDeliveryTestItem;
+
+    public void GenerateDeliveryForEditorTest(ItemData item)
+    {
+        if (item == null || SceneManager.GetActiveScene().name != SceneNames.Arcade) return;
+        // 満枠でもテストできるよう、再生中の依頼1件だけを入れ替える。
+        if (activeRequests.Count >= maxRequests && activeRequests.Count > 0)
+        {
+            Request replaced = activeRequests[activeRequests.Count - 1];
+            ReleaseSpawnSlot(replaced);
+            activeRequests.Remove(replaced);
+        }
+        editorDeliveryTestItem = item;
+        try { GenerateRequest(); }
+        finally { editorDeliveryTestItem = null; }
+    }
+#endif
+
     void GenerateRequest()
     {
         if (activeRequests.Count >= maxRequests) return;
 
 		RequestType type;
 #if UNITY_EDITOR
-        if (SceneManager.GetActiveScene().name == SceneNames.Arcade &&
+        if (editorDeliveryTestItem != null)
+            type = RequestType.DeliverItem;
+        else if (SceneManager.GetActiveScene().name == SceneNames.Arcade &&
             UnityEditor.SessionState.GetBool("MIS.PurificationOnlyTest", false))
             type = RequestType.PurifyWeapon;
         else
@@ -214,7 +237,11 @@ public class RequestManager : MonoBehaviour
         switch (type)
         {
             case RequestType.DeliverItem:
+#if UNITY_EDITOR
+                var item = editorDeliveryTestItem != null ? editorDeliveryTestItem : itemDatabase.GetRandomItemByType(ItemTypes.Medicine);
+#else
                 var item = itemDatabase.GetRandomItemByType(ItemTypes.Medicine);
+#endif
                 if (item == null) return;
                 newRequest.requestName = $"デリバー依頼: {item.itemName}";
                 newRequest.requiredItem = item;
@@ -340,6 +367,22 @@ public class RequestManager : MonoBehaviour
         float x = GameClockText.GetRewardOverflowBonusX();
         newRequest.rewardAmount = Mathf.FloorToInt(newRequest.rewardAmount * (1f + x));
 
+        // 建学祭用: arcadeで生成する対象依頼に固定額を加算し、掲示額と納品額を一致させる。
+        if (SceneManager.GetActiveScene().name == SceneNames.Arcade && mushroomRewardItem != null)
+        {
+            newRequest.rewardAmount += CalculateMushroomRewardBonus(
+                mushroomRewardItem, type, newRequest.requiredItem,
+                OwnedProgressManager.GetBaffOwned(mushroomRewardItem.B_itemID));
+        }
+#if UNITY_EDITOR
+        if (editorDeliveryTestItem != null)
+        {
+            int bonus = mushroomRewardItem == null ? 0 : CalculateMushroomRewardBonus(
+                mushroomRewardItem, type, newRequest.requiredItem,
+                OwnedProgressManager.GetBaffOwned(mushroomRewardItem.B_itemID));
+            Debug.Log($"[キノコ報酬テスト] {newRequest.requiredItem.itemName}: 通常{newRequest.rewardAmount - bonus}G + 籠{bonus}G = 掲示・納品報酬{newRequest.rewardAmount}G");
+        }
+#endif
         activeRequests.Add(newRequest);
 
 		// DeliverItem / CraftWeapon 以外は、作業対象となるアイテムのプレハブをスポーン
@@ -439,6 +482,19 @@ public class RequestManager : MonoBehaviour
 		requestToSlot.Remove(request);
 	}
 
+    public static int CalculateMushroomRewardBonus(BaffItemData effect, RequestType type, ItemData requiredItem, int ownedCount)
+    {
+        if (effect == null || effect.effecttype != BaffEffectType.mushroomReward ||
+            type != RequestType.DeliverItem || requiredItem == null || ownedCount <= 0 ||
+            effect.rewardTargetItems == null) return 0;
+
+        foreach (ItemData target in effect.rewardTargetItems)
+        {
+            if (target != null && target == requiredItem)
+                return Mathf.Max(0, effect.rewardBonusPerOwnedItem) * ownedCount;
+        }
+        return 0;
+    }
     public List<Request> GetActiveRequests()
     {
         return activeRequests;
