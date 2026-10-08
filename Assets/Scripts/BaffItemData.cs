@@ -20,6 +20,11 @@ public class BaffItemData : ScriptableObject
     [Min(0)] public int rewardBonusPerOwnedItem = 100;
     public ItemData[] rewardTargetItems;
 
+    [Header("依頼の抽選設定")]
+    [Tooltip("1個ごとに加える抽選の重み。0.5なら未所持1倍、1個で1.5倍、2個で2倍。")]
+    [Min(0f)] public float requestWeightIncreasePerItem = 0.5f;
+    public RequestType[] requestWeightTargetTypes;
+
     /// <summary>ショップ再入場時: 価格のみ初期化（所持数は維持）</summary>
     public void ResetShopPrice()
     {

@@ -31,6 +31,7 @@ public class RequestManager : MonoBehaviour
     [SerializeField] private RequestBoard requestBoard;
 
     [SerializeField] private BaffItemData mushroomRewardItem;
+    [SerializeField] private BaffItemData blacksmithFrequencyItem;
 
     public List<BaffItemData> items;
     public List<ArtifactData> artifacts;
@@ -199,6 +200,11 @@ public class RequestManager : MonoBehaviour
     void GenerateRequest()
     {
         if (activeRequests.Count >= maxRequests) return;
+        if (requestTypesPool == null || requestTypesPool.Count == 0)
+        {
+            Debug.LogWarning("依頼の抽選候補が未設定です。", this);
+            return;
+        }
 
 		RequestType type;
 #if UNITY_EDITOR
@@ -209,7 +215,7 @@ public class RequestManager : MonoBehaviour
             type = RequestType.PurifyWeapon;
         else
 #endif
-            type = requestTypesPool[UnityEngine.Random.Range(0, requestTypesPool.Count)];
+            type = SelectRequestTypeForRoll(UnityEngine.Random.value);
 
 		// スロット必要タイプ（Deliver/Craft以外）で空きスロットがない場合は生成を停止
 		if (type != RequestType.DeliverItem && type != RequestType.CraftWeapon)
@@ -481,6 +487,22 @@ public class RequestManager : MonoBehaviour
 		}
 		requestToSlot.Remove(request);
 	}
+
+    private BaffItemData GetActiveBlacksmithFrequencyEffect()
+    {
+        if (SceneManager.GetActiveScene().name != SceneNames.Arcade || blacksmithFrequencyItem == null ||
+            blacksmithFrequencyItem.effecttype != BaffEffectType.blacksmithFrequency) return null;
+        return blacksmithFrequencyItem;
+    }
+
+    public RequestType SelectRequestTypeForRoll(double roll)
+    {
+        BaffItemData effect = GetActiveBlacksmithFrequencyEffect();
+        return RequestTypeLottery.Pick(requestTypesPool,
+            effect != null ? effect.requestWeightTargetTypes : null,
+            effect != null ? effect.requestWeightIncreasePerItem : 0f,
+            effect != null ? OwnedProgressManager.GetBaffOwned(effect.B_itemID) : 0, roll);
+    }
 
     public static int CalculateMushroomRewardBonus(BaffItemData effect, RequestType type, ItemData requiredItem, int ownedCount)
     {

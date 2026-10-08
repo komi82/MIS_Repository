@@ -3540,6 +3540,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ba3662fb1d27a7344a14d50667d7260c, type: 3}
   mushroomRewardItem: {fileID: 11400000, guid: f068bbd7cff44c409296926cd898edb0, type: 2}
+  blacksmithFrequencyItem: {fileID: 11400000, guid: b4ec74d9f254490f8e493a51ebf6ed8b, type: 2}
   m_Name: 
   m_EditorClassIdentifier: 
   itemDatabase: {fileID: 11400000, guid: 77b81d8d22a8a4c4bb1a539926501bb2, type: 2}
