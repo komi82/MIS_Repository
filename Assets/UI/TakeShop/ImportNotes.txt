@@ -1,0 +1,3 @@
+Take: Shop anime.zip / Unity 6000.2.9f1. Imported referenced images and animation assets with their original GUIDs and timing. Existing MIS shop purchases and item icons are retained; Take item placeholders become four animated slots (three buffs, one artifact). Template scripts, Packages, ProjectSettings and Library are excluded. Canvas fits the 1920 x 1080 composition across screen sizes. Decorative graphics do not intercept pointer events.
+
+Performance: owner animation textures import at a maximum dimension of 512 pixels. Original PNGs, aspect ratios, animation timing and every frame remain intact. Shop transitions load asynchronously with a progress indicator.

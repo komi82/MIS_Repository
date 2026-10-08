@@ -57,7 +57,7 @@ public static class FestivalRemainingValidation
         string[] args = Environment.GetCommandLineArgs();
         int index = Array.IndexOf(args, "-festivalReport");
         if (index < 0 || index + 1 >= args.Length) throw new InvalidOperationException("Missing -festivalReport path.");
-        Start(args[index + 1], deliveryOnly: Array.IndexOf(args, "-deliveryOnly") >= 0);
+        Start(args[index + 1], shopOnly: Array.IndexOf(args, "-shopOnly") >= 0, deliveryOnly: Array.IndexOf(args, "-deliveryOnly") >= 0);
     }
 
     [MenuItem("MIS/テスト/追加効果の残りをまとめて検証")]
@@ -74,6 +74,12 @@ public static class FestivalRemainingValidation
     {
         string path = Path.GetFullPath(Path.Combine(Application.dataPath, "../Logs/festival-shop-validation.json"));
         Start(path, true);
+    }
+
+    [MenuItem("MIS/テスト/Takeショップの購入と引継ぎを検証")]
+    public static void RunTakeShopFromMenu()
+    {
+        Start(Path.GetFullPath(Path.Combine(Application.dataPath, "../Logs/take-shop-validation.json")), true);
     }
 
     [MenuItem("MIS/テスト/最後の1件の納品と操作復帰を検証")]
@@ -586,6 +592,66 @@ public static class FestivalRemainingValidation
         player.ResetToStartState();
     }
 
+    static IEnumerator TakeShopLayout(ShopManager shop)
+    {
+        var stage = GameObject.Find("TakeShop");
+        var artifacts = Find<ArtifactManager>();
+        Check(stage.GetComponentsInChildren<Component>(true).All(x => x != null), "Take shop has no missing scripts");
+        Check(shop.spawnCount == 3 && artifacts.spawnCount == 1, "shop retains three buff offers and one artifact");
+        var slots = shop.slots.Concat(artifacts.slots).ToArray();
+        Check(slots.Length == 4 && slots.All(x => x.GetComponent<ShopDisplaySlot>() != null), "all four purchase slots use Take layout");
+        var buttons = slots.SelectMany(s => s.Cast<Transform>()).Select(x => x.GetComponent<Button>()).Where(x => x != null).ToArray();
+        Check(buttons.Length == 4, "four real purchase buttons spawned");
+        Check(stage.GetComponentsInChildren<Image>().Where(x => x.GetComponent<Button>() == null).All(x => !x.raycastTarget), "decorative art does not intercept clicks");
+        Check(stage.GetComponentsInChildren<Animator>().All(x => x.runtimeAnimatorController != null), "all shop animations have controllers");
+        yield return Until(() => FadeManager.Instance == null || !FadeManager.Instance.IsFading(), "shop fade completed before pointer checks");
+        Canvas.ForceUpdateCanvases();
+        foreach (var button in buttons)
+        {
+            var rect = (RectTransform)button.transform;
+            Check(Mathf.Approximately(rect.sizeDelta.x, 13.727179f) && rect.localScale == Vector3.one, "offer fits animated slot: " + button.name);
+            var pointer = new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current);
+            pointer.position = RectTransformUtility.WorldToScreenPoint(null, rect.position);
+            var hits = new List<UnityEngine.EventSystems.RaycastResult>();
+            UnityEngine.EventSystems.EventSystem.current.RaycastAll(pointer, hits);
+            Check(hits.Count > 0 && (hits[0].gameObject == button.gameObject || hits[0].gameObject.transform.IsChildOf(button.transform)), "offer receives pointer through art: " + button.name);
+            UnityEngine.EventSystems.ExecuteEvents.Execute(button.gameObject, pointer, UnityEngine.EventSystems.ExecuteEvents.pointerEnterHandler);
+            Check(button.GetComponent<Outline>().effectColor == Color.yellow && !string.IsNullOrEmpty(Get<TMPro.TextMeshProUGUI>(shop,"itemDetailText").text), "hover shows highlight and description: " + button.name);
+            UnityEngine.EventSystems.ExecuteEvents.Execute(button.gameObject, pointer, UnityEngine.EventSystems.ExecuteEvents.pointerExitHandler);
+            Check(button.GetComponent<Outline>().effectColor == Color.black, "hover highlight resets: " + button.name);
+        }
+        Vector2 before = ((RectTransform)slots[0]).anchoredPosition;
+        yield return Frames(17);
+        Check(Vector2.Distance(before, ((RectTransform)slots[0]).anchoredPosition) > 0.0001f, "Take item float animation advances");
+        Check(stage.GetComponentsInChildren<Image>().All(x => x.sprite != null), "all visible shop sprites resolve");
+        var ownerTextures = Resources.FindObjectsOfTypeAll<Texture2D>().Where(texture =>
+            AssetDatabase.GetAssetPath(texture).StartsWith("Assets/UI/TakeShop/Owner/", StringComparison.Ordinal)).ToArray();
+        Check(ownerTextures.Length > 0 && ownerTextures.All(texture => texture.width <= 512 && texture.height <= 512), "shop animation textures respect the runtime size limit");
+        // Editor profiling includes an extra CPU texture copy. Budget a single
+        // texture payload from the actual format and all mips; keep native usage
+        // as a separate measurement instead of dividing it by an assumed factor.
+        // https://docs.unity3d.com/2023.2/Documentation/Manual/ProfilerMemory.html
+        long ownerNativeBytes = ownerTextures.Sum(texture => UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(texture));
+        long ownerPayloadBytes = 0;
+        foreach (var texture in ownerTextures)
+            for (int mip = 0; mip < texture.mipmapCount; mip++)
+                ownerPayloadBytes += UnityEngine.Experimental.Rendering.GraphicsFormatUtility.ComputeMipmapSize(
+                    Mathf.Max(1, texture.width >> mip), Mathf.Max(1, texture.height >> mip), texture.graphicsFormat);
+        report.measurements.Add("Shop owner textures: " + ownerTextures.Length + "; calculated texture payload " + (ownerPayloadBytes / (1024.0 * 1024.0)).ToString("F1") + " MiB; Editor native measurement " + (ownerNativeBytes / (1024.0 * 1024.0)).ToString("F1") + " MiB.");
+        report.measurements.Add("Shop owner texture formats: " + string.Join(", ", ownerTextures.Select(texture => texture.width + "x" + texture.height + " " + texture.graphicsFormat + " mips=" + texture.mipmapCount).Distinct()));
+        Check(ownerPayloadBytes > 0 && ownerPayloadBytes < 3L * 1024 * 1024 * 1024, "shop animation texture payload stays below 3 GiB");
+        // Exercise the artifact callback too; subsequent buff checks use their own balance.
+        var artifactButton = artifacts.slots.SelectMany(s => s.Cast<Transform>()).Select(x => x.GetComponent<Button>()).Single(x => x != null);
+        int ownedBefore = artifacts.ArtifactDatas.Sum(x => OwnedProgressManager.GetArtifactOwned(x.A_itemID));
+        MoneyManager.currentMoney = 10000;
+        artifactButton.onClick.Invoke();
+        int paid = MoneyManager.currentMoney;
+        artifactButton.onClick.Invoke();
+        Check(!artifactButton.gameObject.activeSelf && artifacts.ArtifactDatas.Sum(x => OwnedProgressManager.GetArtifactOwned(x.A_itemID)) == ownedBefore + 1 && paid < 10000 && MoneyManager.currentMoney == paid, "artifact purchase charges once and removes its offer");
+        MoneyManager.currentMoney = 5000;
+        report.measurements.Add("Take shop: animation, pointer raycasts, hover, four offers and artifact purchase checked.");
+    }
+
     static IEnumerator ShopRoundTrip()
     {
         Phase("shop purchase, uniqueness and inventory round trip");
@@ -601,11 +667,18 @@ public static class FestivalRemainingValidation
         int day = DayAdvanceButton.GetDayStatic();
         int completed = RequestManager.RequestCompleted;
         Check(ChangeScene.Instance != null, "persistent scene state manager exists");
+        double shopLoadStarted = EditorApplication.timeSinceStartup;
+        int shopLoadFrame = Time.frameCount;
         ChangeScene.Instance.GoToShop();
-        yield return Until(() => SceneManager.GetActiveScene().name == SceneNames.Shop, "entered real Shop scene");
+        // Loading asynchronously can span many rendered frames; use wall time.
+        while (SceneManager.GetActiveScene().name != SceneNames.Shop && EditorApplication.timeSinceStartup - shopLoadStarted < 180)
+            yield return null;
+        Check(SceneManager.GetActiveScene().name == SceneNames.Shop, "entered real Shop scene");
+        report.measurements.Add("Shop load: " + (EditorApplication.timeSinceStartup - shopLoadStarted).ToString("F2") + " seconds; " + (Time.frameCount - shopLoadFrame) + " rendered frames including fade.");
         yield return Frames(8);
         var shop = Find<ShopManager>();
         Check(shop != null && MoneyManager.currentMoney == 5000, "shop initialized without losing money");
+        if (GameObject.Find("TakeShop") != null) yield return TakeShopLayout(shop);
         var all = shop.baffitemDatas.ToArray();
         int spent = 0;
         for (int id = 14; id <= 23; id++)

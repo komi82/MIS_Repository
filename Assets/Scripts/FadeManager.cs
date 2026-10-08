@@ -148,7 +148,10 @@ public class FadeManager : MonoBehaviour
         }
 
         // シーン切り替え
-        UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
+        if (sceneName == SceneNames.Shop)
+            yield return LoadShopAsync(sceneName);
+        else
+            SceneManager.LoadScene(sceneName);
 
         // 1フレーム待機（シーン読み込み完了を待つ）
         yield return null;
@@ -164,6 +167,68 @@ public class FadeManager : MonoBehaviour
         }
     }
     
+    // Large shop art must not block the main thread behind an opaque fade.
+    IEnumerator LoadShopAsync(string sceneName)
+    {
+        GameObject loading = null;
+        RectTransform progress = null;
+        TMPro.TextMeshProUGUI label = null;
+        if (fadeImage != null)
+        {
+            loading = new GameObject("ShopLoading", typeof(RectTransform));
+            var root = loading.GetComponent<RectTransform>();
+            root.SetParent(fadeImage.transform, false);
+            root.sizeDelta = new Vector2(320f, 90f);
+
+            var textObject = new GameObject("Label", typeof(RectTransform));
+            textObject.transform.SetParent(root, false);
+            label = textObject.AddComponent<TMPro.TextMeshProUGUI>();
+            label.text = "Loading...";
+            label.fontSize = 28f;
+            label.alignment = TMPro.TextAlignmentOptions.Center;
+            label.raycastTarget = false;
+            label.rectTransform.sizeDelta = new Vector2(320f, 50f);
+            label.rectTransform.anchoredPosition = new Vector2(0f, 10f);
+
+            var track = new GameObject("Track", typeof(RectTransform));
+            track.transform.SetParent(root, false);
+            var trackImage = track.AddComponent<Image>();
+            trackImage.color = new Color(1f, 1f, 1f, 0.2f);
+            trackImage.raycastTarget = false;
+            trackImage.rectTransform.sizeDelta = new Vector2(300f, 6f);
+            trackImage.rectTransform.anchoredPosition = new Vector2(0f, -30f);
+
+            var bar = new GameObject("Progress", typeof(RectTransform));
+            bar.transform.SetParent(track.transform, false);
+            var barImage = bar.AddComponent<Image>();
+            barImage.color = new Color(1f, 0.75f, 0.25f, 1f);
+            barImage.raycastTarget = false;
+            progress = barImage.rectTransform;
+            progress.anchorMin = progress.anchorMax = progress.pivot = new Vector2(0f, 0.5f);
+            progress.anchoredPosition = Vector2.zero;
+            progress.sizeDelta = new Vector2(0f, 6f);
+        }
+
+        try
+        {
+            // Present the loading indicator before requesting assets.
+            yield return null;
+            var operation = SceneManager.LoadSceneAsync(sceneName);
+            while (!operation.isDone)
+            {
+                if (progress != null)
+                    progress.sizeDelta = new Vector2(300f * Mathf.Clamp01(operation.progress / 0.9f), 6f);
+                if (label != null)
+                    label.text = "Loading" + new string('.', 1 + (int)(Time.realtimeSinceStartup * 2f) % 3);
+                yield return null;
+            }
+        }
+        finally
+        {
+            if (loading != null) Destroy(loading);
+        }
+    }
+
     /// <summary>
     /// フェードアウト
     /// </summary>
