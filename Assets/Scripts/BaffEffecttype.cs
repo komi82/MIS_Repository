@@ -17,5 +17,15 @@ public enum BaffEffectType
     mushroomReward,
     blacksmithFrequency,
     purificationFrequency,
-    mixingFrequency
+    mixingFrequency,
+    deliveryStreak,
+    doublePurificationLiquid,
+    oreRetention,
+    luckyDelivery,
+    requestForecast,
+    tableAging,
+    slowReward,
+    blacksmithSpecialist,
+    mixingSpecialist,
+    purificationSpecialist
 }

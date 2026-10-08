@@ -53,7 +53,7 @@ public class ShopManager : MonoBehaviour
         List<Transform> availableSlots = new List<Transform>(slots);
         List<BaffItemData> availableItems = new List<BaffItemData>(baffitemDatas);
         availableItems.RemoveAll(item => item == null ||
-            (item.B_itemID == DailyIncomeState.ItemId && OwnedProgressManager.GetBaffOwned(item.B_itemID) > 0));
+            ((item.B_itemID == DailyIncomeState.ItemId || item.uniquePurchase) && OwnedProgressManager.GetBaffOwned(item.B_itemID) > 0));
 
         for (int i = 0; i < spawnCount; i++)
         {
@@ -100,7 +100,7 @@ public class ShopManager : MonoBehaviour
                 button.onClick.AddListener(() =>
                 {
                     // Recheck at purchase so repeated callbacks never charge for a second bank.
-                    if (selectedItem.B_itemID == DailyIncomeState.ItemId &&
+                    if ((selectedItem.B_itemID == DailyIncomeState.ItemId || selectedItem.uniquePurchase) &&
                         OwnedProgressManager.GetBaffOwned(selectedItem.B_itemID) > 0) return;
                     // ゴールド消費
                     bool success = MoneyManager.Instance.SpendMoney(selectedItem.price);

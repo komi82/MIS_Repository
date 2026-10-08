@@ -10,6 +10,44 @@ public class RequestBoard : MonoBehaviour
     [SerializeField] private GameObject requestUIPrefab;
 
     private Dictionary<Request, GameObject> requestToUI = new Dictionary<Request, GameObject>();
+    private GameObject forecastUI;
+    private float nextRefresh;
+
+    private void Update()
+    {
+        if (requestManager == null || Time.unscaledTime < nextRefresh) return;
+        nextRefresh = Time.unscaledTime + 0.25f;
+        foreach (var entry in requestToUI)
+        {
+            if (entry.Key == null || entry.Value == null) continue;
+            var label = entry.Value.GetComponentInChildren<TextMeshProUGUI>();
+            if (label == null) continue;
+            string firstLine = label.text.Split('\n')[0];
+            label.text = firstLine + "\n報酬: " + requestManager.GetDeliveryRewardText(entry.Key);
+        }
+        Request upcoming = requestManager.GetUpcomingRequest();
+        if (upcoming == null)
+        {
+            if (forecastUI != null) forecastUI.SetActive(false);
+            return;
+        }
+        if (forecastUI == null)
+        {
+            forecastUI = Instantiate(requestUIPrefab, requestListParent);
+            forecastUI.name = "UpcomingRequest";
+            var animator = forecastUI.GetComponent<Animator>();
+            if (animator != null) animator.Play("TaskSlideIn", 0, 0f);
+        }
+        forecastUI.SetActive(true);
+        forecastUI.transform.SetAsLastSibling();
+        var preview = forecastUI.GetComponentInChildren<TextMeshProUGUI>();
+        if (preview != null)
+        {
+            string[] categories = { "調合", "浄化", "鍛冶", "属性付与" };
+            preview.text = $"次の依頼：{categories[FestivalUpgradeRules.WorkCategory(upcoming.requestType)]}\n{upcoming.requiredItem.itemName}";
+            preview.color = Color.white;
+        }
+    }
 
     [Header("依頼タイプ別の色設定")]
     public Color deliverItemColor = Color.white;

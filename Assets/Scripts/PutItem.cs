@@ -375,7 +375,9 @@ public class PutItem : MonoBehaviour
 					{
 						ShowUIForTag("Recipe");
 					}
-					HidePutPromptUI();
+                    if (FestivalUpgradeRuntime.InArcade)
+                        ShowPutPromptUI(inventoryManager != null ? inventoryManager.GetSlot(slotselector.selectedIndex)?.CurrentItem : null);
+                    else HidePutPromptUI();
 
 					if (!isProcessingCoroutine && Input.GetKeyDown(KeyCode.F)
 						&& recipePromptUI != null && recipePromptUI.activeSelf
@@ -494,6 +496,14 @@ public class PutItem : MonoBehaviour
             Quaternion rot = anchor != null ? anchor.rotation : Quaternion.identity;
 
             // 使用した2つの素材を削除し、スロットを空にする
+            var retainedOres = new System.Collections.Generic.List<(ItemData item, ItemInstanceState state)>();
+            for (int index = 0; index < 2; index++)
+            {
+                var materialSlot = slots.GetSlotTransform(index);
+                var material = materialSlot == null ? null : materialSlot.GetComponentInChildren<ItemBehaviour>();
+                if (material != null && FestivalUpgradeRuntime.RetainOre(material.ItemData, material.InstanceState))
+                    retainedOres.Add((material.ItemData, material.InstanceState));
+            }
             slots.ClearAllAndDestroyChildren();
 
             // 完成品を次の調合の素材としてslot1に登録する
@@ -521,6 +531,21 @@ public class PutItem : MonoBehaviour
             }
 
             Debug.Log($"クラフト生成: {match.resultItem.itemName}");
+
+            if (FestivalUpgradeRuntime.CraftOutputCount(match.resultItem, taggedObject.CompareTag("craft")) == 2)
+            {
+                Transform extraSlot;
+                bool registeredExtra = slots.TryPlace(match.resultItem, out extraSlot);
+                Vector3 extraPosition = registeredExtra && extraSlot != null ? extraSlot.position : pos + targetObject.transform.right * 0.4f;
+                Instantiate(match.resultItem.prefab, extraPosition, rot, registeredExtra ? extraSlot : null);
+            }
+            foreach (var ore in retainedOres)
+            {
+                // A full inventory leaves the returned ore beside the station instead of losing it.
+                if (inventoryManager != null && inventoryManager.AddItem(ore.item, ore.state)) continue;
+                var returned = Instantiate(ore.item.prefab, pos + targetObject.transform.right * (0.7f + 0.2f * retainedOres.IndexOf(ore)), rot);
+                returned.GetComponent<ItemBehaviour>()?.SetInstanceState(ore.state);
+            }
 
 
 
@@ -920,7 +945,7 @@ public class PutItem : MonoBehaviour
         {
 			GameObject targetObject = hit.collider.gameObject;
 			var slotsOnParent = targetObject.GetComponentInParent<PlacementSlots>();
-			bool isCraftTarget = targetObject.CompareTag("craft") || targetObject.CompareTag("blacksmith") || targetObject.CompareTag("wash") || targetObject.CompareTag("put") || (slotsOnParent != null);
+			bool isCraftTarget = targetObject.CompareTag("craft") || targetObject.CompareTag("blacksmith") || targetObject.CompareTag("wash") || targetObject.CompareTag("put") || (FestivalUpgradeRuntime.InArcade && targetObject.CompareTag("Recipe")) || (slotsOnParent != null);
 
 			if (isCraftTarget)
             {
@@ -970,7 +995,7 @@ public class PutItem : MonoBehaviour
 						{
 							// PlacementSlots が無い or 空き無し。put タグなら床配置を許可、その他は不可
 							string targetStationTag = (slotsOnParent != null ? slotsOnParent.gameObject.tag : targetObject.tag);
-							if (targetStationTag == "put" && slots == null)
+							if ((targetStationTag == "put" || (FestivalUpgradeRuntime.InArcade && targetStationTag == "Recipe")) && slots == null)
 							{
 								spawnPosition = hit.point + targetObject.transform.up * placementOffset;
 							}
@@ -988,6 +1013,8 @@ public class PutItem : MonoBehaviour
 
 						// タグ名をログに反映
 						string stationTag = (slotsOnParent != null ? slotsOnParent.gameObject.tag : targetObject.tag);
+                        placed.GetComponent<ItemBehaviour>()?.SetInstanceState(slot.InstanceState,
+                            stationTag == "Recipe" && FestivalUpgradeRuntime.InArcade);
 						if (SoundManager.Instance != null)
 						{
 							SoundManager.Instance.PlaySFX(SoundManager.Instance.soundData.putSound);

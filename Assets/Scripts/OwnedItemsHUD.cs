@@ -32,6 +32,13 @@ public class OwnedItemsHUD : MonoBehaviour
 
     private readonly List<SlotWidget> baffWidgets = new List<SlotWidget>();
     private readonly List<SlotWidget> artifactWidgets = new List<SlotWidget>();
+    private TextMeshProUGUI pageLabel;
+    private bool wasVisible;
+    private float nextRefreshTime;
+    private int currentPage = 1;
+    private int pageCount = 1;
+    private Vector2 lastTextSize;
+    private bool textLayoutDirty = true;
 
     private class SlotWidget
     {
@@ -55,28 +62,135 @@ public class OwnedItemsHUD : MonoBehaviour
         if (window == gameObject)
             Debug.LogError("OwnedItemsHUD: BringBaff自身ではなく、表示パネルの子オブジェクトをwindowに設定してください。", this);
 
-        ConfigureGrid(baffItemSlotsParent);
-        ConfigureGrid(artifactSlotsParent);
+        ConfigureReadableLayout();
         SetDisplayVisible(false);
         SetWindowVisible(false);
     }
 
     void Update()
     {
-        if (Input.GetKey(showKey))
-        {
-            RefreshDisplay();
-            SetDisplayVisible(true);
-            SetWindowVisible(true);
-        }
-        else
+        if (!Input.GetKey(showKey))
         {
             SetDisplayVisible(false);
             SetWindowVisible(false);
+            wasVisible = false;
+            return;
         }
+
+        SetWindowVisible(true);
+        if (!wasVisible)
+        {
+            currentPage = 1;
+            textLayoutDirty = true;
+            Canvas.ForceUpdateCanvases();
+        }
+        if (!wasVisible || Time.unscaledTime >= nextRefreshTime)
+        {
+            RefreshDisplay();
+            nextRefreshTime = Time.unscaledTime + 0.25f;
+        }
+        SetDisplayVisible(true);
+        UpdatePage();
+        wasVisible = true;
     }
 
-    private void ConfigureGrid(RectTransform parent)
+    private void ConfigureReadableLayout()
+    {
+        if (window == null || window == gameObject || benefitsText == null) return;
+        RectTransform panel = window.GetComponent<RectTransform>();
+        if (panel == null) return;
+
+        // Use the canvas bounds instead of the old fixed-size, transparent overlay.
+        RectTransform root = transform as RectTransform;
+        if (root != null) SetBounds(root, Vector2.zero, Vector2.one);
+        SetBounds(panel, new Vector2(0.04f, 0.04f), new Vector2(0.96f, 0.96f));
+        Image background = window.GetComponent<Image>();
+        if (background == null) background = window.AddComponent<Image>();
+        background.sprite = null;
+        background.color = new Color(0.035f, 0.045f, 0.06f, 1f);
+        background.raycastTarget = false;
+
+        Canvas parentCanvas = transform.GetComponentInParent<Canvas>();
+        Canvas overlay = window.GetComponent<Canvas>();
+        if (overlay == null) overlay = window.AddComponent<Canvas>();
+        overlay.overrideSorting = true;
+        if (parentCanvas != null) overlay.sortingLayerID = parentCanvas.sortingLayerID;
+        overlay.sortingOrder = (parentCanvas != null ? parentCanvas.sortingOrder : 0) + 50;
+        if (window.GetComponent<RectMask2D>() == null) window.AddComponent<RectMask2D>();
+
+        if (baffItemSlotsParent != null)
+            SetBounds(baffItemSlotsParent, new Vector2(0.035f, 0.46f), new Vector2(0.28f, 0.81f));
+        if (artifactSlotsParent != null)
+            SetBounds(artifactSlotsParent, new Vector2(0.035f, 0.15f), new Vector2(0.28f, 0.37f));
+        SetBounds(benefitsText.rectTransform, new Vector2(0.32f, 0.14f), new Vector2(0.96f, 0.85f));
+        benefitsText.fontSize = 34f;
+        benefitsText.enableAutoSizing = false;
+        benefitsText.alignment = TextAlignmentOptions.TopLeft;
+        benefitsText.textWrappingMode = TextWrappingModes.Normal;
+        benefitsText.overflowMode = TextOverflowModes.Page;
+        benefitsText.margin = Vector4.zero;
+        benefitsText.raycastTarget = false;
+        benefitsText.color = Color.white;
+
+        CreateLabel("OwnedItemsTitle", "所持効果", panel,
+            new Vector2(0.035f, 0.89f), new Vector2(0.96f, 0.97f), 44f);
+        CreateLabel("BaffItemsTitle", "所持アイテム", panel,
+            new Vector2(0.035f, 0.82f), new Vector2(0.28f, 0.88f), 28f);
+        CreateLabel("ArtifactsTitle", "アーティファクト", panel,
+            new Vector2(0.035f, 0.39f), new Vector2(0.28f, 0.45f), 28f);
+        pageLabel = CreateLabel("OwnedItemsPages", "", panel,
+            new Vector2(0.035f, 0.035f), new Vector2(0.96f, 0.11f), 28f);
+    }
+
+    private TextMeshProUGUI CreateLabel(string objectName, string text, RectTransform parent,
+        Vector2 min, Vector2 max, float fontSize)
+    {
+        GameObject labelObject = new GameObject(objectName, typeof(RectTransform), typeof(TextMeshProUGUI));
+        labelObject.transform.SetParent(parent, false);
+        TextMeshProUGUI label = labelObject.GetComponent<TextMeshProUGUI>();
+        SetBounds(label.rectTransform, min, max);
+        label.font = benefitsText.font;
+        label.fontSharedMaterial = benefitsText.fontSharedMaterial;
+        label.fontSize = fontSize;
+        label.color = Color.white;
+        label.raycastTarget = false;
+        label.alignment = TextAlignmentOptions.MidlineLeft;
+        label.text = text;
+        return label;
+    }
+
+    private static void SetBounds(RectTransform rect, Vector2 min, Vector2 max)
+    {
+        rect.anchorMin = min;
+        rect.anchorMax = max;
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
+        rect.localScale = Vector3.one;
+        rect.localRotation = Quaternion.identity;
+    }
+
+    private void UpdatePage()
+    {
+        if (benefitsText == null) return;
+        Vector2 size = benefitsText.rectTransform.rect.size;
+        if (textLayoutDirty || size != lastTextSize)
+        {
+            // TMP paginates using the actual font and available space, including after a resize.
+            benefitsText.ForceMeshUpdate();
+            pageCount = Mathf.Max(1, benefitsText.textInfo.pageCount);
+            lastTextSize = size;
+            textLayoutDirty = false;
+        }
+        if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.PageDown)) currentPage++;
+        if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.PageUp)) currentPage--;
+        currentPage = Mathf.Clamp(currentPage, 1, pageCount);
+        benefitsText.pageToDisplay = currentPage;
+        if (pageLabel != null)
+            pageLabel.text = $"{currentPage} / {pageCount} ページ    ← →：ページ切替    {showKey}：押している間だけ表示";
+    }
+
+    private void ConfigureGrid(RectTransform parent, int count)
     {
         if (parent == null) return;
 
@@ -84,13 +198,18 @@ public class OwnedItemsHUD : MonoBehaviour
         if (grid == null)
             grid = parent.gameObject.AddComponent<GridLayoutGroup>();
 
-        grid.cellSize = slotSize;
+        int columns = Mathf.Clamp(slotsPerRow, 1, 4);
+        int rows = Mathf.Max(1, Mathf.CeilToInt(count / (float)columns));
+        float cell = Mathf.Max(1f, Mathf.Min(slotSize.x, slotSize.y,
+            (parent.rect.width - slotSpacing.x * (columns - 1)) / columns,
+            (parent.rect.height - slotSpacing.y * (rows - 1)) / rows));
+        grid.cellSize = new Vector2(cell, cell);
         grid.spacing = slotSpacing;
         grid.startCorner = GridLayoutGroup.Corner.UpperLeft;
         grid.startAxis = GridLayoutGroup.Axis.Horizontal;
         grid.childAlignment = TextAnchor.UpperLeft;
         grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-        grid.constraintCount = Mathf.Max(1, slotsPerRow);
+        grid.constraintCount = columns;
     }
 
     private void EnsureWidgetCount(RectTransform parent, List<SlotWidget> widgets, int count)
@@ -156,6 +275,8 @@ public class OwnedItemsHUD : MonoBehaviour
         List<BaffItemData> ownedBaff = CollectOwnedBaff();
         List<ArtifactData> ownedArtifacts = CollectOwnedArtifacts();
 
+        ConfigureGrid(baffItemSlotsParent, ownedBaff.Count);
+        ConfigureGrid(artifactSlotsParent, ownedArtifacts.Count);
         EnsureWidgetCount(baffItemSlotsParent, baffWidgets, ownedBaff.Count);
         EnsureWidgetCount(artifactSlotsParent, artifactWidgets, ownedArtifacts.Count);
         PopulateSlots(ownedBaff, baffWidgets, item => GetSpriteFromPrefab(item.prefab), item => OwnedProgressManager.GetBaffOwned(item.B_itemID));
@@ -170,7 +291,12 @@ public class OwnedItemsHUD : MonoBehaviour
         StringBuilder text = new StringBuilder();
         AppendBenefits(text, ownedBaff, item => OwnedProgressManager.GetBaffOwned(item.B_itemID), item => item.itemName, item => item.description, item => item.effecttype.ToString());
         AppendBenefits(text, ownedArtifacts, item => OwnedProgressManager.GetArtifactOwned(item.A_itemID), item => item.itemName, item => item.description, item => item.effecttype.ToString());
-        benefitsText.text = text.Length > 0 ? text.ToString() : "・所持している効果はありません";
+        string content = text.Length > 0 ? text.ToString() : "所持している効果はありません";
+        if (benefitsText.text != content)
+        {
+            benefitsText.text = content;
+            textLayoutDirty = true;
+        }
     }
 
     private static void AppendBenefits<T>(
@@ -191,8 +317,9 @@ public class OwnedItemsHUD : MonoBehaviour
                 .Append(getName(item))
                 .Append(" x")
                 .Append(getCount(item))
-                .Append(": ")
-                .AppendLine(description);
+                .AppendLine()
+                .AppendLine(description)
+                .AppendLine();
         }
     }
 

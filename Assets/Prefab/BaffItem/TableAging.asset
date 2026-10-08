@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb8c58d17a0b3cf47a3b2804f727de77, type: 3}
+  m_Name: TableAging
+  m_EditorClassIdentifier: Assembly-CSharp::BaffItemData
+  B_itemID: 19
+  effecttype: 21
+  B_itemName: tableAging
+  price: 150
+  startprice: 150
+  ownedCount: 0
+  prefab: {fileID: 2981309548975973535, guid: c49275e5d42341de88168157a6fba9e6, type: 3}
+  itemName: "熟成の敷物（仮）"
+  description: "中央のレシピ台に置いた完成品の納品報酬が1秒につき+1%。最大+50%。拾い直しても時間を保持。材料として使うと引き継がない。"
+  upgradeBonusRate: 0.01
+  upgradePenaltyRate: 0
+  upgradeMaxBonus: 0.5
+  upgradeChance: 0.2
+  uniquePurchase: 0
+  upgradeTargetItems: []

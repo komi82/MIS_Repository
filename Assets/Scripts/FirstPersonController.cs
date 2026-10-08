@@ -94,6 +94,9 @@ public class FirstPersonController : MonoBehaviour
 
         moveDirection.y = verticalVelocity;
 
+        float slowMultiplier = FestivalUpgradeRuntime.SpeedMultiplier();
+        moveDirection.x *= slowMultiplier;
+        moveDirection.z *= slowMultiplier;
         characterController.Move(moveDirection * moveSpeed * Time.deltaTime);
 
         if (Input.GetKey(KeyCode.W))
