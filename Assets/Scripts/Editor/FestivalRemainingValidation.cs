@@ -21,6 +21,7 @@ public static class FestivalRemainingValidation
     const string Armed = "MIS.FestivalRemaining.Armed";
     const string ReportPath = "MIS.FestivalRemaining.Report";
     const string ShopOnly = "MIS.FestivalRemaining.ShopOnly";
+    const string DeliveryOnly = "MIS.FestivalRemaining.DeliveryOnly";
     const BindingFlags Fields = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
     static readonly Stack<IEnumerator> steps = new Stack<IEnumerator>();
     static Report report;
@@ -56,7 +57,7 @@ public static class FestivalRemainingValidation
         string[] args = Environment.GetCommandLineArgs();
         int index = Array.IndexOf(args, "-festivalReport");
         if (index < 0 || index + 1 >= args.Length) throw new InvalidOperationException("Missing -festivalReport path.");
-        Start(args[index + 1]);
+        Start(args[index + 1], deliveryOnly: Array.IndexOf(args, "-deliveryOnly") >= 0);
     }
 
     [MenuItem("MIS/テスト/追加効果の残りをまとめて検証")]
@@ -75,13 +76,21 @@ public static class FestivalRemainingValidation
         Start(path, true);
     }
 
-    static void Start(string path, bool shopOnly = false)
+    [MenuItem("MIS/テスト/最後の1件の納品と操作復帰を検証")]
+    public static void RunDeliveryFromMenu()
+    {
+        string path = Path.GetFullPath(Path.Combine(Application.dataPath, "../Logs/delivery-ui-validation.json"));
+        Start(path, deliveryOnly: true);
+    }
+
+    static void Start(string path, bool shopOnly = false, bool deliveryOnly = false)
     {
         if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Stop Play Mode first.");
         for (int i = 0; i < SceneManager.sceneCount; i++)
             if (SceneManager.GetSceneAt(i).isDirty) throw new InvalidOperationException("Save scene changes before testing.");
         SessionState.SetString(ReportPath, Path.GetFullPath(path));
         SessionState.SetBool(ShopOnly, shopOnly);
+        SessionState.SetBool(DeliveryOnly, deliveryOnly);
         Directory.CreateDirectory(Path.GetDirectoryName(path));
         File.WriteAllText(path, "{\"status\":\"STARTING\"}");
         SessionState.SetBool(Armed, true);
@@ -96,11 +105,12 @@ public static class FestivalRemainingValidation
         if (state == PlayModeStateChange.EnteredPlayMode)
         {
             bool shopOnly = SessionState.GetBool(ShopOnly, false);
-            report = new Report { unityVersion = Application.unityVersion, scope = shopOnly ? "shop only" : "all remaining effects" };
+            bool deliveryOnly = SessionState.GetBool(DeliveryOnly, false);
+            report = new Report { unityVersion = Application.unityVersion, scope = deliveryOnly ? "last delivery UI" : shopOnly ? "shop only" : "all remaining effects" };
             deadline = EditorApplication.timeSinceStartup + 900;
             Application.runInBackground = true;
             Application.logMessageReceived += OnLog;
-            if (!shopOnly)
+            if (!shopOnly && !deliveryOnly)
             {
                 testKeyboard = InputSystem.AddDevice<Keyboard>("FestivalTestKeyboard");
                 testMouse = InputSystem.AddDevice<Mouse>("FestivalTestMouse");
@@ -108,7 +118,7 @@ public static class FestivalRemainingValidation
                 testMouse.MakeCurrent();
             }
             steps.Clear();
-            steps.Push(Suite(shopOnly));
+            steps.Push(Suite(shopOnly, deliveryOnly));
             EditorApplication.update += Tick;
         }
         else if (state == PlayModeStateChange.ExitingPlayMode && report != null && report.status == "RUNNING")
@@ -230,7 +240,7 @@ public static class FestivalRemainingValidation
         Object.Destroy(request);
     }
 
-    static IEnumerator Suite(bool shopOnly)
+    static IEnumerator Suite(bool shopOnly, bool deliveryOnly)
     {
         Phase("initialization");
         yield return Frames(8);
@@ -239,6 +249,12 @@ public static class FestivalRemainingValidation
         MoneyManager.currentMoney = 0;
         RequestManager.RequestCompleted = 0;
         manager.GetActiveRequests().Clear();
+        if (deliveryOnly)
+        {
+            yield return LastDeliveryUI();
+            Phase("complete");
+            yield break;
+        }
         if (!shopOnly)
         {
             yield return SpecialistPayments();
@@ -250,6 +266,88 @@ public static class FestivalRemainingValidation
         }
         yield return ShopRoundTrip();
         Phase("complete");
+    }
+
+    static IEnumerator LastDeliveryUI()
+    {
+        var station = Find<DeliveryStation>();
+        var list = Get<DeliveryUIList>(station, "deliveryUiList");
+        var panel = Get<GameObject>(station, "deliveryUI");
+        foreach (bool withEffects in new[] { false, true })
+        {
+            Phase("last delivery UI: " + (withEffects ? "all owned effects" : "no effects"));
+            Own();
+            if (withEffects)
+                foreach (var effect in database.allBaffItems.Where(effect => effect != null))
+                    OwnedProgressManager.AddBaffItem(effect.B_itemID);
+
+            manager.GetActiveRequests().Clear();
+            InventoryManager.Instance.ClearAllSlots();
+            var request = Build(RequestType.PurifyWeapon, 7101);
+            manager.GetActiveRequests().Add(request);
+            Check(InventoryManager.Instance.AddItem(request.requiredItem), "last delivery item prepared");
+            panel.SetActive(true);
+            station.CursorActive = true;
+            list.RefreshList();
+            yield return Frames(2);
+            var row = list.contentParent.GetComponentsInChildren<DeliveryUIItem>().Single();
+            Check(row.deliverButton.interactable, "single request delivery button enabled");
+            int balance = MoneyManager.currentMoney;
+            int completed = RequestManager.RequestCompleted;
+            int quote = manager.GetDeliveryReward(request);
+            row.deliverButton.onClick.Invoke();
+            Check(request.isCompleted && manager.GetActiveRequests().Count == 0, "last request removed");
+            Check(!panel.activeSelf && !station.CursorActive, "last delivery closes UI and restores player input");
+            Check(!InventoryManager.Instance.HasItem(request.requiredItem), "last delivery consumes item");
+            int payment = MoneyManager.currentMoney - balance;
+            Check(payment == quote || (withEffects && payment == FestivalUpgradeRuntime.LuckyReward(quote, 0f)), "last delivery reward paid once");
+            Check(RequestManager.RequestCompleted == completed + 1, "last delivery counted once");
+            row.deliverButton.onClick.Invoke();
+            Check(MoneyManager.currentMoney == balance + payment && RequestManager.RequestCompleted == completed + 1, "repeat click cannot deliver twice");
+            yield return Frames(2);
+            Check(list.contentParent.GetComponentsInChildren<DeliveryUIItem>(true).Length == 0, "empty rows removed");
+
+            // Execute the real empty-list refill path, then reopen for the next delivery.
+            Call(manager, "Update");
+            Check(manager.GetActiveRequests().Count == 1, "next request generated after final delivery");
+            var next = manager.GetActiveRequests()[0];
+            Check(InventoryManager.Instance.AddItem(next.requiredItem), "next delivery item prepared");
+            panel.SetActive(true);
+            station.CursorActive = true;
+            list.RefreshList();
+            yield return Frames(2);
+            row = list.contentParent.GetComponentsInChildren<DeliveryUIItem>().Single();
+            row.deliverButton.onClick.Invoke();
+            Check(next.isCompleted && !panel.activeSelf && !station.CursorActive, "next request can also be delivered without lockup");
+            yield return Frames(2);
+
+            var first = Build(RequestType.DeliverItem, 7102);
+            var second = Build(RequestType.PurifyWeapon, 7103);
+            manager.GetActiveRequests().Add(first);
+            manager.GetActiveRequests().Add(second);
+            Check(InventoryManager.Instance.AddItem(first.requiredItem), "multiple request item prepared");
+            panel.SetActive(true);
+            station.CursorActive = true;
+            list.RefreshList();
+            yield return Frames(2);
+            row = list.contentParent.GetComponentsInChildren<DeliveryUIItem>().First();
+            row.deliverButton.onClick.Invoke();
+            Check(first.isCompleted && manager.GetActiveRequests().Count == 1, "one of two requests delivered");
+            Check(panel.activeSelf && station.CursorActive, "remaining request keeps panel open");
+            yield return Frames(2);
+            row = list.contentParent.GetComponentsInChildren<DeliveryUIItem>().Single();
+            Check(!row.deliverButton.interactable, "missing item cannot be delivered");
+            row.OnDeliverClicked();
+            Check(!second.isCompleted && panel.activeSelf && station.CursorActive, "failed delivery keeps UI usable");
+            station.ForceCloseUI();
+            manager.GetActiveRequests().Clear();
+            Object.Destroy(request);
+            Object.Destroy(next);
+            Object.Destroy(first);
+            Object.Destroy(second);
+        }
+        Own();
+        InventoryManager.Instance.ClearAllSlots();
     }
 
     static IEnumerator SpecialistPayments()
