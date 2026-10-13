@@ -69,10 +69,15 @@ public class DayAdvanceButton : MonoBehaviour
     /// ボタンの OnClick から呼び出す。
     /// Dayを1加算した後、そのDay値で閾値を更新する。
     /// </summary>
+    // Reserve the next day without changing the outgoing round's Goal or Day label.
+    public void AdvanceDayForNextRound()
+    {
+        SetDay(GetDay() + 1);
+    }
+
     public void OnClickAdvanceDay()
     {
-        if (!s_hasDay) SetDay(day);
-        SetDay(s_day + 1);
+        AdvanceDayForNextRound();
 
         // 参照先が別シーンにあってInspectorで設定できない場合でも、
         // 実行時に Singleton から取得して更新します。

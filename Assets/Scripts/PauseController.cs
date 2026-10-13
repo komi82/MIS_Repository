@@ -79,6 +79,8 @@ public class PauseController : MonoBehaviour
 
     void Update()
     {
+        // During the mouse trial, Escape closes the focused recipe/delivery panel first.
+        if (toggleKey == KeyCode.Escape && InteractionControlTrial.EscapeBelongsToUI) return;
         // 指定キーでトグル
         bool pressed = false;
 
@@ -389,22 +391,8 @@ public class PauseController : MonoBehaviour
             }
         }
 
-        // 保険: 代表的な入力系コンポーネントが無効化されたままになっていないかチェックして強制的に有効化
-        var fpc = UnityEngine.Object.FindFirstObjectByType<FirstPersonController>();
-        if (fpc != null) fpc.enabled = true;
-
-        var itemPickups = UnityEngine.Object.FindObjectsOfType<ItemPickup>();
-        foreach (var ip in itemPickups) { if (ip != null) ip.enabled = true; }
-
-        var slotSelectors = UnityEngine.Object.FindObjectsOfType<SlotSelector>();
-        foreach (var ss in slotSelectors) { if (ss != null) ss.enabled = true; }
-
-        var putItems = UnityEngine.Object.FindObjectsOfType<PutItem>();
-        foreach (var pi in putItems) { if (pi != null) pi.enabled = true; }
-
-        var recipeStations = UnityEngine.Object.FindObjectsOfType<RecipeStation>();
-        foreach (var rs in recipeStations) { if (rs != null) rs.enabled = true; }
-
+        // ResetPauseState restores only input that this pause actually disabled.
+        // Preserve the tutorial's intentionally disabled controls on scene entry.
         var deliveryStations = UnityEngine.Object.FindObjectsOfType<DeliveryStation>();
         foreach (var ds in deliveryStations) { if (ds != null) ds.CursorActive = false; }
     }

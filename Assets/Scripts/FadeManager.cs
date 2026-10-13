@@ -178,16 +178,16 @@ public class FadeManager : MonoBehaviour
             loading = new GameObject("ShopLoading", typeof(RectTransform));
             var root = loading.GetComponent<RectTransform>();
             root.SetParent(fadeImage.transform, false);
-            root.sizeDelta = new Vector2(320f, 90f);
+            root.sizeDelta = new Vector2(840f, 180f);
 
             var textObject = new GameObject("Label", typeof(RectTransform));
             textObject.transform.SetParent(root, false);
             label = textObject.AddComponent<TMPro.TextMeshProUGUI>();
             label.text = "Loading...";
-            label.fontSize = 28f;
+            label.fontSize = 48f;
             label.alignment = TMPro.TextAlignmentOptions.Center;
             label.raycastTarget = false;
-            label.rectTransform.sizeDelta = new Vector2(320f, 50f);
+            label.rectTransform.sizeDelta = new Vector2(840f, 110f);
             label.rectTransform.anchoredPosition = new Vector2(0f, 10f);
 
             var track = new GameObject("Track", typeof(RectTransform));
@@ -195,8 +195,8 @@ public class FadeManager : MonoBehaviour
             var trackImage = track.AddComponent<Image>();
             trackImage.color = new Color(1f, 1f, 1f, 0.2f);
             trackImage.raycastTarget = false;
-            trackImage.rectTransform.sizeDelta = new Vector2(300f, 6f);
-            trackImage.rectTransform.anchoredPosition = new Vector2(0f, -30f);
+            trackImage.rectTransform.sizeDelta = new Vector2(720f, 10f);
+            trackImage.rectTransform.anchoredPosition = new Vector2(0f, -70f);
 
             var bar = new GameObject("Progress", typeof(RectTransform));
             bar.transform.SetParent(track.transform, false);
@@ -206,20 +206,22 @@ public class FadeManager : MonoBehaviour
             progress = barImage.rectTransform;
             progress.anchorMin = progress.anchorMax = progress.pivot = new Vector2(0f, 0.5f);
             progress.anchoredPosition = Vector2.zero;
-            progress.sizeDelta = new Vector2(0f, 6f);
+            progress.sizeDelta = new Vector2(0f, 10f);
         }
 
         try
         {
             // Present the loading indicator before requesting assets.
             yield return null;
+            double started = Time.realtimeSinceStartupAsDouble;
             var operation = SceneManager.LoadSceneAsync(sceneName);
             while (!operation.isDone)
             {
                 if (progress != null)
-                    progress.sizeDelta = new Vector2(300f * Mathf.Clamp01(operation.progress / 0.9f), 6f);
+                    progress.sizeDelta = new Vector2(720f * Mathf.Clamp01(operation.progress / 0.9f), 10f);
                 if (label != null)
-                    label.text = "Loading" + new string('.', 1 + (int)(Time.realtimeSinceStartup * 2f) % 3);
+                    label.text = "Loading" + new string('.', 1 + (int)(Time.realtimeSinceStartup * 2f) % 3)
+                        + "\n" + (Time.realtimeSinceStartupAsDouble - started).ToString("0") + " s";
                 yield return null;
             }
         }

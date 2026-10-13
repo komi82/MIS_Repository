@@ -624,22 +624,52 @@ public static class FestivalRemainingValidation
         yield return Frames(17);
         Check(Vector2.Distance(before, ((RectTransform)slots[0]).anchoredPosition) > 0.0001f, "Take item float animation advances");
         Check(stage.GetComponentsInChildren<Image>().All(x => x.sprite != null), "all visible shop sprites resolve");
-        var ownerTextures = Resources.FindObjectsOfTypeAll<Texture2D>().Where(texture =>
-            AssetDatabase.GetAssetPath(texture).StartsWith("Assets/UI/TakeShop/Owner/", StringComparison.Ordinal)).ToArray();
-        Check(ownerTextures.Length > 0 && ownerTextures.All(texture => texture.width <= 512 && texture.height <= 512), "shop animation textures respect the runtime size limit");
-        // Editor profiling includes an extra CPU texture copy. Budget a single
-        // texture payload from the actual format and all mips; keep native usage
-        // as a separate measurement instead of dividing it by an assumed factor.
-        // https://docs.unity3d.com/2023.2/Documentation/Manual/ProfilerMemory.html
+        var detail = Get<TMPro.TextMeshProUGUI>(shop, "itemDetailText");
+        string longest = "";
+        var descriptions = shop.baffitemDatas.Where(x => x != null).Select(x => x.itemName + "\n" + x.description + "\n必要な料金: " + x.price + "G")
+            .Concat(artifacts.ArtifactDatas.Where(x => x != null).Select(x => x.itemName + "\n" + x.description + "\n必要な料金: " + x.price + "G"));
+        foreach (var description in descriptions)
+        {
+            if (description.Length > longest.Length) longest = description;
+            detail.text = description;
+            detail.GetComponent<ShopReadability>().Refresh();
+            Canvas.ForceUpdateCanvases(); detail.ForceMeshUpdate(true, true);
+            Check(detail.fontSize >= 38f && !detail.isTextOverflowing, "description is large and unclipped: " + description.Split('\n')[0]);
+            var frame = detail.transform.parent as RectTransform;
+            var canvasRect = detail.canvas.rootCanvas.transform as RectTransform;
+            var corners = new Vector3[4]; frame.GetWorldCorners(corners);
+            Check(corners.All(c => canvasRect.rect.Contains(canvasRect.InverseTransformPoint(c))), "description frame stays on screen: " + description.Split('\n')[0]);
+        }
+        var exit = shop.GetComponentsInParent<Transform>().First().gameObject.scene.GetRootGameObjects()
+            .SelectMany(x => x.GetComponentsInChildren<TMPro.TextMeshProUGUI>(true)).Single(x => x.text.Trim() == "EXIT");
+        exit.ForceMeshUpdate(true, true);
+        Check(exit.fontSize >= 52 && !exit.isTextOverflowing && exit.GetComponentInParent<Button>().interactable, "EXIT is large, unclipped and clickable");
+        detail.text = longest; detail.GetComponent<ShopReadability>().Refresh();
+        // Follow every animation key's sprite to its actual packed texture. Original source
+        // textures can remain in the Editor cache, so they do not measure the rendered payload.
+        var ownerSprites = stage.GetComponentsInChildren<Animator>()
+            .SelectMany(a => a.runtimeAnimatorController.animationClips).Distinct()
+            .SelectMany(clip => AnimationUtility.GetObjectReferenceCurveBindings(clip)
+                .SelectMany(binding => AnimationUtility.GetObjectReferenceCurve(clip, binding)))
+            .Select(key => key.value as Sprite).Where(sprite => sprite != null
+                && AssetDatabase.GetAssetPath(sprite).StartsWith("Assets/UI/TakeShop/Owner/", StringComparison.Ordinal))
+            .Distinct().ToArray();
+        Check(ownerSprites.Length == 3141, "all 3141 original owner animation frames remain referenced");
+        Check(ownerSprites.All(sprite => sprite.packed), "all owner animation frames use packed textures");
+        var ownerTextures = ownerSprites.Select(sprite => sprite.texture).Distinct().ToArray();
         long ownerNativeBytes = ownerTextures.Sum(texture => UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(texture));
         long ownerPayloadBytes = 0;
         foreach (var texture in ownerTextures)
             for (int mip = 0; mip < texture.mipmapCount; mip++)
                 ownerPayloadBytes += UnityEngine.Experimental.Rendering.GraphicsFormatUtility.ComputeMipmapSize(
                     Mathf.Max(1, texture.width >> mip), Mathf.Max(1, texture.height >> mip), texture.graphicsFormat);
-        report.measurements.Add("Shop owner textures: " + ownerTextures.Length + "; calculated texture payload " + (ownerPayloadBytes / (1024.0 * 1024.0)).ToString("F1") + " MiB; Editor native measurement " + (ownerNativeBytes / (1024.0 * 1024.0)).ToString("F1") + " MiB.");
-        report.measurements.Add("Shop owner texture formats: " + string.Join(", ", ownerTextures.Select(texture => texture.width + "x" + texture.height + " " + texture.graphicsFormat + " mips=" + texture.mipmapCount).Distinct()));
-        Check(ownerPayloadBytes > 0 && ownerPayloadBytes < 3L * 1024 * 1024 * 1024, "shop animation texture payload stays below 3 GiB");
+        report.measurements.Add("Shop owner atlas textures: " + ownerTextures.Length + "; calculated texture payload " + (ownerPayloadBytes / (1024.0 * 1024.0)).ToString("F1") + " MiB; Editor native measurement " + (ownerNativeBytes / (1024.0 * 1024.0)).ToString("F1") + " MiB.");
+        report.measurements.Add("Shop owner atlas formats: " + string.Join(", ", ownerTextures.Select(texture => texture.width + "x" + texture.height + " " + texture.graphicsFormat + " mips=" + texture.mipmapCount).Distinct()));
+        Check(ownerPayloadBytes > 0 && ownerPayloadBytes < 750L * 1024 * 1024, "shop animation texture payload stays below 750 MiB");
+        // This suite fixes deltaTime at 1/60; allow the opening curtain to finish in game time.
+        yield return Frames(120);
+        ScreenCapture.CaptureScreenshot(Path.GetFullPath("Logs/mouse-trial-shop.png"));
+        yield return Frames(4);
         // Exercise the artifact callback too; subsequent buff checks use their own balance.
         var artifactButton = artifacts.slots.SelectMany(s => s.Cast<Transform>()).Select(x => x.GetComponent<Button>()).Single(x => x != null);
         int ownedBefore = artifacts.ArtifactDatas.Sum(x => OwnedProgressManager.GetArtifactOwned(x.A_itemID));
@@ -667,6 +697,11 @@ public static class FestivalRemainingValidation
         int day = DayAdvanceButton.GetDayStatic();
         int completed = RequestManager.RequestCompleted;
         Check(ChangeScene.Instance != null, "persistent scene state manager exists");
+        ShopArtWarmup.StartNow();
+        double warmupDeadline = EditorApplication.timeSinceStartup + 180;
+        while (!ShopArtWarmup.IsReady && EditorApplication.timeSinceStartup < warmupDeadline) yield return null;
+        Check(ShopArtWarmup.IsReady, "shop art prepared asynchronously in arcade");
+        report.measurements.Add("Shop warmup: " + ShopArtWarmup.Seconds.ToString("F2") + " s; longest frame " + ShopArtWarmup.LongestFrameSeconds.ToString("F3") + " s.");
         double shopLoadStarted = EditorApplication.timeSinceStartup;
         int shopLoadFrame = Time.frameCount;
         ChangeScene.Instance.GoToShop();

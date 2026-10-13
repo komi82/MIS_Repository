@@ -30,6 +30,7 @@ public class GameClockText : MonoBehaviour
     [SerializeField] private DayAdvanceButton dayAdvanceButton;
     private static bool s_hasCompleteMoneyThreshold;
     private static int s_completeMoneyThreshold;
+    public static int CurrentDayBaseGoal { get; private set; } = 100;
 
     [Header("目標金額設定 (日ごと)")]
     [SerializeField] private int[] dailyThresholds = new int[7] { 1000, 2000, 4000, 6000, 8000, 10000, 15000 };
@@ -87,6 +88,7 @@ public class GameClockText : MonoBehaviour
     {
         s_hasCompleteMoneyThreshold = false;
         s_completeMoneyThreshold = 0;
+        CurrentDayBaseGoal = 100;
         s_rewardOverflowBonusX = 0f;
         s_deliveriesCount = 0;
         s_deliveriesCountDay = -1;
@@ -251,7 +253,7 @@ public class GameClockText : MonoBehaviour
 
         // 目標達成後、日数を一度だけ更新してショップへ進む。
         DayAdvanceButton target = dayAdvanceButton != null ? dayAdvanceButton : DayAdvanceButton.Instance;
-        if (target != null) target.OnClickAdvanceDay();
+        if (target != null) target.AdvanceDayForNextRound();
 
         // シーン破棄前に所持品を保存する。切替中はtransitionStartedを維持する。
         if (ChangeScene.Instance != null)
@@ -372,6 +374,7 @@ public class GameClockText : MonoBehaviour
             baseThreshold = defaultCompleteMoneyThreshold * day;
         }
 
+        CurrentDayBaseGoal = baseThreshold;
         // ボーダーダウンアイテムの効果（所持数 × 100G 緩和）を適用
         int finalThreshold = baseThreshold - (borderdown * 100);
 

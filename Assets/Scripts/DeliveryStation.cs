@@ -11,6 +11,7 @@ public class DeliveryStation : MonoBehaviour
     [SerializeField] private Camera mainCamera;      // プレイヤーのカメラ
     [SerializeField] private DeliveryUIList deliveryUiList;
     public bool CursorActive = false;
+    public bool IsUIOpen => deliveryUI != null && deliveryUI.activeSelf;
 
     private void OnEnable()
     {
@@ -24,6 +25,7 @@ public class DeliveryStation : MonoBehaviour
 
     void Start()
     {
+        InteractionControlTrial.ConfigureCloseHint(deliveryUI);
         deliveryUI.SetActive(false);
     }
 
@@ -44,6 +46,7 @@ public class DeliveryStation : MonoBehaviour
 
     public void ForceCloseUI()
     {
+        InteractionControlTrial.BlockCurrentFrame();
         if (deliveryUI != null)
         {
             deliveryUI.SetActive(false);
@@ -56,14 +59,14 @@ public class DeliveryStation : MonoBehaviour
 
     void Update()
     {
-        // EscキーでUIを強制的に閉じる
-        if (Input.GetKeyDown(KeyCode.Escape) && deliveryUI.activeSelf)
+        // マウス試作中も表示どおりFで閉じられる。Escも共通で使用可能。
+        if (deliveryUI.activeSelf && InteractionControlTrial.ClosePanelPressed)
         {
             ForceCloseUI();
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.F))
+        if (InteractionControlTrial.InteractPressed)
         {
             DetectStationInView();
         }
@@ -76,6 +79,7 @@ public class DeliveryStation : MonoBehaviour
         {
             if (hit.collider.gameObject == this.gameObject)
             {
+                InteractionControlTrial.Consume();
                 // 基本的な効果音再生
                 if (SoundManager.Instance != null)
                 {

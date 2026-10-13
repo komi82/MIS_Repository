@@ -13,22 +13,28 @@ public class RecipeStation : MonoBehaviour
     [SerializeField] private FirstPersonController playerController; // プレイヤー制御用
     [SerializeField] private DeliveryStation deliveryStation; // DeliveryStationとCursorActiveを共有
     public bool CursorActive = false;
+    public bool IsUIOpen => recipeUI != null && recipeUI.activeSelf;
 
     void Start()
     {
+        // Early tutorial scenes deliberately have no recipe panel yet.
+        if (recipeUI == null) { enabled = false; return; }
+        if (mainCamera == null) mainCamera = Camera.main;
+        InteractionControlTrial.ConfigureCloseHint(recipeUI);
         recipeUI.SetActive(false);
     }
 
     void Update()
     {
-        // EscキーでUIを強制的に閉じる
-        if (Input.GetKeyDown(KeyCode.Escape) && recipeUI.activeSelf)
+        if (recipeUI == null) return;
+        // マウス試作中も表示どおりFで閉じられる。Escも共通で使用可能。
+        if (recipeUI.activeSelf && InteractionControlTrial.ClosePanelPressed)
         {
             CloseRecipeUI();
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.F))
+        if (InteractionControlTrial.InteractPressed)
         {
             DetectStationInView();
         }
@@ -36,11 +42,13 @@ public class RecipeStation : MonoBehaviour
 
     void DetectStationInView()
     {
+        if (recipeUI == null || mainCamera == null) return;
         Ray ray = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
         if (Physics.Raycast(ray, out RaycastHit hit, detectRange))
         {
             if (hit.collider.gameObject == this.gameObject)
             {
+                InteractionControlTrial.Consume();
                 // UIが非表示の場合は必ず表示にする
                 if (!recipeUI.activeSelf)
                 {
@@ -65,11 +73,13 @@ public class RecipeStation : MonoBehaviour
         }
 
         // レイキャストが当たらない場合はUIを非表示にしない
-        // （ユーザーがFキーを押したときにのみ切り替え）
+        // （インタラクト入力で開き、Escまたは閉じるボタンで閉じる）
     }
 
     void CloseRecipeUI()
     {
+        if (recipeUI == null) return;
+        InteractionControlTrial.BlockCurrentFrame();
         recipeUI.SetActive(false);
         CursorActive = false;
         if (deliveryStation != null)

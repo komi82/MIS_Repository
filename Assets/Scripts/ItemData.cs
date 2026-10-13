@@ -12,4 +12,6 @@ public class ItemData : ScriptableObject
     public string itemName;
     public Sprite icon;
     public GameObject prefab;
+    [Header("台に置いたときの表示")]
+    [Min(0.1f)] public float placementScale = 1f;
 }

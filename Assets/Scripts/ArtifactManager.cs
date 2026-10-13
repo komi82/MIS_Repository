@@ -19,6 +19,7 @@ public class ArtifactManager : MonoBehaviour
 
     void Start()
     {
+        ShopReadability.Configure(itemDetailText);
         InitializeArtifact();
 
         SpawnItems();
@@ -28,8 +29,8 @@ public class ArtifactManager : MonoBehaviour
     {
         foreach (ArtifactData A_item in ArtifactDatas)
         {
-            A_item.ResetShopPrice();
             A_item.ownedCount = OwnedProgressManager.GetArtifactOwned(A_item.A_itemID);
+            A_item.price = ShopPricing.ForCurrentVisit(A_item.startprice, OwnedProgressManager.GetArtifactOwned(A_item.A_itemID));
         }
     }
 
@@ -50,6 +51,10 @@ public class ArtifactManager : MonoBehaviour
             // ランダムアイテム
             int itemIndex = Random.Range(0, availableItems.Count);
             ArtifactData selectedItem = availableItems[itemIndex];
+            // Keep the visible offer and its charge identical for this visit.
+            int offerPrice = ShopPricing.ForCurrentVisit(selectedItem.startprice,
+                OwnedProgressManager.GetArtifactOwned(selectedItem.A_itemID));
+            selectedItem.price = offerPrice;
 
             // アイテム生成
             GameObject A_itemObj = Instantiate(
@@ -77,16 +82,17 @@ public class ArtifactManager : MonoBehaviour
             ShopItemDescriptionTrigger trigger = A_itemObj.AddComponent<ShopItemDescriptionTrigger>();
             if (trigger != null)
             {
-                trigger.Setup(selectedItem.itemName, selectedItem.description, itemDetailText, selectedItem.price);
+                trigger.Setup(selectedItem.itemName, selectedItem.description, itemDetailText, offerPrice);
             }
 
             if (button != null)
             {
+                var stock = ShopStockNotice.Register(A_itemObj, itemDetailText);
                 button.onClick.AddListener(() =>
                 {
                     if (!A_itemObj.activeSelf) return; // Sold offers cannot be charged twice.
                     // ゴールド消費
-                    bool success = MoneyManager.Instance.SpendMoney(selectedItem.price);
+                    bool success = MoneyManager.Instance.SpendMoney(offerPrice);
 
                     // 購入成功時
                     if (success)
@@ -94,7 +100,6 @@ public class ArtifactManager : MonoBehaviour
                         OwnedProgressManager.AddArtifact(selectedItem.A_itemID);
                         selectedItem.ownedCount = OwnedProgressManager.GetArtifactOwned(selectedItem.A_itemID);
 
-                        selectedItem.price = Mathf.RoundToInt(selectedItem.price * 1.1f);
                         Debug.Log(selectedItem.A_itemName + " を購入");
 
                         if (itemDetailText != null)
@@ -103,6 +108,7 @@ public class ArtifactManager : MonoBehaviour
                         }
 
                         A_itemObj.SetActive(false);
+                        if (stock != null) stock.Refresh();
                     }
                 });
             }

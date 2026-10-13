@@ -22,6 +22,7 @@ public class ShopManager : MonoBehaviour
 
     void Start()
     {
+        ShopReadability.Configure(itemDetailText);
         InitializeItem(); //アイテム価格の初期値化
 
         SpawnItems(); //ショップにアイテムを生成
@@ -43,8 +44,8 @@ public class ShopManager : MonoBehaviour
     {
         foreach (BaffItemData B_item in baffitemDatas)
         {
-            B_item.ResetShopPrice();
             B_item.ownedCount = OwnedProgressManager.GetBaffOwned(B_item.B_itemID);
+            B_item.price = ShopPricing.ForCurrentVisit(B_item.startprice, OwnedProgressManager.GetBaffOwned(B_item.B_itemID));
         }
     }
 
@@ -67,6 +68,10 @@ public class ShopManager : MonoBehaviour
             // ランダムアイテム
             int itemIndex = Random.Range(0, availableItems.Count);
             BaffItemData selectedItem = availableItems[itemIndex];
+            // Keep the visible offer and its charge identical for this visit.
+            int offerPrice = ShopPricing.ForCurrentVisit(selectedItem.startprice,
+                OwnedProgressManager.GetBaffOwned(selectedItem.B_itemID));
+            selectedItem.price = offerPrice;
 
             // アイテム生成
             GameObject itemObj = Instantiate(
@@ -94,11 +99,12 @@ public class ShopManager : MonoBehaviour
             ShopItemDescriptionTrigger trigger = itemObj.AddComponent<ShopItemDescriptionTrigger>();
             if (trigger != null)
             {
-                trigger.Setup(selectedItem.itemName, selectedItem.description, itemDetailText, selectedItem.price);
+                trigger.Setup(selectedItem.itemName, selectedItem.description, itemDetailText, offerPrice);
             }
 
             if (button != null)
             {
+                var stock = ShopStockNotice.Register(itemObj, itemDetailText);
                 button.onClick.AddListener(() =>
                 {
                     // Recheck at purchase so repeated callbacks never charge for a second bank.
@@ -106,7 +112,7 @@ public class ShopManager : MonoBehaviour
                         OwnedProgressManager.GetBaffOwned(selectedItem.B_itemID) > 0) return;
                     if (!itemObj.activeSelf) return; // Sold offers cannot be charged twice.
                     // ゴールド消費
-                    bool success = MoneyManager.Instance.SpendMoney(selectedItem.price);
+                    bool success = MoneyManager.Instance.SpendMoney(offerPrice);
 
                     // 購入成功時
                     if (success)
@@ -114,7 +120,6 @@ public class ShopManager : MonoBehaviour
                         OwnedProgressManager.AddBaffItem(selectedItem.B_itemID);
                         selectedItem.ownedCount = OwnedProgressManager.GetBaffOwned(selectedItem.B_itemID);
 
-                        selectedItem.price = Mathf.RoundToInt(selectedItem.price * 1.1f); //アイテムの価格上昇
 
                         Debug.Log(selectedItem.B_itemName + " を購入");
 
@@ -123,7 +128,8 @@ public class ShopManager : MonoBehaviour
                             itemDetailText.text = ""; // 購入時に詳細テキストをクリア
                         }
 
-                        itemObj.SetActive(false); //アイテム購入を一度きりに
+                        itemObj.SetActive(false);
+                        if (stock != null) stock.Refresh(); //アイテム購入を一度きりに
                     }
                 });
             }

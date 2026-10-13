@@ -55,7 +55,7 @@ public class ItemPickup : MonoBehaviour
             return;
         }
 
-        if (deliveryStation != null && deliveryStation.CursorActive)
+        if (InteractionControlTrial.WorldInputBlocked || (deliveryStation != null && deliveryStation.CursorActive))
         {
             currentTargetItem = null;
             if (pickupPromptUI != null)
@@ -67,7 +67,7 @@ public class ItemPickup : MonoBehaviour
 
         DetectItemInView(); 
 
-        if (Input.GetKeyDown(KeyCode.F))
+        if (InteractionControlTrial.InteractPressed)
         {
             TryPickupItem();
         }
@@ -87,7 +87,7 @@ public class ItemPickup : MonoBehaviour
                 PromptUIUtility.SetTextAndResizeWidth(
                     pickupPromptText,
                     pickupPromptUI.GetComponent<RectTransform>(),
-                    $"<sprite name=F> 拾う：{item.ItemData.itemName}");
+                    $"{InteractionControlTrial.PickupLabel} 拾う：{item.ItemData.itemName}");
                 return;
             }
         }
@@ -100,6 +100,7 @@ public class ItemPickup : MonoBehaviour
     void TryPickupItem()
     {
         if (currentTargetItem == null) return;
+        InteractionControlTrial.Consume();
 
         // Infinite sources create a fresh physical item; movable objects retain their state.
         bool success = inventoryManager.AddItem(currentTargetItem.ItemData,

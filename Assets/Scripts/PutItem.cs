@@ -101,6 +101,11 @@ public class PutItem : MonoBehaviour
 		if (putPromptUI != null) putPromptUI.SetActive(false);
 		if (recipePromptUI != null) recipePromptUI.SetActive(false);
 		if (karasuPromptUI != null) karasuPromptUI.SetActive(false);
+        InteractionControlTrial.ConfigurePrompt(craftPromptUI, "調合を始める");
+        InteractionControlTrial.ConfigurePrompt(blacksmithPromptUI, "鍛冶を始める");
+        InteractionControlTrial.ConfigurePrompt(washPromptUI, "浄化を始める");
+        InteractionControlTrial.ConfigurePrompt(recipePromptUI, "レシピを見る");
+        InteractionControlTrial.ConfigurePrompt(karasuPromptUI, "納品画面を開く");
 	}
 
 	private void BeginPlayerUiBlock()
@@ -116,6 +121,7 @@ public class PutItem : MonoBehaviour
 
 	private void EndPlayerUiBlock()
 	{
+        InteractionControlTrial.BlockCurrentFrame();
 		if (deliveryStation != null)
 		{
 			deliveryStation.CursorActive = false;
@@ -255,7 +261,7 @@ public class PutItem : MonoBehaviour
 			PromptUIUtility.SetTextAndResizeWidth(
 				putPromptText,
 				putPromptUI.GetComponent<RectTransform>(),
-				$"<sprite name=E> 置く：{itemToPlace.itemName}");
+				$"{InteractionControlTrial.PlaceLabel} 置く：{itemToPlace.itemName}");
 		}
 		else
 		{
@@ -283,6 +289,13 @@ public class PutItem : MonoBehaviour
 			CloseRecipePromptUI();
 			return;
 		}
+
+        if (InteractionControlTrial.WorldInputBlocked)
+        {
+            HideCurrentUI();
+            HidePutPromptUI();
+            return;
+        }
 
         Ray ray = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
         if (Physics.Raycast(ray, out RaycastHit hit, pickupRange))
@@ -379,7 +392,7 @@ public class PutItem : MonoBehaviour
                         ShowPutPromptUI(inventoryManager != null ? inventoryManager.GetSlot(slotselector.selectedIndex)?.CurrentItem : null);
                     else HidePutPromptUI();
 
-					if (!isProcessingCoroutine && Input.GetKeyDown(KeyCode.F)
+					if (!isProcessingCoroutine && InteractionControlTrial.InteractPressed
 						&& recipePromptUI != null && recipePromptUI.activeSelf
 						&& taggedObject.GetComponent<RecipeStation>() == null)
 					{
@@ -394,17 +407,19 @@ public class PutItem : MonoBehaviour
 					HidePutPromptUI();
 				}
 				
-				// コルーチン処理中はR、E、Fキーを無効化
+				// コルーチン処理中は取得・設置・加工開始を無効化
 				if (!isProcessingCoroutine)
 				{
-					if (Input.GetKeyDown(KeyCode.E))
+					if (InteractionControlTrial.PlacePressed)
 					{
+                        InteractionControlTrial.Consume();
 						slotselector.SelectSlot(slotselector.selectedIndex);
 						PutSelectedItem();
 					}
 
-					// Rキーでクラフト結果を生成
-					if (Input.GetKeyDown(KeyCode.R))
+					// Rキーは台の素材を狙っていても加工を開始できる。
+					if (InteractionControlTrial.CraftPressed && (!InteractionControlTrial.UseMouse
+                        || HasMatchingRecipe(taggedObject, slotsOnParent)))
 					{
 						PlacementSlots slots = slotsOnParent != null ? slotsOnParent : targetObject.GetComponent<PlacementSlots>();
 						// タグに応じて参照するデータベースを切替
@@ -416,6 +431,7 @@ public class PutItem : MonoBehaviour
 
 						if (slots != null && activeDB != null)
 						{
+                            InteractionControlTrial.Consume();
 							// コルーチン開始直前にUIを非表示にする
 							HideCurrentUI();
 							HidePutPromptUI();
@@ -521,12 +537,12 @@ public class PutItem : MonoBehaviour
             // 内部的にはslot1の子にすることで次の調合素材として扱えるようにする
             if (registeredResult && resultSlot != null)
             {
-                Instantiate(match.resultItem.prefab, pos, rot, resultSlot);
+                WorldItemPlacement.Spawn(match.resultItem, pos, rot, resultSlot, slots.gameObject);
             }
             else
             {
                 // 万が一スロット登録に失敗しても完成品自体は生成する
-                Instantiate(match.resultItem.prefab, pos, rot);
+                WorldItemPlacement.Spawn(match.resultItem, pos, rot, null, slots.gameObject);
                 Debug.LogWarning("完成品を次の調合用スロットに登録できませんでした");
             }
 
@@ -537,13 +553,13 @@ public class PutItem : MonoBehaviour
                 Transform extraSlot;
                 bool registeredExtra = slots.TryPlace(match.resultItem, out extraSlot);
                 Vector3 extraPosition = registeredExtra && extraSlot != null ? extraSlot.position : pos + targetObject.transform.right * 0.4f;
-                Instantiate(match.resultItem.prefab, extraPosition, rot, registeredExtra ? extraSlot : null);
+                WorldItemPlacement.Spawn(match.resultItem, extraPosition, rot, registeredExtra ? extraSlot : null, slots.gameObject);
             }
             foreach (var ore in retainedOres)
             {
                 // A full inventory leaves the returned ore beside the station instead of losing it.
                 if (inventoryManager != null && inventoryManager.AddItem(ore.item, ore.state)) continue;
-                var returned = Instantiate(ore.item.prefab, pos + targetObject.transform.right * (0.7f + 0.2f * retainedOres.IndexOf(ore)), rot);
+                var returned = WorldItemPlacement.Spawn(ore.item, pos + targetObject.transform.right * (0.7f + 0.2f * retainedOres.IndexOf(ore)), rot, null, slots.gameObject);
                 returned.GetComponent<ItemBehaviour>()?.SetInstanceState(ore.state);
             }
 
@@ -989,7 +1005,7 @@ public class PutItem : MonoBehaviour
 						if (slots != null && slots.TryPlace(itemToPlace, out placeSlot) && placeSlot != null)
 						{
 							spawnPosition = placeSlot.position;
-							spawnRotation = placeSlot.rotation * itemToPlace.prefab.transform.rotation;
+							spawnRotation = placeSlot.rotation;
 						}
 						else
 						{
@@ -997,7 +1013,7 @@ public class PutItem : MonoBehaviour
 							string targetStationTag = (slotsOnParent != null ? slotsOnParent.gameObject.tag : targetObject.tag);
 							if ((targetStationTag == "put" || (FestivalUpgradeRuntime.InArcade && targetStationTag == "Recipe")) && slots == null)
 							{
-								spawnPosition = hit.point + targetObject.transform.up * placementOffset;
+								spawnPosition = hit.point;
 							}
 							else
 							{
@@ -1007,9 +1023,8 @@ public class PutItem : MonoBehaviour
 						}
 
 						// 生成（スロットがあれば子に、無ければ通常）
-						GameObject placed = placeSlot != null
-							? Instantiate(itemToPlace.prefab, spawnPosition, spawnRotation, placeSlot)
-							: Instantiate(itemToPlace.prefab, spawnPosition, spawnRotation);
+						GameObject placed = WorldItemPlacement.Spawn(itemToPlace, spawnPosition, spawnRotation, placeSlot,
+                            slots != null ? slots.gameObject : targetObject);
 
 						// タグ名をログに反映
 						string stationTag = (slotsOnParent != null ? slotsOnParent.gameObject.tag : targetObject.tag);
@@ -1055,7 +1070,7 @@ public class PutItem : MonoBehaviour
 						else
 						{
 							if (recipeDatabase == null && weaponRecipeDatabase == null && washRecipeDatabase == null) Debug.LogWarning("RecipeDatabase が未設定です");
-							if (slots == null) Debug.LogWarning("PlacementSlots が見つかりません。対象または親に付与してください");
+							if (slots == null && !targetObject.CompareTag("put") && !targetObject.CompareTag("Recipe")) Debug.LogWarning("PlacementSlots が見つかりません。対象または親に付与してください");
 						}
                     }
                     else
