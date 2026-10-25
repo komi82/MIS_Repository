@@ -853,6 +853,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 206d2a76f33caf948af86b0638e036e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  baffItemDatabase: {fileID: 11400000, guid: b9e307d28efdd0c43803a5fdefff2e01, type: 2}
+  artifactDatabase: {fileID: 11400000, guid: 6d5ae3e60fa7ad54b9b332855a720633, type: 2}
   xScoreText: {fileID: 1991277803}
   yScoreText: {fileID: 1814580401}
   aScoreText: {fileID: 2140331455}

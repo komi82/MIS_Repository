@@ -36,7 +36,7 @@ public class DayAdvanceButton : MonoBehaviour
 
     public void Updateday()
     {
-        DayText.text = $"Day {day}";
+        if (DayText != null) DayText.text = $"Day {GetDay()}";
     }
 
     public static void ResetPersistentState()
@@ -58,11 +58,18 @@ public class DayAdvanceButton : MonoBehaviour
         return s_hasDay ? s_day : 1;
     }
 
-    public void SetDay(int value)
+    public void SetDay(int value) => SetDayStatic(value);
+
+    public static void SetDayStatic(int value)
     {
         s_day = Mathf.Max(1, value);
         s_hasDay = true;
-        day = s_day; // inspector表示も追従させる
+        if (Instance != null) Instance.day = s_day;
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
     }
 
     /// <summary>

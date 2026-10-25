@@ -15,6 +15,10 @@ public class ScoreDisplay : MonoBehaviour
     [SerializeField] private TextMeshProUGUI yScoreText;
     [SerializeField] private TextMeshProUGUI aScoreText;
     
+    [Header("リザルトで見返す所持品")]
+    [SerializeField] private BaffItemDatabase baffItemDatabase;
+    [SerializeField] private ArtifactDatabase artifactDatabase;
+
     [Header("ランク表示")]
     [SerializeField] private Image rankImage; // ランクを表示するImage
     [SerializeField] [Tooltip("各ランクの閾値。日数基準で設定してください。例: {1,3,5} ")]
@@ -48,21 +52,23 @@ public class ScoreDisplay : MonoBehaviour
         Cursor.visible = true;
 
         // 日数を取得（DayAdvanceButton.Instance がない場合は static メソッドを使用）
-        int dayCount = DayAdvanceButton.GetDayStatic();
+        int dayCount = RunResultState.HasResult ? RunResultState.Day : DayAdvanceButton.GetDayStatic();
+        int finalMoney = RunResultState.HasResult ? RunResultState.Money : MoneyManager.currentMoney;
+        int finalRequests = RunResultState.HasResult ? RunResultState.Requests : RequestManager.RequestCompleted;
 
         // 稼いだ金額と依頼件数は従来どおり表示
         if (xScoreText != null)
         {
-            xScoreText.text = $"最終金額: {MoneyManager.currentMoney}G";
+            xScoreText.text = $"最終金額: {finalMoney}G";
 #if UNITY_WEBGL && !UNITY_EDITOR
             var moneyClient = UnityroomApiClient.Instance;
-            if (moneyClient != null) moneyClient.SendScore(2, MoneyManager.currentMoney, ScoreboardWriteMode.HighScoreDesc);
+            if (moneyClient != null) moneyClient.SendScore(2, finalMoney, ScoreboardWriteMode.HighScoreDesc);
 #endif
         }
 
         if (yScoreText != null)
         {
-            yScoreText.text = $"依頼件数: {RequestManager.RequestCompleted}件";
+            yScoreText.text = $"依頼件数: {finalRequests}件";
         }
 
         // 日数は "Day x" 表記で表示
@@ -84,6 +90,7 @@ public class ScoreDisplay : MonoBehaviour
 
         // ランクを更新（閾値はインスペクターで日数基準として設定される）
         UpdateRank(finalScore);
+        ResultScreenUI.Build(aScoreText, xScoreText, yScoreText, rankImage, baffItemDatabase, artifactDatabase);
     }
     
     /// <summary>

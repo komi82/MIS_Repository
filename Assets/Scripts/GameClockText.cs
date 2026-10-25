@@ -43,7 +43,8 @@ public class GameClockText : MonoBehaviour
     private float dailyIncomeNoticeUntil;
     private bool dailyIncomeInitialized;
     public bool RoundEnded => transitionStarted;
-    public void ReduceTime(float seconds) { remainingTime = Mathf.Max(0, remainingTime - Mathf.Max(0, seconds)); UpdateClockDisplay(); }
+    public bool IsTutorial => gameObject.scene.name.StartsWith("tutorial", System.StringComparison.OrdinalIgnoreCase);
+    public void ReduceTime(float seconds) { if (IsTutorial) return; remainingTime = Mathf.Max(0, remainingTime - Mathf.Max(0, seconds)); UpdateClockDisplay(); }
     private bool transitionStarted = false;
     private bool isCompleteTransition = false; // Completeシーンへ遷移するかどうか
     [SerializeField] private DeliveryStation deliveryStation;
@@ -53,6 +54,14 @@ public class GameClockText : MonoBehaviour
 
     private void Awake()
     {
+        if (IsTutorial)
+        {
+            // Awake also runs for disabled clock components already present in tutorial7/8.
+            if (clockText != null) clockText.enabled = false;
+            if (completeThresholdText != null) completeThresholdText.enabled = false;
+            if (transitionPanel != null) transitionPanel.SetActive(false);
+            if (completePanel != null) completePanel.SetActive(false);
+        }
         // もし複数生成された場合は後勝ちではなく、既存を優先して破棄する。
         if (Instance != null && Instance != this)
         {
@@ -104,6 +113,15 @@ public class GameClockText : MonoBehaviour
 
     IEnumerator Start()
     {
+        // Practice scenes advance only through their tutorial objectives, never the arcade clock.
+        if (IsTutorial)
+        {
+            if (clockText != null) clockText.enabled = false;
+            if (completeThresholdText != null) completeThresholdText.enabled = false;
+            if (transitionPanel != null) transitionPanel.SetActive(false);
+            if (completePanel != null) completePanel.SetActive(false);
+            yield break;
+        }
         // OwnedProgressManager から各アイテムの所持数を同期する
         if (items != null)
         {
@@ -183,7 +201,7 @@ public class GameClockText : MonoBehaviour
 
     void Update()
     {
-        if (!dailyIncomeInitialized) return;
+        if (IsTutorial || !dailyIncomeInitialized) return;
         UpdateDailyIncomeNotice();
         if (transitionStarted) return;
 
@@ -221,6 +239,7 @@ public class GameClockText : MonoBehaviour
 
     private void BeginRoundEnd(bool completedByThreshold)
     {
+        if (IsTutorial || transitionStarted) return;
         transitionStarted = true;
         isCompleteTransition = completedByThreshold;
 
@@ -254,6 +273,13 @@ public class GameClockText : MonoBehaviour
         if (transitionPanel != null) transitionPanel.SetActive(false);
         yield return new WaitForSeconds(1f);
 
+        // Keep the completed day on the result. Day 8 is reserved only after choosing Continue.
+        if (RunResultState.IsClearDay(DayAdvanceButton.GetDayStatic()))
+        {
+            ChangeScene.ShowResult(true);
+            yield break;
+        }
+
         // 目標達成後、日数を一度だけ更新してショップへ進む。
         DayAdvanceButton target = dayAdvanceButton != null ? dayAdvanceButton : DayAdvanceButton.Instance;
         if (target != null) target.AdvanceDayForNextRound();
@@ -269,14 +295,7 @@ public class GameClockText : MonoBehaviour
 
     void TransitionToNextScene()
     {
-        string nextScene = SceneNames.Result;
-
-        if (IsMenuScene(nextScene))
-        {
-            ActivateCursorForMenuScene();
-        }
-
-        FadeManager.Instance.LoadSceneWithFade(nextScene);
+        if (!IsTutorial) ChangeScene.ShowResult(false);
     }
 
     private void TransitionToShop()

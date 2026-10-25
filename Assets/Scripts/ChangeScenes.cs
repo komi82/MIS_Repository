@@ -161,6 +161,37 @@ public class ChangeScene: MonoBehaviour
         StartCoroutine(RestoreArcadeStateExplicit());
     }
 
+    private static ChangeScene EnsurePersistentInstance()
+    {
+        if (Instance == null) new GameObject("ChangeScene(Persistent)").AddComponent<ChangeScene>();
+        return Instance;
+    }
+
+    public static void ShowResult(bool cleared)
+    {
+        EnsurePersistentInstance().SaveArcadeStateExplicit();
+        RunResultState.Capture(cleared);
+        LoadMenu(SceneNames.Result);
+    }
+
+    public static bool ContinueAfterWeekOne()
+    {
+        if (!RunResultState.TryContinue()) return false;
+        var manager = EnsurePersistentInstance();
+        DayAdvanceButton.SetDayStatic(8);
+        if (manager.savedState != null) manager.savedState.dayCount = 8;
+        LoadMenu(SceneNames.Shop);
+        return true;
+    }
+
+    private static void LoadMenu(string scene)
+    {
+        Cursor.lockState = CursorLockMode.Confined;
+        Cursor.visible = true;
+        if (FadeManager.Instance != null) FadeManager.Instance.LoadSceneWithFade(scene);
+        else SceneManager.LoadScene(scene);
+    }
+
     public void GoToShop()
     {
         // インベントリが破棄される前に保存する。

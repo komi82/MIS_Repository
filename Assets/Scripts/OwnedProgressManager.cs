@@ -12,11 +12,15 @@ public static class OwnedProgressManager
 
     public static void ResetAll()
     {
+        RunResultState.Reset();
         DailyChallengeRuntime.ResetRun();
         baffOwnedById.Clear();
         DailyIncomeState.Reset();
         artifactOwnedById.Clear();
     }
+
+    public static Dictionary<int, int> CopyBaffCounts() => new Dictionary<int, int>(baffOwnedById);
+    public static Dictionary<int, int> CopyArtifactCounts() => new Dictionary<int, int>(artifactOwnedById);
 
     public static void AddBaffItem(int itemId, int amount = 1)
     {

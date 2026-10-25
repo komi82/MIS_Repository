@@ -34,6 +34,40 @@ public class OwnedItemsHUD : MonoBehaviour
     private readonly List<SlotWidget> artifactWidgets = new List<SlotWidget>();
     private TextMeshProUGUI pageLabel;
     private bool wasVisible;
+    private bool resultMode;
+    private bool pinnedOpen;
+    public bool IsOpen => window != null && window.activeSelf;
+    public void ToggleResultWindow() { pinnedOpen = !pinnedOpen; }
+    public void ChangePage(int direction) { currentPage = Mathf.Clamp(currentPage + direction, 1, pageCount); }
+
+    public static OwnedItemsHUD CreateForResult(Transform parent, TextMeshProUGUI template,
+        BaffItemDatabase baffDatabase, ArtifactDatabase artifacts)
+    {
+        var host = new GameObject("ResultOwnedItems", typeof(RectTransform));
+        host.transform.SetParent(parent, false);
+        var hud = host.AddComponent<OwnedItemsHUD>();
+        hud.resultMode = true;
+        hud.baffItemDatabase = baffDatabase;
+        hud.artifactDatabase = artifacts;
+        hud.window = CreateRect("OwnedItemsWindow", host.transform).gameObject;
+        hud.baffItemSlotsParent = CreateRect("BaffItems", hud.window.transform);
+        hud.artifactSlotsParent = CreateRect("Artifacts", hud.window.transform);
+        hud.benefitsText = CreateRect("Descriptions", hud.window.transform).gameObject.AddComponent<TextMeshProUGUI>();
+        hud.benefitsText.font = template.font;
+        hud.benefitsText.fontSharedMaterial = template.fontSharedMaterial;
+        hud.window.SetActive(false);
+        return hud;
+    }
+
+    private static RectTransform CreateRect(string name, Transform parent)
+    {
+        var obj = new GameObject(name, typeof(RectTransform));
+        obj.transform.SetParent(parent, false);
+        return (RectTransform)obj.transform;
+    }
+
+    private int BaffCount(int id) => resultMode && RunResultState.HasResult ? RunResultState.GetBaffCount(id) : OwnedProgressManager.GetBaffOwned(id);
+    private int ArtifactCount(int id) => resultMode && RunResultState.HasResult ? RunResultState.GetArtifactCount(id) : OwnedProgressManager.GetArtifactOwned(id);
     private float nextRefreshTime;
     private int currentPage = 1;
     private int pageCount = 1;
@@ -69,7 +103,12 @@ public class OwnedItemsHUD : MonoBehaviour
 
     void Update()
     {
-        if (!Input.GetKey(showKey))
+        if (resultMode)
+        {
+            if (Input.GetKeyDown(showKey)) ToggleResultWindow();
+            if (Input.GetKeyDown(KeyCode.Escape)) pinnedOpen = false;
+        }
+        if (!(resultMode ? pinnedOpen : Input.GetKey(showKey)))
         {
             SetDisplayVisible(false);
             SetWindowVisible(false);
@@ -108,7 +147,7 @@ public class OwnedItemsHUD : MonoBehaviour
         if (background == null) background = window.AddComponent<Image>();
         background.sprite = null;
         background.color = new Color(0.035f, 0.045f, 0.06f, 1f);
-        background.raycastTarget = false;
+        background.raycastTarget = resultMode;
 
         Canvas parentCanvas = transform.GetComponentInParent<Canvas>();
         Canvas overlay = window.GetComponent<Canvas>();
@@ -116,6 +155,7 @@ public class OwnedItemsHUD : MonoBehaviour
         overlay.overrideSorting = true;
         if (parentCanvas != null) overlay.sortingLayerID = parentCanvas.sortingLayerID;
         overlay.sortingOrder = (parentCanvas != null ? parentCanvas.sortingOrder : 0) + 50;
+        if (resultMode && window.GetComponent<GraphicRaycaster>() == null) window.AddComponent<GraphicRaycaster>();
         if (window.GetComponent<RectMask2D>() == null) window.AddComponent<RectMask2D>();
 
         if (baffItemSlotsParent != null)
@@ -133,13 +173,22 @@ public class OwnedItemsHUD : MonoBehaviour
         benefitsText.color = Color.white;
 
         CreateLabel("OwnedItemsTitle", "所持効果", panel,
-            new Vector2(0.035f, 0.89f), new Vector2(0.96f, 0.97f), 44f);
+            new Vector2(0.035f, 0.89f), new Vector2(0.75f, 0.97f), 44f);
         CreateLabel("BaffItemsTitle", "所持アイテム", panel,
             new Vector2(0.035f, 0.82f), new Vector2(0.28f, 0.88f), 28f);
         CreateLabel("ArtifactsTitle", "アーティファクト", panel,
             new Vector2(0.035f, 0.39f), new Vector2(0.28f, 0.45f), 28f);
         pageLabel = CreateLabel("OwnedItemsPages", "", panel,
-            new Vector2(0.035f, 0.035f), new Vector2(0.96f, 0.11f), 28f);
+            new Vector2(0.035f, 0.035f), new Vector2(resultMode ? 0.70f : 0.96f, 0.11f), 28f);
+        if (resultMode)
+        {
+            ResultScreenUI.CreateButton("CloseOwnedItems", "閉じる", panel, benefitsText,
+                new Vector2(.78f, .89f), new Vector2(.96f, .97f), ToggleResultWindow);
+            ResultScreenUI.CreateButton("PreviousOwnedPage", "前へ", panel, benefitsText,
+                new Vector2(.71f, .035f), new Vector2(.82f, .11f), () => ChangePage(-1));
+            ResultScreenUI.CreateButton("NextOwnedPage", "次へ", panel, benefitsText,
+                new Vector2(.84f, .035f), new Vector2(.96f, .11f), () => ChangePage(1));
+        }
     }
 
     private TextMeshProUGUI CreateLabel(string objectName, string text, RectTransform parent,
@@ -187,7 +236,9 @@ public class OwnedItemsHUD : MonoBehaviour
         currentPage = Mathf.Clamp(currentPage, 1, pageCount);
         benefitsText.pageToDisplay = currentPage;
         if (pageLabel != null)
-            pageLabel.text = $"{currentPage} / {pageCount} ページ    ← →：ページ切替    {showKey}：押している間だけ表示";
+            pageLabel.text = resultMode
+                ? $"{currentPage} / {pageCount} ページ    ← →：切替    Tab / Esc：閉じる"
+                : $"{currentPage} / {pageCount} ページ    ← →：ページ切替    {showKey}：押している間だけ表示";
     }
 
     private void ConfigureGrid(RectTransform parent, int count)
@@ -279,8 +330,8 @@ public class OwnedItemsHUD : MonoBehaviour
         ConfigureGrid(artifactSlotsParent, ownedArtifacts.Count);
         EnsureWidgetCount(baffItemSlotsParent, baffWidgets, ownedBaff.Count);
         EnsureWidgetCount(artifactSlotsParent, artifactWidgets, ownedArtifacts.Count);
-        PopulateSlots(ownedBaff, baffWidgets, item => GetSpriteFromPrefab(item.prefab), item => OwnedProgressManager.GetBaffOwned(item.B_itemID));
-        PopulateSlots(ownedArtifacts, artifactWidgets, item => GetSpriteFromPrefab(item.prefab), item => OwnedProgressManager.GetArtifactOwned(item.A_itemID));
+        PopulateSlots(ownedBaff, baffWidgets, item => GetSpriteFromPrefab(item.prefab), item => BaffCount(item.B_itemID));
+        PopulateSlots(ownedArtifacts, artifactWidgets, item => GetSpriteFromPrefab(item.prefab), item => ArtifactCount(item.A_itemID));
         RefreshBenefitsText(ownedBaff, ownedArtifacts);
     }
 
@@ -289,8 +340,8 @@ public class OwnedItemsHUD : MonoBehaviour
         if (benefitsText == null) return;
 
         StringBuilder text = new StringBuilder();
-        AppendBenefits(text, ownedBaff, item => OwnedProgressManager.GetBaffOwned(item.B_itemID), item => item.itemName, item => item.description, item => item.effecttype.ToString());
-        AppendBenefits(text, ownedArtifacts, item => OwnedProgressManager.GetArtifactOwned(item.A_itemID), item => item.itemName + (DailyChallengeRuntime.IsArtifactDisabled(item.A_itemID) ? "（今日だけ無効）" : ""), item => item.description, item => item.effecttype.ToString());
+        AppendBenefits(text, ownedBaff, item => BaffCount(item.B_itemID), item => item.itemName, item => item.description, item => item.effecttype.ToString());
+        AppendBenefits(text, ownedArtifacts, item => ArtifactCount(item.A_itemID), item => item.itemName + (DailyChallengeRuntime.IsArtifactDisabled(item.A_itemID) ? "（今日だけ無効）" : ""), item => item.description, item => item.effecttype.ToString());
         string content = text.Length > 0 ? text.ToString() : "所持している効果はありません";
         if (benefitsText.text != content)
         {
@@ -331,7 +382,7 @@ public class OwnedItemsHUD : MonoBehaviour
         foreach (BaffItemData item in baffItemDatabase.allBaffItems)
         {
             if (item == null) continue;
-            if (OwnedProgressManager.GetBaffOwned(item.B_itemID) > 0)
+            if (BaffCount(item.B_itemID) > 0)
                 list.Add(item);
         }
         return list;
@@ -345,7 +396,7 @@ public class OwnedItemsHUD : MonoBehaviour
         foreach (ArtifactData item in artifactDatabase.allArtifacts)
         {
             if (item == null) continue;
-            if (OwnedProgressManager.GetArtifactOwned(item.A_itemID) > 0)
+            if (ArtifactCount(item.A_itemID) > 0)
                 list.Add(item);
         }
         return list;

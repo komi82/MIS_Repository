@@ -23,6 +23,7 @@ public static class MisValidationRequest
             {
                 case "tutorial": TutorialMouseValidation.Run(); break;
                 case "arcade": InteractionControlTrialValidation.Run(); break;
+                case "results": RunResultValidation.Run(); break;
                 case "content": KouaContentValidation.Run(); break;
                 default: throw new InvalidOperationException("Unknown validation request: " + request);
             }
