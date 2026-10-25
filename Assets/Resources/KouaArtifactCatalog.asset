@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 345089e9b59055fb8c96a05543718e1b, type: 3}
+  m_Name: KouaArtifactCatalog
+  m_EditorClassIdentifier: 
+  artifacts:
+  - {fileID: 11400000, guid: 810dac56052354dea8c2b574e0681d9d, type: 2}
+  - {fileID: 11400000, guid: 5644a1af85b650b49f8803be0ed34524, type: 2}
+  - {fileID: 11400000, guid: b05553744f455900aac00f9edd939c60, type: 2}
+  - {fileID: 11400000, guid: 9d12106b3ca45348ae1715e5c292ea7d, type: 2}
+  - {fileID: 11400000, guid: fc8a3f93bdbb51c0a2cc2da5578cb741, type: 2}
+  - {fileID: 11400000, guid: b18f6d5e6a42575a9390952be5cb5404, type: 2}
+  - {fileID: 11400000, guid: 0e4c1d8496f15f88a2fe4220ff624d10, type: 2}
+  - {fileID: 11400000, guid: 6dadcf1fbcdd5470b5078987227a75a9, type: 2}
+  - {fileID: 11400000, guid: 5c5159e140185c5999f51a9b11e2c948, type: 2}
+  - {fileID: 11400000, guid: 6367de2a012353019a34e1e6aa1e2814, type: 2}
+  recipes:
+  - {fileID: 11400000, guid: b15c0bd54b601d34e931eb0fd17c6d8a, type: 2}
+  - {fileID: 11400000, guid: 5ec72eacf2d5c0646a3229248aec511b, type: 2}
+  - {fileID: 11400000, guid: 4fe5f4c574ff5734eaca2f507bd13478, type: 2}
+  ores:
+  - {fileID: 11400000, guid: 4591a8d5f99a502438d999ecf57e6e04, type: 2}
+  - {fileID: 11400000, guid: a3a057b642b13e74da15bdb7324d5b5f, type: 2}
+  - {fileID: 11400000, guid: 449c9306d483e4241ac4997142cc9709, type: 2}
+  plants:
+  - {fileID: 11400000, guid: 0a111a79be92a56498e171ee308c5ea3, type: 2}
+  - {fileID: 11400000, guid: 922ba8b90cce22345a5a9eea9a130e12, type: 2}
+  mushrooms:
+  - {fileID: 11400000, guid: 2b36e50e72b34e84bbeb84773273bf99, type: 2}
+  - {fileID: 11400000, guid: 51484e5415738b64b839e01a84e6db4a, type: 2}
+  - {fileID: 11400000, guid: c1bbf94d49e432d469f1c9024bc40a85, type: 2}

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
@@ -85,6 +86,7 @@ public class TutorialSequence : MonoBehaviour
             textBoxRoot.SetActive(true);
         }
 
+        TutorialControlGuide.Configure(postTutorialWindow);
         BeginTutorial();
     }
 
@@ -103,7 +105,7 @@ public class TutorialSequence : MonoBehaviour
             return;
         }
 
-        if (Input.GetMouseButtonDown(0))
+        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
         {
             AdvanceLine();
         }
@@ -155,6 +157,8 @@ public class TutorialSequence : MonoBehaviour
             return;
         }
 
+        // The click dismissing the explanation must not also pick up an item or open a station.
+        InteractionControlTrial.BlockCurrentFrame();
         sequenceFinished = true;
         IsActive = false;
 

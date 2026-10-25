@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75240b0abad55ad42b81fffeb8380ab0, type: 3}
+  m_Name: TimeIsMoney
+  m_EditorClassIdentifier: Assembly-CSharp::ArtifactData
+  A_itemID: 105
+  effecttype: 31
+  A_itemName: TimeIsMoney
+  price: 700
+  startprice: 700
+  ownedCount: 0
+  prefab: {fileID: 6068648090133099813, guid: e25b6b4974c652c6acfc2d8d4611a10f, type: 3}
+  itemName: "\u6642\u306f\u91d1\u306a\u308a"
+  description: "\u55b6\u696d\u6642\u9593\u304c30\u79d2\u77ed\u304f\u306a\u308b\u4ee3\u308f\u308a\u306b\u3001\u3059\u3079\u3066\u306e\u4f9d\u983c\u306e\u5831\u916c\u304c3\u500d\u306b\u306a\u308b\u3002"
+  uniquePurchase: 1

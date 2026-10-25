@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75240b0abad55ad42b81fffeb8380ab0, type: 3}
+  m_Name: MemoryBook
+  m_EditorClassIdentifier: Assembly-CSharp::ArtifactData
+  A_itemID: 109
+  effecttype: 35
+  A_itemName: MemoryBook
+  price: 300
+  startprice: 300
+  ownedCount: 0
+  prefab: {fileID: 6068648090133099813, guid: e6bd3dc9f6165edda17ae95ac6374739, type: 3}
+  itemName: "\u8a18\u61b6\u306e\u8853\u66f8"
+  description: "M\u30ad\u30fc\u3067\u3069\u3053\u304b\u3089\u3067\u3082\u30ec\u30b7\u30d4\u3092\u958b\u3051\u308b\u3002F\u30fbEsc\u30fbM\u3067\u9589\u3058\u308b\u3002\u30ec\u30b7\u30d4\u7981\u6b62\u306e\u82e6\u96e3\u4e2d\u306f\u958b\u3051\u306a\u3044\u3002"
+  uniquePurchase: 1

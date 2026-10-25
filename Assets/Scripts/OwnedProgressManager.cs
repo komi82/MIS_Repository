@@ -12,6 +12,7 @@ public static class OwnedProgressManager
 
     public static void ResetAll()
     {
+        DailyChallengeRuntime.ResetRun();
         baffOwnedById.Clear();
         DailyIncomeState.Reset();
         artifactOwnedById.Clear();
@@ -34,6 +35,13 @@ public static class OwnedProgressManager
     public static int GetBaffOwned(int itemId)
     {
         return baffOwnedById.TryGetValue(itemId, out int count) ? count : 0;
+    }
+
+    public static List<int> GetOwnedArtifactIds()
+    {
+        var result = new List<int>();
+        foreach (var pair in artifactOwnedById) if (pair.Value > 0) result.Add(pair.Key);
+        return result;
     }
 
     public static int GetArtifactOwned(int itemId)

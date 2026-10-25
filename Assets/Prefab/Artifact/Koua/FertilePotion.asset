@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75240b0abad55ad42b81fffeb8380ab0, type: 3}
+  m_Name: FertilePotion
+  m_EditorClassIdentifier: Assembly-CSharp::ArtifactData
+  A_itemID: 101
+  effecttype: 27
+  A_itemName: FertilePotion
+  price: 250
+  startprice: 250
+  ownedCount: 0
+  prefab: {fileID: 6068648090133099813, guid: 04769ba3efa559ac8a13800654a22313, type: 3}
+  itemName: "\u80a5\u6c83\u306e\u8c4a\u85ac"
+  description: "\u690d\u7269\u3092\u7d20\u6750\u306b\u4f7f\u3046\u4f9d\u983c\u306e\u5831\u916c\u304c30%\u5897\u52a0\u3059\u308b\u3002"
+  uniquePurchase: 1

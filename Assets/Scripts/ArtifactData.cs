@@ -10,6 +10,7 @@ public class ArtifactData : ScriptableObject
     public int startprice;
     public float ownedCount;
     public GameObject prefab;
+    public bool uniquePurchase;
 
     [Header("表示情報")]
     public string itemName;

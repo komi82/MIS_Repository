@@ -290,7 +290,7 @@ public class OwnedItemsHUD : MonoBehaviour
 
         StringBuilder text = new StringBuilder();
         AppendBenefits(text, ownedBaff, item => OwnedProgressManager.GetBaffOwned(item.B_itemID), item => item.itemName, item => item.description, item => item.effecttype.ToString());
-        AppendBenefits(text, ownedArtifacts, item => OwnedProgressManager.GetArtifactOwned(item.A_itemID), item => item.itemName, item => item.description, item => item.effecttype.ToString());
+        AppendBenefits(text, ownedArtifacts, item => OwnedProgressManager.GetArtifactOwned(item.A_itemID), item => item.itemName + (DailyChallengeRuntime.IsArtifactDisabled(item.A_itemID) ? "（今日だけ無効）" : ""), item => item.description, item => item.effecttype.ToString());
         string content = text.Length > 0 ? text.ToString() : "所持している効果はありません";
         if (benefitsText.text != content)
         {

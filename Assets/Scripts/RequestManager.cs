@@ -24,6 +24,7 @@ public class RequestManager : MonoBehaviour
 
 	// テストとスロットの対応を保持
 	private Dictionary<Request, Transform> requestToSlot = new Dictionary<Request, Transform>();
+    private readonly Dictionary<Request, GameObject> requestTargets = new Dictionary<Request, GameObject>();
 
     [Header("依頼管理")]
     [SerializeField] private List<Request> activeRequests = new List<Request>();
@@ -35,6 +36,7 @@ public class RequestManager : MonoBehaviour
     [SerializeField] private BaffItemData purificationFrequencyItem;
     [SerializeField] private BaffItemData mixingFrequencyItem;
     [SerializeField] private BaffItemDatabase upgradeDatabase;
+    private readonly Dictionary<Request, float> expiryTimes = new Dictionary<Request, float>();
     private Request upcomingRequest;
     private readonly DeliveryStreakState deliveryStreak = new DeliveryStreakState();
     private int streakDay = -1;
@@ -78,7 +80,7 @@ public class RequestManager : MonoBehaviour
         {
             foreach (ArtifactData artifact in artifacts)
             {
-                if (artifact != null && artifact.effecttype == type)
+                if (artifact != null && artifact.effecttype == type && !DailyChallengeRuntime.IsArtifactDisabled(artifact.A_itemID))
                 {
                     total += Mathf.RoundToInt(artifact.ownedCount);
                 }
@@ -113,19 +115,20 @@ public class RequestManager : MonoBehaviour
             }
         }
 
-        // シーン遷移で初期化しない仕様
-        GenerateRequest();
-        ScheduleNextRequest();
+        DailyChallengeRuntime.BeginDay(DayAdvanceButton.GetDayStatic());
         //各種バフアイテムの所持数を合計する
         potionReward = GetTotal(BaffEffectType.potionup);
         weaponReward = GetTotal(BaffEffectType.weaponup);
         cursedReward = GetTotal(BaffEffectType.cursedup);
         doubleCount = GetTotal(BaffEffectType.doublecount);
         extramoney = GetTotal(BaffEffectType.extramoney);
+        GenerateRequest();
+        ScheduleNextRequest();
     }
 
     void Update()
     {
+        ExpireRequests();
       /*  // OwnedProgressManager から各アイテムの所持数を同期する
         if (items != null)
         {
@@ -239,6 +242,7 @@ public class RequestManager : MonoBehaviour
         }
         if (newRequest == upcomingRequest) upcomingRequest = null;
         activeRequests.Add(newRequest);
+        if (DailyChallengeRuntime.Is(DailyChallenge.ExpiringRequests)) expiryTimes[newRequest] = DailyChallengeRuntime.Elapsed + DailyChallengeRuntime.Settings.requestLifetime;
 
 		// DeliverItem / CraftWeapon 以外は、作業対象となるアイテムのプレハブをスポーン
 		if (type != RequestType.DeliverItem && type != RequestType.CraftWeapon)
@@ -429,7 +433,8 @@ public class RequestManager : MonoBehaviour
         int day = DayAdvanceButton.GetDayStatic();
         if (day != streakDay) { deliveryStreak.Reset(); streakDay = day; }
         if (slot == null && InventoryManager.Instance != null) slot = InventoryManager.Instance.FindSlotByItem(request.requiredItem);
-        return FestivalUpgradeRuntime.DeliveryReward(request.rewardAmount, request.requestType, deliveryStreak, slot?.InstanceState);
+        int amount = FestivalUpgradeRuntime.DeliveryReward(request.rewardAmount, request.requestType, deliveryStreak, slot?.InstanceState);
+        return DailyChallengeRuntime.Reward(KouaArtifactRuntime.Reward(amount, request), request);
     }
 
     public string GetDeliveryRewardText(Request request)
@@ -437,6 +442,8 @@ public class RequestManager : MonoBehaviour
         string text = $"{GetDeliveryReward(request)}G";
         var lucky = FestivalUpgradeRuntime.Owned(BaffEffectType.luckyDelivery);
         if (lucky != null) text += $"（{100f * lucky.upgradeChance:0}%で追加ボーナス）";
+        if (KouaArtifactRuntime.Has(KouaArtifactRuntime.WhimsicalWealth)) text += "（50%で1.5倍／50%で半額）";
+        if (expiryTimes.TryGetValue(request, out float expiry)) text += $" 残り{Mathf.Max(0, expiry - DailyChallengeRuntime.Elapsed):0}秒";
         return text;
     }
 
@@ -464,6 +471,7 @@ public class RequestManager : MonoBehaviour
 
 		GameObject spawned = Instantiate(targetItem.prefab, spawnPos, spawnRot, parent);
 		spawned.name = $"RequestTarget_{targetItem.itemName}";
+        requestTargets[request] = spawned;
 
 		if (slot != null)
 		{
@@ -486,7 +494,9 @@ public class RequestManager : MonoBehaviour
 
     public bool TryDeliverByRequest(Request request)
     {
+        ExpireRequests();
         if (request == null || !activeRequests.Contains(request) || moneyManager == null) return false;
+        if (DailyChallengeRuntime.DeliveryWait > 0) { DailyChallengeRuntime.Notify("納品待ち：あと" + DailyChallengeRuntime.DeliveryWait.ToString("0.0") + "秒"); return false; }
 
         if (!request.isCompleted)
         {
@@ -501,6 +511,9 @@ public class RequestManager : MonoBehaviour
             int payment = GetDeliveryReward(request, deliverySlot);
             if (FestivalUpgradeRuntime.Owned(BaffEffectType.luckyDelivery) != null)
                 payment = FestivalUpgradeRuntime.LuckyReward(payment, UnityEngine.Random.value);
+            if (KouaArtifactRuntime.Has(KouaArtifactRuntime.WhimsicalWealth)) payment = KouaArtifactRuntime.RollPayment(payment, UnityEngine.Random.value);
+            DailyChallengeRuntime.Delivered();
+            expiryTimes.Remove(request);
             request.isCompleted = true;
             
             // アイテムをインベントリから削除
@@ -516,6 +529,8 @@ public class RequestManager : MonoBehaviour
 			// （デリバーは依頼の完了であり、作業対象の削除ではない）
 			// ReleaseSpawnSlot(request); // コメントアウト
             activeRequests.Remove(request);
+            requestToSlot.Remove(request);
+            requestTargets.Remove(request);
             requestBoard.DisplayRequests();
             RequestCompleted++;
             if (GameClockText.Instance != null)
@@ -530,14 +545,12 @@ public class RequestManager : MonoBehaviour
 
 	private void ReleaseSpawnSlot(Request request)
 	{
-		if (requestToSlot == null) return;
-		if (!requestToSlot.TryGetValue(request, out Transform slot) || slot == null) return;
-		for (int i = slot.childCount - 1; i >= 0; i--)
-		{
-			var child = slot.GetChild(i);
-			Destroy(child.gameObject);
-		}
+        // A picked-up target frees its slot for another request. Never clear the whole slot.
+        if (requestTargets.TryGetValue(request, out var target) && target != null &&
+            requestToSlot.TryGetValue(request, out var slot) && slot != null && target.transform.parent == slot)
+            Destroy(target);
 		requestToSlot.Remove(request);
+        requestTargets.Remove(request);
 	}
 
     private static RequestTypeLottery.WeightModifier GetFrequencyModifier(BaffItemData effect, BaffEffectType expectedType)
@@ -558,7 +571,15 @@ public class RequestManager : MonoBehaviour
             GetFrequencyModifier(purificationFrequencyItem, BaffEffectType.purificationFrequency),
             GetFrequencyModifier(mixingFrequencyItem, BaffEffectType.mixingFrequency)
         };
-        return RequestTypeLottery.Pick(requestTypesPool, modifiers, roll);
+        double total = 0;
+        foreach (var type in requestTypesPool) total += RequestTypeLottery.GetWeight(type, modifiers) * DailyChallengeRuntime.Weight(type);
+        double remaining = roll * total;
+        foreach (var type in requestTypesPool)
+        {
+            remaining -= RequestTypeLottery.GetWeight(type, modifiers) * DailyChallengeRuntime.Weight(type);
+            if (remaining < 0) return type;
+        }
+        return requestTypesPool[requestTypesPool.Count - 1];
     }
 
     public static int CalculateMushroomRewardBonus(BaffItemData effect, RequestType type, ItemData requiredItem, int ownedCount)
@@ -574,6 +595,25 @@ public class RequestManager : MonoBehaviour
         }
         return 0;
     }
+    void ExpireRequests()
+    {
+        if (!DailyChallengeRuntime.Is(DailyChallenge.ExpiringRequests)) return;
+        bool changed = false;
+        for (int i = activeRequests.Count - 1; i >= 0; i--)
+        {
+            var request = activeRequests[i];
+            if (!expiryTimes.TryGetValue(request, out float until) || DailyChallengeRuntime.Elapsed < until) continue;
+            activeRequests.RemoveAt(i); expiryTimes.Remove(request);
+            // Keep any materials already moved by the player; only remove the abandoned supplied target.
+            ReleaseSpawnSlot(request); Destroy(request); changed = true;
+        }
+        if (!changed) return;
+        DailyChallengeRuntime.Notify("時間切れの依頼がキャンセルされました");
+        requestBoard?.DisplayRequests();
+        foreach (var list in FindObjectsByType<DeliveryUIList>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            if (list.gameObject.activeInHierarchy) list.RefreshList();
+    }
+
     public List<Request> GetActiveRequests()
     {
         return activeRequests;

@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-/// <summary>アーケードの操作比較用。製品ビルドとチュートリアルは従来操作を維持する。</summary>
+/// <summary>ゲーム本編とチュートリアルの共通操作。Editorのアーケードでは従来操作との比較も可能。</summary>
 [DefaultExecutionOrder(-10000)]
 public sealed class InteractionControlTrial : MonoBehaviour
 {
@@ -21,19 +21,29 @@ public sealed class InteractionControlTrial : MonoBehaviour
     {
         get
         {
+            string scene = SceneManager.GetActiveScene().name;
+            if (IsTutorialScene(scene)) return true;
+            if (scene != SceneNames.Arcade) return false;
 #if UNITY_EDITOR
-            return UnityEditor.SessionState.GetBool(PreferenceKey, true)
-                && SceneManager.GetActiveScene().name == SceneNames.Arcade;
+            return UnityEditor.SessionState.GetBool(PreferenceKey, true);
 #else
-            return false;
+            return true;
 #endif
         }
+    }
+
+    public static bool IsTutorialScene(string scene)
+    {
+        return scene == "tutorial" || scene == SceneNames.Tutorial2
+            || scene == SceneNames.Tutorial3 || scene == SceneNames.Tutorial4
+            || scene == SceneNames.Tutorial5 || scene == SceneNames.Tutorial6
+            || scene == SceneNames.Tutorial7 || scene == "tutorial8";
     }
 
     public static string PickupLabel => UseMouse ? "左クリック" : "<sprite name=F>";
     public static string PlaceLabel => UseMouse ? "右クリック" : "<sprite name=E>";
     public static bool WorldInputBlocked => UseMouse &&
-        (blockedFrame == Time.frameCount || Time.timeScale <= 0f || Cursor.visible
+        (blockedFrame == Time.frameCount || TutorialSequence.IsActive || Time.timeScale <= 0f || Cursor.visible
             || Cursor.lockState != CursorLockMode.Locked);
 
     public static bool InteractPressed => UseMouse
@@ -116,8 +126,10 @@ public sealed class InteractionControlTrial : MonoBehaviour
     public static void ConfigureCloseHint(GameObject ui)
     {
         if (!UseMouse || ui == null) return;
+        bool configured = false;
         foreach (var label in ui.GetComponentsInChildren<TextMeshProUGUI>(true))
         {
+            if (label.text == "F / Esc で閉じる") { configured = true; continue; }
             if (label.text.Trim() != "で閉じる") continue;
             var panel = label.transform.parent as RectTransform;
             if (panel == null || panel.GetComponent<Image>() == null) continue;
@@ -129,6 +141,29 @@ public sealed class InteractionControlTrial : MonoBehaviour
             Vector3 parentScale = panel.parent.lossyScale;
             panel.localScale = new Vector3(canvas.lossyScale.x / parentScale.x,
                 canvas.lossyScale.y / parentScale.y, 1f);
+            panel.position = canvas.TransformPoint(canvas.rect.min + new Vector2(28f, 20f));
+            label.text = "F / Esc で閉じる";
+            configured = true;
+        }
+        // Some tutorial modal prefabs have no legacy close hint at all.
+        if (!configured)
+        {
+            var canvasComponent = ui.GetComponentInParent<Canvas>();
+            if (canvasComponent == null) return;
+            var template = canvasComponent.GetComponentInChildren<TextMeshProUGUI>(true);
+            if (template == null) return;
+            var obj = new GameObject("MouseCloseHint", typeof(RectTransform), typeof(Image));
+            obj.transform.SetParent(ui.transform, false);
+            obj.GetComponent<Image>().color = new Color(.035f, .03f, .025f, .9f);
+            obj.GetComponent<Image>().raycastTarget = false;
+            var text = new GameObject("Text", typeof(RectTransform)); text.transform.SetParent(obj.transform, false);
+            var label = text.AddComponent<TextMeshProUGUI>(); label.font = template.font; label.fontSharedMaterial = template.fontSharedMaterial;
+            var panel = (RectTransform)obj.transform;
+            ConfigureLabelPanel(panel, label, new Vector2(580f, 100f), 48f);
+            var canvas = (RectTransform)canvasComponent.rootCanvas.transform;
+            panel.anchorMin = panel.anchorMax = panel.pivot = Vector2.zero;
+            var parentScale = panel.parent.lossyScale;
+            panel.localScale = new Vector3(canvas.lossyScale.x / parentScale.x, canvas.lossyScale.y / parentScale.y, 1f);
             panel.position = canvas.TransformPoint(canvas.rect.min + new Vector2(28f, 20f));
             label.text = "F / Esc で閉じる";
         }

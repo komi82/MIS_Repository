@@ -470,12 +470,25 @@ public class PutItem : MonoBehaviour
 
 	private IEnumerator ProcessCrafting(PlacementSlots slots, RecipeDatabase activeDB, GameObject taggedObject, RaycastHit hit, GameObject targetObject)
 	{
-		// コルーチン処理開始時にフラグを設定
+        if (DailyChallengeRuntime.WorkBlocked(taggedObject.tag))
+        {
+            DailyChallengeRuntime.Notify("今は" + DailyChallengeRuntime.Description());
+            isProcessingCoroutine = false; isCraftingInProgress = false;
+            yield break;
+        }
+		// コルーチン処理開始
 		isProcessingCoroutine = true;
 		
 		var combo = slots.GetCombination();
 		RecipeData match = activeDB.FindMatch(combo.Item1, combo.Item2);
 		
+        PlacementSlots companion = null;
+        RecipeData companionRecipe = null;
+        if (KouaArtifactRuntime.Has(KouaArtifactRuntime.ResonanceBook))
+        {
+            companion = FindResonantStation(slots, taggedObject.tag, activeDB, out companionRecipe);
+            if (companion != null) DailyChallengeRuntime.Notify("共鳴：左右の作業台を同時に加工");
+        }
 		if (match != null && match.resultItem != null && match.resultItem.prefab != null)
 		{
 			// PowerGageの処理が必要な場合
@@ -507,10 +520,57 @@ public class PutItem : MonoBehaviour
             yield return null; // 1フレーム待機してから処理を続行
 
 
+            CompleteRecipe(slots, match, taggedObject.CompareTag("craft"));
+            if (companion != null && companionRecipe != null)
+            {
+                // The pair is selected before the QTE. Recheck to avoid consuming unrelated replacements.
+                var pair = companion.GetCombination();
+                if (activeDB.FindMatch(pair.Item1, pair.Item2) == companionRecipe)
+                    CompleteRecipe(companion, companionRecipe, taggedObject.CompareTag("craft"));
+            }
+
+            if (targets.Contains(scene))
+
+			{
+				ConditionalSceneTransition.TriggerTransitionStatic();
+			}
+
+		}
+		else
+		{
+			Debug.Log("クラフト可能なレシピがありません");
+		}
+
+		// コルーチン処理終了時にフラグをリセット
+		isProcessingCoroutine = false;
+		// クラフト処理終了フラグを設定
+		isCraftingInProgress = false;
+	}
+
+    PlacementSlots FindResonantStation(PlacementSlots source, string tag, RecipeDatabase db, out RecipeData recipe)
+    {
+        recipe = null;
+        if (db == null || source == null) return null;
+        PlacementSlots nearest = null; float distance = float.MaxValue;
+        foreach (var candidate in FindObjectsByType<PlacementSlots>(FindObjectsSortMode.None))
+        {
+            if (candidate == source || !candidate.CompareTag(tag)) continue;
+            var pair = candidate.GetCombination(); var match = db.FindMatch(pair.Item1, pair.Item2);
+            if (match == null || match.resultItem == null || match.resultItem.prefab == null) continue;
+            float d = (source.transform.position - candidate.transform.position).sqrMagnitude;
+            if (d < distance) { nearest = candidate; distance = d; recipe = match; }
+        }
+        return nearest;
+    }
+
+    void CompleteRecipe(PlacementSlots slots, RecipeData match, bool mixing)
+    {
             Transform anchor = slots.GetResultAnchor();
-            Vector3 pos = anchor != null ? anchor.position : hit.point + targetObject.transform.up * placementOffset;
+            Vector3 pos = anchor != null ? anchor.position : slots.transform.position + slots.transform.up * placementOffset;
             Quaternion rot = anchor != null ? anchor.rotation : Quaternion.identity;
 
+            int normalOutput = FestivalUpgradeRuntime.CraftOutputCount(match.resultItem, mixing);
+            int outputCount = DailyChallengeRuntime.Output(normalOutput, Random.value);
             // 使用した2つの素材を削除し、スロットを空にする
             var retainedOres = new System.Collections.Generic.List<(ItemData item, ItemInstanceState state)>();
             for (int index = 0; index < 2; index++)
@@ -524,7 +584,7 @@ public class PutItem : MonoBehaviour
 
             // 完成品を次の調合の素材としてslot1に登録する
             Transform resultSlot = null;
-            bool registeredResult = slots.TryPlace(match.resultItem, out resultSlot);
+            bool registeredResult = outputCount > 0 && slots.TryPlace(match.resultItem, out resultSlot);
 
             // 基本的な効果音再生
             if (SoundManager.Instance != null)
@@ -539,7 +599,7 @@ public class PutItem : MonoBehaviour
             {
                 WorldItemPlacement.Spawn(match.resultItem, pos, rot, resultSlot, slots.gameObject);
             }
-            else
+            else if (outputCount > 0)
             {
                 // 万が一スロット登録に失敗しても完成品自体は生成する
                 WorldItemPlacement.Spawn(match.resultItem, pos, rot, null, slots.gameObject);
@@ -548,40 +608,25 @@ public class PutItem : MonoBehaviour
 
             Debug.Log($"クラフト生成: {match.resultItem.itemName}");
 
-            if (FestivalUpgradeRuntime.CraftOutputCount(match.resultItem, taggedObject.CompareTag("craft")) == 2)
+            if (outputCount == 2)
             {
                 Transform extraSlot;
                 bool registeredExtra = slots.TryPlace(match.resultItem, out extraSlot);
-                Vector3 extraPosition = registeredExtra && extraSlot != null ? extraSlot.position : pos + targetObject.transform.right * 0.4f;
+                Vector3 extraPosition = registeredExtra && extraSlot != null ? extraSlot.position : pos + slots.transform.right * 0.4f;
                 WorldItemPlacement.Spawn(match.resultItem, extraPosition, rot, registeredExtra ? extraSlot : null, slots.gameObject);
             }
             foreach (var ore in retainedOres)
             {
                 // A full inventory leaves the returned ore beside the station instead of losing it.
                 if (inventoryManager != null && inventoryManager.AddItem(ore.item, ore.state)) continue;
-                var returned = WorldItemPlacement.Spawn(ore.item, pos + targetObject.transform.right * (0.7f + 0.2f * retainedOres.IndexOf(ore)), rot, null, slots.gameObject);
+                var returned = WorldItemPlacement.Spawn(ore.item, pos + slots.transform.right * (0.7f + 0.2f * retainedOres.IndexOf(ore)), rot, null, slots.gameObject);
                 returned.GetComponent<ItemBehaviour>()?.SetInstanceState(ore.state);
             }
 
 
 
-            if (targets.Contains(scene))
-
-			{
-				ConditionalSceneTransition.TriggerTransitionStatic();
-			}
-
-		}
-		else
-		{
-			Debug.Log("クラフト可能なレシピがありません");
-		}
-		
-		// コルーチン処理終了時にフラグをリセット
-		isProcessingCoroutine = false;
-		// クラフト処理終了フラグを設定
-		isCraftingInProgress = false;
-	}
+            if (outputCount < normalOutput) DailyChallengeRuntime.Notify("今日の苦難で完成品が1個失われました");
+    }
 
 	private IEnumerator WaitForBlacksmithCompletion(RecipeData match)
 	{
@@ -606,6 +651,16 @@ public class PutItem : MonoBehaviour
 			}
 		}
 
+        var originalTargets = blacksmithImagesB;
+        int extra = (KouaArtifactRuntime.Has(KouaArtifactRuntime.StrangeHammer) && KouaArtifactRuntime.IsRepair(match) ? 3 : 0)
+            + (DailyChallengeRuntime.Is(DailyChallenge.HarderQte) ? 2 : 0);
+        var temporaryTargets = new System.Collections.Generic.List<Image>();
+        var template = blacksmithImagesB == null ? null : blacksmithImagesB.FirstOrDefault(x => x != null);
+        if (template != null && extra > 0)
+        {
+            for (int i = 0; i < extra; i++) temporaryTargets.Add(Instantiate(template, template.transform.parent));
+            blacksmithImagesB = originalTargets.Concat(temporaryTargets).ToArray();
+        }
 		// 未設定の画像は数えず、有効なマークを最低1個残す。
 		int availableTargets = 0;
 		if (blacksmithImagesB != null)
@@ -613,7 +668,8 @@ public class PutItem : MonoBehaviour
 			foreach (Image target in blacksmithImagesB)
 				if (target != null) availableTargets++;
 		}
-		int requiredTargets = availableTargets == 0 ? 0 : Mathf.Max(1, availableTargets - reductionCount);
+		int requiredTargets = availableTargets == 0 ? 0 : Mathf.Min(availableTargets,
+            Mathf.Max(1, availableTargets - temporaryTargets.Count - reductionCount) + temporaryTargets.Count);
 		int shownTargets = 0;
 		if (blacksmithImagesB != null)
 		{
@@ -655,6 +711,8 @@ public class PutItem : MonoBehaviour
 #if UNITY_EDITOR
 				Debug.Log($"[鍛冶計測] 完了：槌 {reductionCount}個 / {shownTargets}マークを処理" );
 #endif
+                foreach (var target in temporaryTargets) if (target != null) Destroy(target.gameObject);
+                blacksmithImagesB = originalTargets;
 				if (blacksmithImageA != null) blacksmithImageA.gameObject.SetActive(false);
 				EndPlayerUiBlock();
 				break;
@@ -771,7 +829,7 @@ public class PutItem : MonoBehaviour
 		BeginPlayerUiBlock();
 		
 		// 減衰を差し引いた実際の上昇速度を補正する。未所持時は元の速度。
-		float durationMultiplier = GetCraftHoldDurationMultiplier(out int shorteningItemCount);
+		float durationMultiplier = GetCraftHoldDurationMultiplier(out int shorteningItemCount) * DailyChallengeRuntime.QteDifficulty;
 		float increasePerSecond = PowerGageDecayPerSecond
 			+ (PowerGageIncreasePerSecond - PowerGageDecayPerSecond) / durationMultiplier;
 
@@ -787,7 +845,7 @@ public class PutItem : MonoBehaviour
 		// PowerGageミニゲームの処理
 		while (!isPowerGageCompleted)
 		{
-			float deltaTime = Time.deltaTime;
+			float deltaTime = Time.deltaTime * DailyChallengeRuntime.Speed;
 
 #if UNITY_EDITOR
 			bool isHolding = Input.GetKey(KeyCode.Space);
@@ -841,7 +899,7 @@ public class PutItem : MonoBehaviour
                 if (item != null && item.effecttype == BaffEffectType.purificationWindowExpansion)
                     ownedCount += OwnedProgressManager.GetBaffOwned(item.B_itemID);
         }
-        float halfWidth = 0.1f + 0.05f * Mathf.Clamp(ownedCount, 0, 4);
+        float halfWidth = (0.1f + 0.05f * Mathf.Clamp(ownedCount, 0, 4)) / DailyChallengeRuntime.QteDifficulty;
         lower = 0.5f - halfWidth;
         upper = 0.5f + halfWidth;
     }
@@ -883,7 +941,7 @@ public class PutItem : MonoBehaviour
 		// Washミニゲームの処理
 		while (!isWashCompleted)
 		{
-			float deltaTime = Time.deltaTime;
+			float deltaTime = Time.deltaTime * DailyChallengeRuntime.Speed;
 
             // スペースキーを押した瞬間に成功・失敗を判定
             if (Input.GetKeyDown(KeyCode.Space))
@@ -939,7 +997,7 @@ public class PutItem : MonoBehaviour
 				isWashMaxValue = false;
 			}
 			
-			float washMove = WashSliderMovePerSecond * deltaTime;
+			float washMove = WashSliderMovePerSecond * deltaTime * DailyChallengeRuntime.QteDifficulty;
 			if (isWashMaxValue == true)
 			{
 				washSlider.value -= washMove;

@@ -42,6 +42,8 @@ public class GameClockText : MonoBehaviour
     private TextMeshProUGUI dailyIncomeNotice;
     private float dailyIncomeNoticeUntil;
     private bool dailyIncomeInitialized;
+    public bool RoundEnded => transitionStarted;
+    public void ReduceTime(float seconds) { remainingTime = Mathf.Max(0, remainingTime - Mathf.Max(0, seconds)); UpdateClockDisplay(); }
     private bool transitionStarted = false;
     private bool isCompleteTransition = false; // Completeシーンへ遷移するかどうか
     [SerializeField] private DeliveryStation deliveryStation;
@@ -117,7 +119,8 @@ public class GameClockText : MonoBehaviour
         limitup = GetTotal(BaffEffectType.limitup);
         borderdown = GetTotal(BaffEffectType.borderdown);
 
-        remainingTime = RoundDurationSeconds;
+        DailyChallengeRuntime.BeginDay(DayAdvanceButton.GetDayStatic());
+        remainingTime = DailyChallengeRuntime.Duration(RoundDurationSeconds);
 
         if (transitionPanel != null) transitionPanel.SetActive(false); // UI非表示
         if (completePanel != null)
@@ -190,7 +193,7 @@ public class GameClockText : MonoBehaviour
             return;
         }
 
-        remainingTime = Mathf.Max(0f, remainingTime - Time.deltaTime);
+        remainingTime = Mathf.Max(0f, remainingTime - Time.deltaTime * DailyChallengeRuntime.Speed);
         UpdateClockDisplay();
         UpdateCompleteThresholdDisplay();
 
@@ -376,7 +379,7 @@ public class GameClockText : MonoBehaviour
 
         CurrentDayBaseGoal = baseThreshold;
         // ボーダーダウンアイテムの効果（所持数 × 100G 緩和）を適用
-        int finalThreshold = baseThreshold - (borderdown * 100);
+        int finalThreshold = DailyChallengeRuntime.Goal(baseThreshold) - (borderdown * 100);
 
         SetCompleteMoneyThreshold(Mathf.Max(0, finalThreshold));
         UpdateCompleteThresholdDisplay();

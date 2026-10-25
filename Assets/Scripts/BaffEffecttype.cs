@@ -27,5 +27,7 @@ public enum BaffEffectType
     slowReward,
     blacksmithSpecialist,
     mixingSpecialist,
-    purificationSpecialist
+    purificationSpecialist,
+    anotherRound, fertilePotion, strongHammer, strangeHammer, resonanceBook, timeIsMoney,
+    oreMirror, reactionPotion, whimsicalWealth, memoryBook
 }

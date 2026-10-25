@@ -38,6 +38,7 @@ public class ArtifactManager : MonoBehaviour
     {
         List<Transform> availableSlots = new List<Transform>(slots);
         List<ArtifactData> availableItems = new List<ArtifactData>(ArtifactDatas);
+        availableItems.RemoveAll(x => x == null || (x.uniquePurchase && OwnedProgressManager.GetArtifactOwned(x.A_itemID) > 0));
 
         for (int i = 0; i < spawnCount; i++)
         {
@@ -90,6 +91,7 @@ public class ArtifactManager : MonoBehaviour
                 var stock = ShopStockNotice.Register(A_itemObj, itemDetailText);
                 button.onClick.AddListener(() =>
                 {
+                    if (selectedItem.uniquePurchase && OwnedProgressManager.GetArtifactOwned(selectedItem.A_itemID) > 0) return;
                     if (!A_itemObj.activeSelf) return; // Sold offers cannot be charged twice.
                     // ゴールド消費
                     bool success = MoneyManager.Instance.SpendMoney(offerPrice);

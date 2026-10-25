@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75240b0abad55ad42b81fffeb8380ab0, type: 3}
+  m_Name: ReactionPotion
+  m_EditorClassIdentifier: Assembly-CSharp::ArtifactData
+  A_itemID: 107
+  effecttype: 33
+  A_itemName: ReactionPotion
+  price: 250
+  startprice: 250
+  ownedCount: 0
+  prefab: {fileID: 6068648090133099813, guid: 4b578e26b22251d4b26d7fc4353152c0, type: 3}
+  itemName: "\u53cd\u5fdc\u4fc3\u9032\u85ac"
+  description: "\u8abf\u5408\u4f9d\u983c\u306e\u5831\u916c\u304c30%\u5897\u52a0\u3059\u308b\u3002"
+  uniquePurchase: 1

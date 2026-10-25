@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 /// <summary>
@@ -34,6 +35,12 @@ public class RecipeStation : MonoBehaviour
             return;
         }
 
+        if (Keyboard.current != null && Keyboard.current.mKey.wasPressedThisFrame && KouaArtifactRuntime.Has(KouaArtifactRuntime.MemoryBook))
+        {
+            if (recipeUI.activeSelf) CloseRecipeUI();
+            else if (!InteractionControlTrial.WorldInputBlocked) OpenRecipeUI();
+            return;
+        }
         if (InteractionControlTrial.InteractPressed)
         {
             DetectStationInView();
@@ -52,17 +59,7 @@ public class RecipeStation : MonoBehaviour
                 // UIが非表示の場合は必ず表示にする
                 if (!recipeUI.activeSelf)
                 {
-                    recipeUI.SetActive(true);
-                    CursorActive = true;
-                    // DeliveryStationと共有する場合
-                    if (deliveryStation != null)
-                    {
-                        deliveryStation.CursorActive = true;
-                    }
-                    Cursor.lockState = CursorLockMode.Confined; // ゲームウィンドウ内に制限
-                    Cursor.visible = true; // カーソルを明示的に表示
-                    // プレイヤー制御を無効化
-                    if (playerController != null) playerController.enabled = false;
+                    OpenRecipeUI();
                 }
                 else
                 {
@@ -74,6 +71,17 @@ public class RecipeStation : MonoBehaviour
 
         // レイキャストが当たらない場合はUIを非表示にしない
         // （インタラクト入力で開き、Escまたは閉じるボタンで閉じる）
+    }
+
+    void OpenRecipeUI()
+    {
+        if (DailyChallengeRuntime.RecipeBlocked) { DailyChallengeRuntime.Notify("今日の苦難でレシピを開けません"); return; }
+        if (recipeUI == null) return;
+        InteractionControlTrial.Consume();
+        recipeUI.SetActive(true); CursorActive = true;
+        if (deliveryStation != null) deliveryStation.CursorActive = true;
+        Cursor.lockState = CursorLockMode.Confined; Cursor.visible = true;
+        if (playerController != null) playerController.enabled = false;
     }
 
     void CloseRecipeUI()

@@ -19,6 +19,7 @@ public class FirstPersonController : MonoBehaviour
     private CharacterController characterController;
     [SerializeField] private DeliveryStation deliveryStation;
 
+    Vector3 slipperyVelocity;
     float xRotation = 0f;
     float yRotation = 0f;
     public float gravity = -9.81f;
@@ -62,12 +63,14 @@ public class FirstPersonController : MonoBehaviour
           moveSpeed = mo;
         }
 
-        if (deliveryStation.CursorActive == false)
+        if ((deliveryStation == null || !deliveryStation.CursorActive) && !TutorialSequence.IsActive && Mouse.current != null && Keyboard.current != null)
         {
             // マウス入力（視点の回転）
             float mouseX = Mouse.current.delta.x.ReadValue() * sensitivity;
             float mouseY = Mouse.current.delta.y.ReadValue() * sensitivity;
 
+            if (KouaArtifactRuntime.Has(KouaArtifactRuntime.AnotherRound)) { mouseX = -mouseX; mouseY = -mouseY; }
+            if (DailyChallengeRuntime.Is(DailyChallenge.NoRightTurn)) mouseX = Mathf.Min(0, mouseX);
             // カメラの回転（上下のみ）
             xRotation -= mouseY * 0.5f;
             xRotation = Mathf.Clamp(xRotation, -90f, 90f); // 上下の可動域を制限（-90度 = 真下、90度 = 真上）
@@ -81,7 +84,14 @@ public class FirstPersonController : MonoBehaviour
         float horizontal = Keyboard.current.aKey.isPressed ? -1f : Keyboard.current.dKey.isPressed ? 1f : 0f;
         float vertical = Keyboard.current.wKey.isPressed ? 1f : Keyboard.current.sKey.isPressed ? -1f : 0f;
 
+        if (KouaArtifactRuntime.Has(KouaArtifactRuntime.AnotherRound)) { horizontal = -horizontal; vertical = -vertical; }
         Vector3 moveDirection = playerBody.forward * vertical + playerBody.right * horizontal;
+        if (DailyChallengeRuntime.Is(DailyChallenge.SlipperyMovement))
+        {
+            slipperyVelocity = Vector3.MoveTowards(slipperyVelocity, moveDirection, DailyChallengeRuntime.Settings.slipperyAcceleration * Time.deltaTime);
+            moveDirection = slipperyVelocity;
+        }
+        else slipperyVelocity = Vector3.zero;
         // 重力の適用
         if (characterController.isGrounded)
         {
@@ -97,7 +107,9 @@ public class FirstPersonController : MonoBehaviour
         float slowMultiplier = FestivalUpgradeRuntime.SpeedMultiplier();
         moveDirection.x *= slowMultiplier;
         moveDirection.z *= slowMultiplier;
-        characterController.Move(moveDirection * moveSpeed * Time.deltaTime);
+        Vector3 beforeMove = transform.position;
+        characterController.Move(moveDirection * moveSpeed * DailyChallengeRuntime.Speed * Time.deltaTime);
+        DailyChallengeRuntime.ObserveMovement(transform.position - beforeMove);
 
         if (Input.GetKey(KeyCode.W))
         {
