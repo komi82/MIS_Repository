@@ -86,7 +86,7 @@ public class TutorialSequence : MonoBehaviour
             textBoxRoot.SetActive(true);
         }
 
-        TutorialControlGuide.Configure(postTutorialWindow);
+       // TutorialControlGuide.Configure(postTutorialWindow);
         BeginTutorial();
     }
 

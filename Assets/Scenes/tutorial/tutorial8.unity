@@ -970,6 +970,8 @@ MonoBehaviour:
   inventoryManager: {fileID: 1608064549}
   mainCamera: {fileID: 330585545}
   slotSelector: {fileID: 0}
+  deliveryStation: {fileID: 0}
+  putItem: {fileID: 0}
   pickupPromptUI: {fileID: 827266349}
   pickupPromptText: {fileID: 164558330}
 --- !u!114 &283417131
@@ -994,7 +996,9 @@ MonoBehaviour:
   weaponRecipeDatabase: {fileID: 11400000, guid: 5ec72eacf2d5c0646a3229248aec511b, type: 2}
   washRecipeDatabase: {fileID: 11400000, guid: 4fe5f4c574ff5734eaca2f507bd13478, type: 2}
   powerGageSlider: {fileID: 754845518}
+  craftingBaffItems: {fileID: 0}
   washSlider: {fileID: 963971735}
+  washSuccessArea: {fileID: 0}
   blacksmithImageA: {fileID: 1622633372}
   blacksmithImagesB:
   - {fileID: 1936691275}
@@ -1203,7 +1207,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: tutorialLines.Array.size
-      value: 5
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[0]'
@@ -1224,6 +1228,18 @@ PrefabInstance:
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[4]'
       value: "\u304A\u91D1\u306B\u4F59\u88D5\u304C\u3042\u308B\u306A\u3089\u3001\n\u4F55\u304B\u8CB7\u3063\u3066\u884C\u304F\u306E\u3082\n\u3042\u308A\u304B\u3082\u306D"
+      objectReference: {fileID: 0}
+    - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
+      propertyPath: 'tutorialLines.Array.data[5]'
+      value: "\u3053\u3053\u3060\u3051\u306E\u8A71\u5F7C\u306F\n\u58F2\u4E0A\u3088\u308A\u9867\u5BA2\u306E\u6570\n\u3092\u898B\u308B\u6240\u304C\u3042\u3063\u3066\u306D"
+      objectReference: {fileID: 0}
+    - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
+      propertyPath: 'tutorialLines.Array.data[6]'
+      value: "\u6700\u521D\u3053\u305D\u5B89\u3051\u308C\u3069\u3001\n\u4F55\u5EA6\u3082\u8CB7\u3046\u5BA2\u306B\u306F\n\u7B49\u3057\u304F\u5024\u4E0A\u3052\u3059\u308B\u3093\u3060\u3002"
+      objectReference: {fileID: 0}
+    - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
+      propertyPath: 'tutorialLines.Array.data[7]'
+      value: "\u305D\u308C\u3068\u304A\u91D1\u306E\u51FA\u3069\u3053\u308D\n\u306F\u4E00\u3064\u3057\u304B\u306A\u3044\u304B\u3089\u3001\n\u8CB7\u3044\u3059\u304E\u306F\u7981\u7269\u3002\n\u541F\u5473\u3057\u3066\u8CB7\u3046\u3068\u3044\u3044\u3001\u3088"
       objectReference: {fileID: 0}
     - target: {fileID: 8573119395220833042, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: m_Pivot.x
@@ -1518,6 +1534,11 @@ MonoBehaviour:
   activeRequests: []
   moneyManager: {fileID: 1912912051}
   requestBoard: {fileID: 200898202}
+  mushroomRewardItem: {fileID: 0}
+  blacksmithFrequencyItem: {fileID: 0}
+  purificationFrequencyItem: {fileID: 0}
+  mixingFrequencyItem: {fileID: 0}
+  upgradeDatabase: {fileID: 0}
   items: []
   artifacts: []
   potionReward: 0
@@ -20811,7 +20832,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: a7a399fe91e1b8c4990e18e9ea3337e5, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 6191d96780aedfe49830e675f3c2714b, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -26846,15 +26867,15 @@ MonoBehaviour:
   completeThresholdText: {fileID: 1857049361}
   transitionPanel: {fileID: 1485101284}
   completePanel: {fileID: 709386763}
-  border: 3
-  borderbaff: 0
   borderdown: 0
+  limitup: 0
   completeMoneyThreshold: 500
   dayAdvanceButton: {fileID: 1717329647}
   dailyThresholds: e8030000d0070000a00f000070170000401f000010270000983a0000
   items: []
   deliveryStation: {fileID: 1981430905}
   playerController: {fileID: 0}
+  arcadeResetPoint: {fileID: 0}
 --- !u!114 &1717329645
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27583,6 +27604,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MoneyManager
   moneyText: {fileID: 1857049361}
+  gainMoneyText: {fileID: 0}
 --- !u!114 &1857049361
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -28083,6 +28105,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MoneyManager
   moneyText: {fileID: 1912912049}
+  gainMoneyText: {fileID: 0}
 --- !u!1 &1926354116
 GameObject:
   m_ObjectHideFlags: 0
@@ -29017,6 +29040,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SoundManager
   soundData: {fileID: 11400000, guid: 5f9a087741c7bd041af506f492333b2e, type: 2}
   enableDebugLog: 0
+  autoPlayGameplayBGM: 1
 --- !u!114 &1995236009
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29144,6 +29168,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MoneyManager
   moneyText: {fileID: 2022247819}
+  gainMoneyText: {fileID: 0}
 --- !u!114 &2022247819
 MonoBehaviour:
   m_ObjectHideFlags: 0
