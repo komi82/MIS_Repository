@@ -44,7 +44,7 @@ public class GameClockText : MonoBehaviour
     private bool dailyIncomeInitialized;
     public bool RoundEnded => transitionStarted;
     public bool IsTutorial => gameObject.scene.name.StartsWith("tutorial", System.StringComparison.OrdinalIgnoreCase);
-    public void ReduceTime(float seconds) { if (IsTutorial) return; remainingTime = Mathf.Max(0, remainingTime - Mathf.Max(0, seconds)); UpdateClockDisplay(); }
+    public void ReduceTime(float seconds) { if (IsTutorial || DayStartSequence.IsBlocking) return; remainingTime = Mathf.Max(0, remainingTime - Mathf.Max(0, seconds)); UpdateClockDisplay(); }
     private bool transitionStarted = false;
     private bool isCompleteTransition = false; // Completeシーンへ遷移するかどうか
     [SerializeField] private DeliveryStation deliveryStation;
@@ -151,6 +151,7 @@ public class GameClockText : MonoBehaviour
         UpdateClockDisplay();
         // Let every Start finish (MoneyManager hides its gain label during Start).
         yield return null;
+        while (DayStartSequence.IsBlocking) yield return null;
         if (MoneyManager.Instance != null && DailyIncomeState.TryClaim(currentDay,
             OwnedProgressManager.GetBaffOwned(DailyIncomeState.ItemId)))
         {
@@ -202,7 +203,7 @@ public class GameClockText : MonoBehaviour
 
     void Update()
     {
-        if (IsTutorial || !dailyIncomeInitialized) return;
+        if (IsTutorial || !dailyIncomeInitialized || DayStartSequence.IsBlocking) return;
         UpdateDailyIncomeNotice();
         if (transitionStarted) return;
 

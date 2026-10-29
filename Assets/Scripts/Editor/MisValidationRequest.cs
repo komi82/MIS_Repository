@@ -26,6 +26,7 @@ public static class MisValidationRequest
                 case "results": RunResultValidation.Run(); break;
                 case "content": KouaContentValidation.Run(); break;
                 case "readability": UIReadabilityValidation.Run(); break;
+                case "day-start": DayStartValidation.Run(); break;
                 default: throw new InvalidOperationException("Unknown validation request: " + request);
             }
         }

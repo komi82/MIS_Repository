@@ -79,6 +79,7 @@ public class PauseController : MonoBehaviour
 
     void Update()
     {
+        if (DayStartSequence.IsBlocking) return;
         // During the mouse trial, Escape closes the focused recipe/delivery panel first.
         if (toggleKey == KeyCode.Escape && InteractionControlTrial.EscapeBelongsToUI) return;
         // 指定キーでトグル
@@ -141,7 +142,7 @@ public class PauseController : MonoBehaviour
     /// </summary>
     public void Pause()
     {
-        if (isPaused) return;
+        if (isPaused || DayStartSequence.IsBlocking) return;
         isPaused = true;
 
         Debug.Log("PauseController: Pausing");

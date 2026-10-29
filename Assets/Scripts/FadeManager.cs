@@ -125,42 +125,53 @@ public class FadeManager : MonoBehaviour
     IEnumerator FadeAndLoadScene(string sceneName)
     {
         isFading = true;
-        
-        if (enableDebugLog)
+        bool nextDay = SceneManager.GetActiveScene().name == SceneNames.Shop && sceneName == SceneNames.Arcade;
+        DayStartSequence dayStart = null;
+        try
         {
-            Debug.Log($"FadeManager: シーン切り替え開始 - {sceneName}");
-        }
-        
-        // フェードアウト
-        yield return StartCoroutine(FadeOut());
-        
-        // シーン切り替え前にポーズを解除（PauseController がポーズUIを残さないようにする）
-        var pauseControllers = UnityEngine.Object.FindObjectsOfType<PauseController>();
-        if (pauseControllers != null && pauseControllers.Length > 0)
-        {
-            foreach (var pc in pauseControllers)
+            if (enableDebugLog)
             {
-                if (pc != null)
+                Debug.Log($"FadeManager: シーン切り替え開始 - {sceneName}");
+            }
+
+            // フェードアウト
+            yield return StartCoroutine(FadeOut());
+
+            // シーン切り替え前にポーズを解除（PauseController がポーズUIを残さないようにする）
+            var pauseControllers = UnityEngine.Object.FindObjectsOfType<PauseController>();
+            if (pauseControllers != null && pauseControllers.Length > 0)
+            {
+                foreach (var pc in pauseControllers)
                 {
-                    pc.Resume();
+                    if (pc != null)
+                    {
+                        pc.Resume();
+                    }
                 }
             }
+
+            // Arm before loading: Arcade's first frame must not consume play time or input.
+            if (nextDay) dayStart = DayStartSequence.Begin();
+            // シーン切り替え
+            if (sceneName == SceneNames.Shop)
+                yield return LoadShopAsync(sceneName);
+            else
+                SceneManager.LoadScene(sceneName);
+
+            // 1フレーム待機（シーン読み込み完了を待つ）
+            yield return null;
+
+            if (dayStart != null) yield return dayStart.WaitForAnimation();
+            // The presentation has been removed; reveal Arcade before starting the day.
+            yield return StartCoroutine(FadeIn());
+
+        }
+        finally
+        {
+            if (dayStart != null) dayStart.Complete();
+            isFading = false;
         }
 
-        // シーン切り替え
-        if (sceneName == SceneNames.Shop)
-            yield return LoadShopAsync(sceneName);
-        else
-            SceneManager.LoadScene(sceneName);
-
-        // 1フレーム待機（シーン読み込み完了を待つ）
-        yield return null;
-        
-        // フェードイン
-        yield return StartCoroutine(FadeIn());
-        
-        isFading = false;
-        
         if (enableDebugLog)
         {
             Debug.Log("FadeManager: シーン切り替え完了");

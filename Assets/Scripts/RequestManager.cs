@@ -128,6 +128,7 @@ public class RequestManager : MonoBehaviour
 
     void Update()
     {
+        if (DayStartSequence.IsBlocking) return;
         ExpireRequests();
       /*  // OwnedProgressManager から各アイテムの所持数を同期する
         if (items != null)

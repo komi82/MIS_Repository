@@ -970,6 +970,8 @@ MonoBehaviour:
   inventoryManager: {fileID: 1608064549}
   mainCamera: {fileID: 330585545}
   slotSelector: {fileID: 0}
+  deliveryStation: {fileID: 0}
+  putItem: {fileID: 0}
   pickupPromptUI: {fileID: 827266349}
   pickupPromptText: {fileID: 164558330}
 --- !u!114 &283417131
@@ -994,7 +996,9 @@ MonoBehaviour:
   weaponRecipeDatabase: {fileID: 11400000, guid: 5ec72eacf2d5c0646a3229248aec511b, type: 2}
   washRecipeDatabase: {fileID: 11400000, guid: 4fe5f4c574ff5734eaca2f507bd13478, type: 2}
   powerGageSlider: {fileID: 754845518}
+  craftingBaffItems: {fileID: 0}
   washSlider: {fileID: 963971735}
+  washSuccessArea: {fileID: 0}
   blacksmithImageA: {fileID: 1622633372}
   blacksmithImagesB:
   - {fileID: 1936691275}
@@ -1203,55 +1207,59 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: tutorialLines.Array.size
-      value: 12
+      value: 13
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[0]'
-      value: "\u305D\u3046\u3044\u3084\u30DC\u30AF\u306B\u306F\u3001\u6BCE\u591C\u9854\u3092\u51FA\u3057\u3066\u3044\u308B\n\u4F55\u3067\u3082\u5C4B\u3055\u3093\u304C\u3042\u3063\u3066\u306D\u3002\n\u6700\u5F8C\u306B\u3001\u30B7\u30E7\u30C3\u30D7\u3068\u6BCE\u65E5\u306E\u300C\u82E6\u96E3\u300D\u3092\u7D39\u4ECB\u3059\u308B\u3088\u3002"
+      value: "\u305d\u3046\u3044\u3084\u30dc\u30af\u306b\u306f\u3001\u6bce\u591c\u9854\u3092\u51fa\u3057\u3066\u3044\u308b\n\u4f55\u3067\u3082\u5c4b\u3055\u3093\u304c\u3042\u3063\u3066\u306d\u3002\n\u6700\u5f8c\u306b\u3001\u30b7\u30e7\u30c3\u30d7\u3068\u6bce\u65e5\u306e\u300c\u82e6\u96e3\u300d\u3092\u7d39\u4ecb\u3059\u308b\u3088\u3002"
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[1]'
-      value: "\u3010\u30B7\u30E7\u30C3\u30D7\u3078\u884C\u304F\u306B\u306F\u3011\n\u305D\u306E\u65E5\u306E\u76EE\u6A19\u3092\u9054\u6210\u3057\u3066\u55B6\u696D\u3092\u7D42\u3048\u308B\u3068\u3001\n\u6B21\u306E\u55B6\u696D\u306B\u5411\u3051\u3066\u30B7\u30E7\u30C3\u30D7\u3067\u6E96\u5099\u3067\u304D\u308B\u3088\u3002"
+      value: "\u3010\u30b7\u30e7\u30c3\u30d7\u3078\u884c\u304f\u306b\u306f\u3011\n\u305d\u306e\u65e5\u306e\u76ee\u6a19\u3092\u9054\u6210\u3057\u3066\u55b6\u696d\u3092\u7d42\u3048\u308b\u3068\u3001\n\u6b21\u306e\u55b6\u696d\u306b\u5411\u3051\u3066\u30b7\u30e7\u30c3\u30d7\u3067\u6e96\u5099\u3067\u304d\u308b\u3088\u3002"
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[2]'
-      value: "\u3010\u5546\u54C1\u306E\u8AAC\u660E\u3092\u898B\u308B\u3011\n\u5546\u54C1\u306B\u30DE\u30A6\u30B9\u3092\u91CD\u306D\u308B\u3068\u3001\n\u540D\u524D\u30FB\u5024\u6BB5\u30FB\u52B9\u679C\u304C\u8868\u793A\u3055\u308C\u308B\u3088\u3002"
+      value: "\u3010\u5546\u54c1\u306e\u8aac\u660e\u3092\u898b\u308b\u3011\n\u5546\u54c1\u306b\u30de\u30a6\u30b9\u3092\u91cd\u306d\u308b\u3068\u3001\n\u540d\u524d\u30fb\u5024\u6bb5\u30fb\u52b9\u679c\u304c\u8868\u793a\u3055\u308c\u308b\u3088\u3002"
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[3]'
-      value: "\u3010\u5546\u54C1\u3092\u8CB7\u3046\u3011\n\u5DE6\u30AF\u30EA\u30C3\u30AF\u3067\u3001\u6240\u6301\u91D1\u3092\u4F7F\u3063\u3066\u8CFC\u5165\u3059\u308B\u3088\u3002\n\u8CB7\u3063\u305F\u5546\u54C1\u306F\u305D\u306E\u5834\u3067\u306F\u58F2\u308A\u5207\u308C\u3002\n\u52B9\u679C\u3084\u8CFC\u5165\u3067\u304D\u308B\u500B\u6570\u3082\u3001\u8AAC\u660E\u3092\u78BA\u8A8D\u3057\u3066\u306D\u3002"
+      value: "\u3010\u5546\u54c1\u3092\u8cb7\u3046\u3011\n\u5de6\u30af\u30ea\u30c3\u30af\u3067\u3001\u6240\u6301\u91d1\u3092\u4f7f\u3063\u3066\u8cfc\u5165\u3059\u308b\u3088\u3002\n\u8cb7\u3063\u305f\u5546\u54c1\u306f\u305d\u306e\u5834\u3067\u306f\u58f2\u308a\u5207\u308c\u3002\n\u52b9\u679c\u3084\u8cfc\u5165\u3067\u304d\u308b\u500b\u6570\u3082\u3001\u8aac\u660e\u3092\u78ba\u8a8d\u3057\u3066\u306d\u3002"
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[4]'
-      value: "\u3010\u8CB7\u3063\u305F\u30A2\u30A4\u30C6\u30E0\u3092\u898B\u8FD4\u3059\u3011\n\u55B6\u696D\u4E2D\u306F Tab \u30AD\u30FC\u3092\u62BC\u3057\u3066\u3044\u308B\u9593\u3001\n\u6301\u3063\u3066\u3044\u308B\u30D0\u30D5\u3068\u30A2\u30FC\u30C6\u30A3\u30D5\u30A1\u30AF\u30C8\u3092\u78BA\u8A8D\u3067\u304D\u308B\u3088\u3002\n\u30EA\u30B6\u30EB\u30C8\u3067\u306F Tab \u30AD\u30FC\u3084\u6240\u6301\u30A2\u30A4\u30C6\u30E0\u306E\u30DC\u30BF\u30F3\u3067\u958B\u3051\u308B\u3088\u3002"
+      value: "\u3010\u5024\u6bb5\u3068\u8cb7\u3044\u3059\u304e\u306b\u6ce8\u610f\u3011\n\u65e5\u304c\u9032\u3093\u3060\u308a\u3001\u540c\u3058\u5546\u54c1\u3092\u8cb7\u3044\u91cd\u306d\u305f\u308a\u3059\u308b\u3068\u5024\u6bb5\u304c\u4e0a\u304c\u308b\u3088\u3002\n\u652f\u6255\u3044\u306b\u306f\u55b6\u696d\u4e2d\u306e\u6240\u6301\u91d1\u3092\u4f7f\u3046\u304b\u3089\u3001\n\u4eca\u306e\u5024\u6bb5\u3068\u52b9\u679c\u3092\u898b\u3066\u3001\u5fc5\u8981\u306a\u3082\u306e\u3092\u9078\u307c\u3046\u3002"
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[5]'
-      value: "\u3010\u6B21\u306E\u55B6\u696D\u3078\u3011\n\u6E96\u5099\u304C\u3067\u304D\u305F\u3089\u3001\u30B7\u30E7\u30C3\u30D7\u53F3\u4E0A\u306E\u300CEXIT\u300D\u3092\u30AF\u30EA\u30C3\u30AF\u3002\n\u4F55\u3082\u8CB7\u308F\u305A\u306B\u9032\u3093\u3067\u3082\u5927\u4E08\u592B\u3060\u3088\u3002"
+      value: "\u3010\u8cb7\u3063\u305f\u30a2\u30a4\u30c6\u30e0\u3092\u898b\u8fd4\u3059\u3011\n\u55b6\u696d\u4e2d\u306f Tab \u30ad\u30fc\u3092\u62bc\u3057\u3066\u3044\u308b\u9593\u3001\n\u6301\u3063\u3066\u3044\u308b\u30d0\u30d5\u3068\u30a2\u30fc\u30c6\u30a3\u30d5\u30a1\u30af\u30c8\u3092\u78ba\u8a8d\u3067\u304d\u308b\u3088\u3002\n\u30ea\u30b6\u30eb\u30c8\u3067\u306f Tab \u30ad\u30fc\u3084\u6240\u6301\u30a2\u30a4\u30c6\u30e0\u306e\u30dc\u30bf\u30f3\u3067\u958b\u3051\u308b\u3088\u3002"
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[6]'
-      value: "\u3010\u65E5\u66FF\u308F\u308A\u306E\u82E6\u96E3\u3011\n1\u65E5\u76EE\u306B\u306F\u82E6\u96E3\u306F\u306A\u3044\u3088\u3002\n2\u65E5\u76EE\u4EE5\u964D\u306F\u6BCE\u65E5\u3001\u30E9\u30F3\u30C0\u30E0\u306A\u82E6\u96E3\u304C1\u3064\u9078\u3070\u308C\u308B\u3002"
+      value: "\u3010\u6b21\u306e\u55b6\u696d\u3078\u3011\n\u6e96\u5099\u304c\u3067\u304d\u305f\u3089\u3001\u30b7\u30e7\u30c3\u30d7\u53f3\u4e0a\u306e\u300cEXIT\u300d\u3092\u30af\u30ea\u30c3\u30af\u3002\n\u65e5\u4ed8\u306e\u6f14\u51fa\u304c\u7d42\u308f\u308b\u3068\u3001\u6b21\u306e\u65e5\u304c\u59cb\u307e\u308b\u3088\u3002\n\u4f55\u3082\u8cb7\u308f\u305a\u306b\u9032\u3093\u3067\u3082\u5927\u4e08\u592b\u3002"
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[7]'
-      value: "\u3010\u82E6\u96E3\u306E\u4F8B\u3011\n\u76EE\u6A19\u91D1\u984D\u304C\u9AD8\u304F\u306A\u3063\u305F\u308A\u3001\u5236\u9650\u6642\u9593\u304C\u77ED\u304F\u306A\u3063\u305F\u308A\u3001\n\u7279\u5B9A\u306E\u4F9D\u983C\u304C\u6765\u306B\u304F\u304F\u306A\u308B\u3053\u3068\u304C\u3042\u308B\u3088\u3002\n\u3044\u3064\u3082\u3068\u9055\u3046\u6761\u4EF6\u306B\u5408\u308F\u305B\u3066\u52D5\u3053\u3046\u3002"
+      value: "\u3010\u65e5\u66ff\u308f\u308a\u306e\u82e6\u96e3\u3011\n\u3053\u306e\u5730\u57df\u3067\u306f\u3001\u5929\u5019\u3084\u30a8\u30fc\u30c6\u30eb\u306e\u4e71\u308c\u3092\u300c\u82e6\u96e3\u300d\u3068\u547c\u3076\u3002\n1\u65e5\u76ee\u306b\u306f\u82e6\u96e3\u306f\u306a\u3044\u3088\u3002\n2\u65e5\u76ee\u4ee5\u964d\u306f\u6bce\u65e5\u3001\u30e9\u30f3\u30c0\u30e0\u306a\u82e6\u96e3\u304c1\u3064\u9078\u3070\u308c\u308b\u3002"
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[8]'
-      value: "\u3010\u4ECA\u65E5\u306E\u82E6\u96E3\u3092\u78BA\u8A8D\u3059\u308B\u3011\n\u55B6\u696D\u4E2D\u306F\u753B\u9762\u4E0A\u90E8\u306E\u300C\u82E6\u96E3\u300D\u306E\u8868\u793A\u3092\u898B\u3066\u306D\u3002\n\u6B21\u306E\u65E5\u306B\u306F\u5225\u306E\u82E6\u96E3\u306B\u5207\u308A\u66FF\u308F\u308B\u3002\n\u524D\u306E\u65E5\u306E\u82E6\u96E3\u304C\u7A4D\u307F\u91CD\u306A\u308B\u3053\u3068\u306F\u306A\u3044\u3088\u3002"
+      value: "\u3010\u82e6\u96e3\u306e\u4f8b\u3011\n\u76ee\u6a19\u91d1\u984d\u304c\u9ad8\u304f\u306a\u3063\u305f\u308a\u3001\u5236\u9650\u6642\u9593\u304c\u77ed\u304f\u306a\u3063\u305f\u308a\u3001\n\u7279\u5b9a\u306e\u4f9d\u983c\u304c\u6765\u306b\u304f\u304f\u306a\u308b\u3053\u3068\u304c\u3042\u308b\u3088\u3002\n\u3044\u3064\u3082\u3068\u9055\u3046\u6761\u4ef6\u306b\u5408\u308f\u305b\u3066\u52d5\u3053\u3046\u3002"
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[9]'
-      value: "\u3010\u6301\u3061\u7269\u3078\u306E\u5F71\u97FF\u3011\n\u30A2\u30FC\u30C6\u30A3\u30D5\u30A1\u30AF\u30C8\u304C\u4E00\u6642\u7684\u306B\u7121\u52B9\u306B\u306A\u308B\u82E6\u96E3\u3082\u3042\u308B\u3088\u3002\n\u30A2\u30A4\u30C6\u30E0\u304C\u306A\u304F\u306A\u308B\u308F\u3051\u3067\u306F\u306A\u304F\u3001\n\u305D\u306E\u65E5\u306E\u52B9\u679C\u3060\u3051\u304C\u6B62\u307E\u308B\u3093\u3060\u3002"
+      value: "\u3010\u4eca\u65e5\u306e\u82e6\u96e3\u3092\u78ba\u8a8d\u3059\u308b\u3011\n\u55b6\u696d\u4e2d\u306f\u753b\u9762\u4e0a\u90e8\u306e\u300c\u82e6\u96e3\u300d\u306e\u8868\u793a\u3092\u898b\u3066\u306d\u3002\n\u6b21\u306e\u65e5\u306b\u306f\u5225\u306e\u82e6\u96e3\u306b\u5207\u308a\u66ff\u308f\u308b\u3002\n\u524d\u306e\u65e5\u306e\u82e6\u96e3\u304c\u7a4d\u307f\u91cd\u306a\u308b\u3053\u3068\u306f\u306a\u3044\u3088\u3002"
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[10]'
-      value: "\u3010\u9014\u4E2D\u3067\u6761\u4EF6\u304C\u5909\u308F\u308B\u82E6\u96E3\u3011\n\u300C\u3060\u308B\u307E\u3055\u3093\u304C\u3053\u308D\u3093\u3060\u300D\u3067\u306F\u3001\n\u300C\u6B62\u307E\u3063\u3066\uFF01\u300D\u306E\u8868\u793A\u4E2D\u306F\u79FB\u52D5\u3092\u6B62\u3081\u3088\u3046\u3002\n\u4F5C\u696D\u7981\u6B62\u306E\u82E6\u96E3\u306F\u3001\u7981\u6B62\u3055\u308C\u308B\u4F5C\u696D\u304C\u9014\u4E2D\u3067\u5909\u308F\u308B\u3088\u3002"
+      value: "\u3010\u6301\u3061\u7269\u3078\u306e\u5f71\u97ff\u3011\n\u30a2\u30fc\u30c6\u30a3\u30d5\u30a1\u30af\u30c8\u304c\u4e00\u6642\u7684\u306b\u7121\u52b9\u306b\u306a\u308b\u82e6\u96e3\u3082\u3042\u308b\u3088\u3002\n\u30a2\u30a4\u30c6\u30e0\u304c\u306a\u304f\u306a\u308b\u308f\u3051\u3067\u306f\u306a\u304f\u3001\n\u305d\u306e\u65e5\u306e\u52b9\u679c\u3060\u3051\u304c\u6b62\u307e\u308b\u3093\u3060\u3002"
       objectReference: {fileID: 0}
     - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: 'tutorialLines.Array.data[11]'
-      value: "\u3053\u308C\u3067\u8AAC\u660E\u306F\u304A\u3057\u307E\u3044\u3002\n\u30B7\u30E7\u30C3\u30D7\u3067\u6E96\u5099\u3057\u3066\u3001\u305D\u306E\u65E5\u306E\u82E6\u96E3\u3092\u78BA\u304B\u3081\u306A\u304C\u3089\n\u304A\u5E97\u3092\u7D9A\u3051\u3066\u3044\u3053\u3046\u3002\n\u5DE6\u30AF\u30EA\u30C3\u30AF\u3067\u30BF\u30A4\u30C8\u30EB\u306B\u623B\u308B\u3088\u3002"
+      value: "\u3010\u9014\u4e2d\u3067\u6761\u4ef6\u304c\u5909\u308f\u308b\u82e6\u96e3\u3011\n\u300c\u3060\u308b\u307e\u3055\u3093\u304c\u3053\u308d\u3093\u3060\u300d\u3067\u306f\u3001\n\u300c\u6b62\u307e\u3063\u3066\uff01\u300d\u306e\u8868\u793a\u4e2d\u306f\u79fb\u52d5\u3092\u6b62\u3081\u3088\u3046\u3002\n\u4f5c\u696d\u7981\u6b62\u306e\u82e6\u96e3\u306f\u3001\u7981\u6b62\u3055\u308c\u308b\u4f5c\u696d\u304c\u9014\u4e2d\u3067\u5909\u308f\u308b\u3088\u3002"
+      objectReference: {fileID: 0}
+    - target: {fileID: 8539049815302821419, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
+      propertyPath: 'tutorialLines.Array.data[12]'
+      value: "\u3053\u308c\u3067\u8aac\u660e\u306f\u304a\u3057\u307e\u3044\u3002\n\u30b7\u30e7\u30c3\u30d7\u3067\u6e96\u5099\u3057\u3066\u3001\u305d\u306e\u65e5\u306e\u82e6\u96e3\u3092\u78ba\u304b\u3081\u306a\u304c\u3089\n\u304a\u5e97\u3092\u7d9a\u3051\u3066\u3044\u3053\u3046\u3002\n\u5de6\u30af\u30ea\u30c3\u30af\u3067\u30bf\u30a4\u30c8\u30eb\u306b\u623b\u308b\u3088\u3002"
       objectReference: {fileID: 0}
     - target: {fileID: 8573119395220833042, guid: 20f8bfcf9654f0748a099a0c29337534, type: 3}
       propertyPath: m_Pivot.x
@@ -1546,6 +1554,11 @@ MonoBehaviour:
   activeRequests: []
   moneyManager: {fileID: 1912912051}
   requestBoard: {fileID: 200898202}
+  mushroomRewardItem: {fileID: 0}
+  blacksmithFrequencyItem: {fileID: 0}
+  purificationFrequencyItem: {fileID: 0}
+  mixingFrequencyItem: {fileID: 0}
+  upgradeDatabase: {fileID: 0}
   items: []
   artifacts: []
   potionReward: 0
@@ -20839,7 +20852,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 1b9ea3a057c3b12428317558dde9e243, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 6191d96780aedfe49830e675f3c2714b, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -26874,15 +26887,15 @@ MonoBehaviour:
   completeThresholdText: {fileID: 1857049361}
   transitionPanel: {fileID: 1485101284}
   completePanel: {fileID: 709386763}
-  border: 3
-  borderbaff: 0
   borderdown: 0
+  limitup: 0
   completeMoneyThreshold: 500
   dayAdvanceButton: {fileID: 1717329647}
   dailyThresholds: e8030000d0070000a00f000070170000401f000010270000983a0000
   items: []
   deliveryStation: {fileID: 1981430905}
   playerController: {fileID: 0}
+  arcadeResetPoint: {fileID: 0}
 --- !u!114 &1717329645
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27611,6 +27624,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MoneyManager
   moneyText: {fileID: 1857049361}
+  gainMoneyText: {fileID: 0}
 --- !u!114 &1857049361
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -28111,6 +28125,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MoneyManager
   moneyText: {fileID: 1912912049}
+  gainMoneyText: {fileID: 0}
 --- !u!1 &1926354116
 GameObject:
   m_ObjectHideFlags: 0
@@ -29045,6 +29060,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SoundManager
   soundData: {fileID: 11400000, guid: 5f9a087741c7bd041af506f492333b2e, type: 2}
   enableDebugLog: 0
+  autoPlayGameplayBGM: 1
 --- !u!114 &1995236009
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29172,6 +29188,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MoneyManager
   moneyText: {fileID: 2022247819}
+  gainMoneyText: {fileID: 0}
 --- !u!114 &2022247819
 MonoBehaviour:
   m_ObjectHideFlags: 0
