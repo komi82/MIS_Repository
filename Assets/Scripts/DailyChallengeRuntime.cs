@@ -89,7 +89,7 @@ public sealed class DailyChallengeRuntime : MonoBehaviour
     void Update()
     {
         if (GameClockText.Instance != null && GameClockText.Instance.RoundEnded) return;
-        elapsed += Time.deltaTime;
+        if (!DayStartSequence.IsBlocking) elapsed += Time.deltaTime;
         if (label != null)
         {
             string message = selected == DailyChallenge.None ? "1日目：苦難なし" : "今日の苦難：" + Description();

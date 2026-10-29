@@ -42,7 +42,7 @@ public sealed class InteractionControlTrial : MonoBehaviour
 
     public static string PickupLabel => UseMouse ? "左クリック" : "<sprite name=F>";
     public static string PlaceLabel => UseMouse ? "右クリック" : "<sprite name=E>";
-    public static bool WorldInputBlocked => UseMouse &&
+    public static bool WorldInputBlocked => DayStartSequence.IsBlocking || UseMouse &&
         (blockedFrame == Time.frameCount || TutorialSequence.IsActive || Time.timeScale <= 0f || Cursor.visible
             || Cursor.lockState != CursorLockMode.Locked);
 

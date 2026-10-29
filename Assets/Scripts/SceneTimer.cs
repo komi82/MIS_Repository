@@ -12,7 +12,7 @@ public class SceneTimer : MonoBehaviour
 {
     public static SceneTimer Instance { get; private set; }
 
-    private float startTime;
+    private float elapsed;
 
     void Awake()
     {
@@ -32,10 +32,7 @@ public class SceneTimer : MonoBehaviour
 
     void Update()
     {
-        if (Instance != null)
-        {
-            float elapsed = Instance.GetElapsedTime();
-        }
+        if (!DayStartSequence.IsBlocking) elapsed += Time.deltaTime;
     }
 
 
@@ -46,7 +43,7 @@ public class SceneTimer : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        startTime = Time.time;
+        elapsed = 0f;
         Debug.Log($"Scene '{scene.name}' loaded. Timer started.");
         
         // シーン名に応じてカーソル状態を設定
@@ -76,7 +73,7 @@ public class SceneTimer : MonoBehaviour
 
     public float GetElapsedTime()
     {
-        return Time.time - startTime;
+        return elapsed;
     }
 
 

@@ -117,6 +117,8 @@ public static class RunResultValidation
         yield return Until(() => SceneManager.GetActiveScene().name == scene, "Reached " + scene);
         yield return Frames(8);
         yield return Until(() => FadeManager.Instance == null || !FadeManager.Instance.IsFading(), "Fade finished");
+        if (scene == SceneNames.Arcade)
+            yield return Until(() => GameClockText.Instance != null && Get<bool>(GameClockText.Instance, "dailyIncomeInitialized"), "Day clock and daily income initialized");
     }
     static IEnumerator Load(string scene)
     {

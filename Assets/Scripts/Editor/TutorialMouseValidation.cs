@@ -177,8 +177,42 @@ public static class TutorialMouseValidation
         Call(pickup, "Update");
         pickup.enabled = false;
     }
+    static void ValidateDialogue(TutorialSequence sequence, string scene)
+    {
+        var body = Get<TMPro.TextMeshProUGUI>(sequence, "tutorialText");
+        var lines = Get<string[]>(sequence, "tutorialLines");
+        var canvas = body.canvas.rootCanvas.transform as RectTransform;
+        var corners = new Vector3[4];
+        for (int i = 0; i < lines.Length; i++)
+        {
+            Set(sequence, "currentLineIndex", i); Call(sequence, "ApplyLineText");
+            Canvas.ForceUpdateCanvases(); body.ForceMeshUpdate(true, true);
+            Check(!body.isTextOverflowing && body.fontSize >= 34f,
+                scene + ": dialogue " + (i + 1) + " fits its text area at a readable size");
+        }
+        foreach (var label in body.canvas.GetComponentsInChildren<TMPro.TextMeshProUGUI>())
+        {
+            label.rectTransform.GetWorldCorners(corners);
+            Check(corners.All(c => canvas.rect.Contains(canvas.InverseTransformPoint(c))),
+                scene + ": " + label.name + " stays on screen");
+        }
+        if (scene == "tutorial8")
+        {
+            Check(lines.Any(x => x.Contains("所持金")) && lines.Any(x => x.Contains("EXIT")) &&
+                lines.Any(x => x.Contains("2日目")) && lines.Any(x => x.Contains("画面上部")),
+                "final lesson explains buying, exiting, daily challenges and where to read them");
+        }
+        Set(sequence, "currentLineIndex", 0); Call(sequence, "ApplyLineText");
+    }
+
     static IEnumerator Suite()
     {
+        foreach (string guid in AssetDatabase.FindAssets("t:BaffItemData"))
+        {
+            var item = AssetDatabase.LoadAssetAtPath<BaffItemData>(AssetDatabase.GUIDToAssetPath(guid));
+            var icon = item.prefab != null ? item.prefab.GetComponent<UnityEngine.UI.Image>() : null;
+            Check(icon != null && icon.sprite != null, item.itemName + ": prefab resolves a real sprite");
+        }
         foreach (string scene in new[] { "tutorial", "tutorial2", "tutorial3", "tutorial4", "tutorial5", "tutorial6", "tutorial7", "tutorial8" })
         {
             Release();
@@ -193,6 +227,17 @@ public static class TutorialMouseValidation
             Check(sequence != null && TutorialSequence.IsActive && gate != null && InteractionControlTrial.UseMouse,
                 scene + ": explanation starts with mouse controls");
             sequence.enabled = false;
+            ValidateDialogue(sequence, scene);
+            Capture(scene + "-dialogue");
+            yield return null;
+            if (scene == "tutorial8")
+            {
+                Set(sequence, "currentLineIndex", 2); Call(sequence, "ApplyLineText"); Capture("shop-help");
+                yield return null;
+                Set(sequence, "currentLineIndex", 6); Call(sequence, "ApplyLineText"); Capture("hardship-help");
+                yield return null;
+                Set(sequence, "currentLineIndex", 0); Call(sequence, "ApplyLineText");
+            }
             // Deliberately reset the cursor: the explanation must block gameplay independently.
             GameplayCursor();
             Press(MouseButton.Left);
@@ -202,7 +247,12 @@ public static class TutorialMouseValidation
             Check(Get<int>(sequence, "currentLineIndex") == 1, scene + ": left click advances the explanation");
             Release(); yield return null;
             Press(MouseButton.Right); Call(sequence, "Update");
-            Check(Get<int>(sequence, "currentLineIndex") == 1, scene + ": right click does not skip explanation");
+            Check(Get<int>(sequence, "currentLineIndex") == 0 && TutorialSequence.IsActive,
+                scene + ": right click returns to previous explanation without enabling gameplay");
+            Release(); yield return null;
+            Press(MouseButton.Right); Call(sequence, "Update");
+            Check(Get<int>(sequence, "currentLineIndex") == 0 && TutorialSequence.IsActive,
+                scene + ": previous page stops at the first page");
             Release(); yield return null;
             int count = Get<string[]>(sequence, "tutorialLines").Length;
             Set(sequence, "currentLineIndex", count - 1);
@@ -211,11 +261,6 @@ public static class TutorialMouseValidation
                 scene + ": dismissing click is blocked for the rest of the frame");
             Check(!Cursor.visible && Cursor.lockState == CursorLockMode.Locked,
                 scene + ": gameplay cursor restored");
-            if (scene == "tutorial8")
-            {
-                // This extra lesson automatically returns to title when its explanation finishes.
-                foreach (var finish in Object.FindObjectsByType<TutorialSequenceFinishFade>(FindObjectsSortMode.None)) finish.StopAllCoroutines();
-            }
             // TutorialSequence enables these components on dismissal; their first Start runs next frame.
             Release(); yield return null;
             var guide = Get<GameObject>(sequence, "postTutorialWindow");
@@ -301,6 +346,10 @@ public static class TutorialMouseValidation
             Release();
             for (int i = 0; i < 3; i++) yield return null;
         }
+        float finishDeadline = Time.realtimeSinceStartup + 8f;
+        while (SceneManager.GetActiveScene().name != "title" && Time.realtimeSinceStartup < finishDeadline) yield return null;
+        Check(SceneManager.GetActiveScene().name == "title", "last explanation returns to the title through its real scene transition");
+        Check(!TutorialSequence.IsActive && Find<TutorialPresentation>() == null, "tutorial overlay and input block are cleared on leaving the last lesson");
     }
 }
 #endif

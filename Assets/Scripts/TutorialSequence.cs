@@ -37,6 +37,7 @@ public class TutorialSequence : MonoBehaviour
     [SerializeField] private OffScreenObjectIndicator offScreenIndicator;
     [SerializeField] private Volume globalVolume;
 
+    private TutorialPresentation presentation;
     private int currentLineIndex;
     private bool sequenceFinished;
     private readonly List<Behaviour> disabledBehaviours = new List<Behaviour>();
@@ -86,12 +87,14 @@ public class TutorialSequence : MonoBehaviour
             textBoxRoot.SetActive(true);
         }
 
-       // TutorialControlGuide.Configure(postTutorialWindow);
+        presentation = TutorialPresentation.Create(textBoxRoot, tutorialText, postTutorialWindow);
+        TutorialControlGuide.Configure(postTutorialWindow);
         BeginTutorial();
     }
 
     void OnDestroy()
     {
+        if (presentation != null) Destroy(presentation.gameObject);
         if (IsActive)
         {
             IsActive = false;
@@ -102,6 +105,13 @@ public class TutorialSequence : MonoBehaviour
     {
         if (sequenceFinished || !IsActive)
         {
+            return;
+        }
+
+        if (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame)
+        {
+            currentLineIndex = Mathf.Max(0, currentLineIndex - 1);
+            ApplyLineText();
             return;
         }
 
@@ -147,6 +157,7 @@ public class TutorialSequence : MonoBehaviour
         if (tutorialText != null && currentLineIndex < tutorialLines.Length)
         {
             tutorialText.text = tutorialLines[currentLineIndex];
+            if (presentation != null) presentation.SetPage(currentLineIndex, tutorialLines.Length);
         }
     }
 
@@ -246,7 +257,7 @@ public class TutorialSequence : MonoBehaviour
     }
 
     /// <summary>
-    /// 左クリック以外のマウス操作とキーボード操作を止める（既存 UI ブロックと同様）。
+    /// 説明送り以外のゲーム操作を止める（既存 UI ブロックと同様）。
     /// </summary>
     void BlockGameplayInput()
     {

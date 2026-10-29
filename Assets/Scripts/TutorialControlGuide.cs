@@ -12,6 +12,9 @@ public static class TutorialControlGuide
         string instruction;
         switch (SceneManager.GetActiveScene().name)
         {
+            case "tutorial":
+                instruction = "マウスを動かす：見渡す\nW / A / S / D：移動する\n目印の場所まで歩いてみよう";
+                break;
             case SceneNames.Tutorial2:
                 instruction = "左クリック：素材を拾う\n右クリック：テーブルに置く\n1～4：持ち物を選ぶ";
                 break;
@@ -36,42 +39,8 @@ public static class TutorialControlGuide
         }
 
         var label = window.GetComponentInChildren<TextMeshProUGUI>(true);
-        var panel = window.transform as RectTransform;
-        if (label == null || panel == null || label.canvas == null) return;
-        // Replace the legacy key illustrations inside this guide, preserving its background.
-        foreach (var graphic in window.GetComponentsInChildren<Graphic>(true))
-            if (graphic.transform != panel && graphic != label) graphic.enabled = false;
-        label.enabled = true;
-        label.gameObject.SetActive(true);
-        var canvas = label.canvas.rootCanvas.transform as RectTransform;
-        var background = window.GetComponent<Image>();
-        if (background != null)
-        {
-            background.sprite = null;
-            background.type = Image.Type.Simple;
-            background.color = new Color(.035f, .03f, .025f, .9f);
-        }
-        var parentScale = panel.parent.lossyScale;
-        panel.localScale = new Vector3(canvas.lossyScale.x / parentScale.x,
-            canvas.lossyScale.y / parentScale.y, 1f);
-        panel.pivot = new Vector2(0f, 1f);
-        panel.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 760f);
-        panel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 280f);
-        panel.position = canvas.TransformPoint(new Vector2(canvas.rect.xMin + 28f, canvas.rect.yMax - 28f));
-        label.rectTransform.localScale = Vector3.one;
-        label.rectTransform.localRotation = Quaternion.identity;
-        label.rectTransform.anchorMin = Vector2.zero;
-        label.rectTransform.anchorMax = Vector2.one;
-        label.rectTransform.offsetMin = new Vector2(28f, 20f);
-        label.rectTransform.offsetMax = new Vector2(-28f, -20f);
-        label.margin = Vector4.zero;
-        label.enableAutoSizing = false;
-        label.fontSize = 36f;
-        label.color = Color.white;
-        label.enableVertexGradient = false;
-        label.alignment = TextAlignmentOptions.MidlineLeft;
-        label.raycastTarget = false;
+        if (label == null) return;
+        TutorialPresentation.ConfigureGuide(window, label);
         label.text = instruction;
-        foreach (var graphic in window.GetComponentsInChildren<Graphic>(true)) graphic.raycastTarget = false;
     }
 }

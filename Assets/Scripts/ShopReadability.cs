@@ -16,9 +16,9 @@ public sealed class ShopReadability : MonoBehaviour
         var border = new GameObject("ShopDescriptionFrame", typeof(RectTransform), typeof(Image));
         var rect = (RectTransform)border.transform;
         rect.SetParent(root, false);
-        rect.anchorMin = rect.anchorMax = rect.pivot = Vector2.zero;
-        rect.anchoredPosition = new Vector2(44f, 36f);
-        rect.sizeDelta = new Vector2(1140f, 276f);
+        rect.anchorMin = new Vector2(.025f, .035f);
+        rect.anchorMax = new Vector2(.62f, .29f);
+        rect.offsetMin = rect.offsetMax = Vector2.zero;
         var image = border.GetComponent<Image>();
         image.color = new Color(0.11f, 0.07f, 0.045f, 0.94f);
         image.raycastTarget = false;
@@ -32,7 +32,9 @@ public sealed class ShopReadability : MonoBehaviour
         detail.rectTransform.offsetMin = new Vector2(28f, 20f);
         detail.rectTransform.offsetMax = new Vector2(-28f, -20f);
         detail.margin = Vector4.zero;
-        detail.enableAutoSizing = false;
+        detail.enableAutoSizing = true;
+        detail.fontSizeMin = 26;
+        detail.fontSizeMax = 38;
         detail.fontSize = 38;
         detail.color = new Color(1f, 0.97f, 0.88f, 1f);
         detail.alignment = TextAlignmentOptions.TopLeft;
@@ -79,7 +81,7 @@ public sealed class ShopReadability : MonoBehaviour
         // Keep the component active so a new hover can make the background visible again.
         panel.GetComponent<Image>().enabled = !string.IsNullOrWhiteSpace(label.text);
         panel.GetComponent<Outline>().enabled = !string.IsNullOrWhiteSpace(label.text);
-        float preferred = label.GetPreferredValues(label.text, panel.rect.width - 56f, 1000f).y;
-        panel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, Mathf.Max(260f, preferred + 48f));
+        // A bounded area keeps long descriptions clear of offers and the quick guide.
+        label.SetVerticesDirty();
     }
 }

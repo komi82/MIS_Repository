@@ -59,7 +59,7 @@ public class ScoreDisplay : MonoBehaviour
         // 稼いだ金額と依頼件数は従来どおり表示
         if (xScoreText != null)
         {
-            xScoreText.text = $"最終金額: {finalMoney}G";
+            xScoreText.text = $"最終金額: {finalMoney:N0}G";
 #if UNITY_WEBGL && !UNITY_EDITOR
             var moneyClient = UnityroomApiClient.Instance;
             if (moneyClient != null) moneyClient.SendScore(2, finalMoney, ScoreboardWriteMode.HighScoreDesc);
@@ -68,7 +68,7 @@ public class ScoreDisplay : MonoBehaviour
 
         if (yScoreText != null)
         {
-            yScoreText.text = $"依頼件数: {finalRequests}件";
+            yScoreText.text = $"依頼件数: {finalRequests:N0}件";
         }
 
         // 日数は "Day x" 表記で表示
