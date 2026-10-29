@@ -247,7 +247,12 @@ public static class TutorialMouseValidation
             Check(Get<int>(sequence, "currentLineIndex") == 1, scene + ": left click advances the explanation");
             Release(); yield return null;
             Press(MouseButton.Right); Call(sequence, "Update");
-            Check(Get<int>(sequence, "currentLineIndex") == 1, scene + ": right click does not skip explanation");
+            Check(Get<int>(sequence, "currentLineIndex") == 0 && TutorialSequence.IsActive,
+                scene + ": right click returns to previous explanation without enabling gameplay");
+            Release(); yield return null;
+            Press(MouseButton.Right); Call(sequence, "Update");
+            Check(Get<int>(sequence, "currentLineIndex") == 0 && TutorialSequence.IsActive,
+                scene + ": previous page stops at the first page");
             Release(); yield return null;
             int count = Get<string[]>(sequence, "tutorialLines").Length;
             Set(sequence, "currentLineIndex", count - 1);

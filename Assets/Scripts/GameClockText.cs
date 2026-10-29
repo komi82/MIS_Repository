@@ -54,6 +54,7 @@ public class GameClockText : MonoBehaviour
 
     private void Awake()
     {
+        NumericTextLayout.Hud(completeThresholdText, 0);
         if (IsTutorial)
         {
             // Awake also runs for disabled clock components already present in tutorial7/8.

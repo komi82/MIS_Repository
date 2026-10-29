@@ -108,6 +108,13 @@ public class TutorialSequence : MonoBehaviour
             return;
         }
 
+        if (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame)
+        {
+            currentLineIndex = Mathf.Max(0, currentLineIndex - 1);
+            ApplyLineText();
+            return;
+        }
+
         if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
         {
             AdvanceLine();
@@ -250,7 +257,7 @@ public class TutorialSequence : MonoBehaviour
     }
 
     /// <summary>
-    /// 左クリック以外のマウス操作とキーボード操作を止める（既存 UI ブロックと同様）。
+    /// 説明送り以外のゲーム操作を止める（既存 UI ブロックと同様）。
     /// </summary>
     void BlockGameplayInput()
     {

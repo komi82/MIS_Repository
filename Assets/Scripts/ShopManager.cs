@@ -23,6 +23,7 @@ public class ShopManager : MonoBehaviour
     void Start()
     {
         ShopReadability.Configure(itemDetailText);
+        ShopQuickGuide.Create(itemDetailText);
         InitializeItem(); //アイテム価格の初期値化
 
         SpawnItems(); //ショップにアイテムを生成

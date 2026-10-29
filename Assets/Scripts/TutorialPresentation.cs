@@ -68,6 +68,9 @@ public sealed class TutorialPresentation : MonoBehaviour
         heading.text = LessonTitle();
         presentation.pageHint = Label(panel, body, "TutorialPageHint", new Vector2(.04f, .04f), new Vector2(.96f, .13f));
         Style(presentation.pageHint, 28, TextAlignmentOptions.MidlineRight);
+        presentation.pageHint.enableAutoSizing = true;
+        presentation.pageHint.fontSizeMin = 22;
+        presentation.pageHint.fontSizeMax = 28;
         presentation.pageHint.color = new Color(.87f, .83f, .75f);
         if (guide != null && InteractionControlTrial.UseMouse) guide.transform.SetParent(root.transform, false);
         return presentation;
@@ -78,7 +81,7 @@ public sealed class TutorialPresentation : MonoBehaviour
         if (pageHint == null) return;
         string next = index + 1 < count ? "左クリックで次へ" :
             SceneManager.GetActiveScene().name == "tutorial8" ? "左クリックでタイトルへ" : "左クリックで練習へ";
-        pageHint.text = $"{index + 1} / {count}    {next}";
+        pageHint.text = $"{index + 1} / {count}    右クリックで前へ  /  {next}";
     }
 
     public static void ConfigureGuide(GameObject window, TextMeshProUGUI label)

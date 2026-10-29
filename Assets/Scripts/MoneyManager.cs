@@ -18,6 +18,16 @@ public class MoneyManager : MonoBehaviour
 
     private void OnEnable()
     {
+        // Only active balance managers configure their labels; legacy disabled components
+        // also remain on the goal/day objects in older scenes.
+        bool gameplay = gameObject.scene.name == SceneNames.Arcade ||
+            gameObject.scene.name.StartsWith("tutorial", System.StringComparison.OrdinalIgnoreCase);
+        if (gameplay)
+        {
+            NumericTextLayout.Hud(moneyText, 1);
+            NumericTextLayout.Hud(gainMoneyText, 2);
+        }
+        else NumericTextLayout.Fit(moneyText, 42f);
         UpdateUI();
     }
 

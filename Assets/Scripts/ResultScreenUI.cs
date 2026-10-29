@@ -15,6 +15,8 @@ public static class ResultScreenUI
         LayoutText(day, new Vector2(.12f, .66f), new Vector2(.88f, .77f), 68);
         LayoutText(money, new Vector2(.43f, .46f), new Vector2(.94f, .57f), 42);
         LayoutText(requests, new Vector2(.43f, .32f), new Vector2(.94f, .43f), 42);
+        NumericTextLayout.Fit(money, 42f);
+        NumericTextLayout.Fit(requests, 42f);
         if (rank != null)
         {
             Bounds(rank.rectTransform, new Vector2(.08f, .26f), new Vector2(.38f, .55f));
